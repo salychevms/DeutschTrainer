@@ -1,6 +1,7 @@
 package de.salychevms.deutschtrainer.Service;
 
 import de.salychevms.deutschtrainer.Config.BotConfig;
+import de.salychevms.deutschtrainer.Controllers.UsersController;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -8,14 +9,15 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 
-
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
 
     final BotConfig config;
+    final UsersController usersController;
 
-    public TelegramBot(BotConfig config) {
+    public TelegramBot(BotConfig config, UsersController usersController) {
         this.config = config;
+        this.usersController = usersController;
     }
 
 
@@ -40,21 +42,24 @@ public class TelegramBot extends TelegramLongPollingBot {
 
             switch (messageText) {
                 case "/start":
-                    sendMessage(chatId, "Hi, "+userName+"! You activated this bot.");
+                    sendMessage(chatId, "Hi, " + userName + "! You activated this bot.");
+                    if (!usersController.registeredOr(userName)) {
+                        sendMessage(chatId, "You're not registered before!\nPlease, register to use");
+                    }
                     break;
                 default:
                     sendMessage(chatId, "Sorry! It does not works.");
             }
         }
     }
-    private void sendMessage(long chatId, String toSend){
-        SendMessage message=new SendMessage();
+
+    private void sendMessage(long chatId, String toSend) {
+        SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(toSend);
-
         try {
             execute(message);
-        }catch (TelegramApiException e){
+        } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
     }
