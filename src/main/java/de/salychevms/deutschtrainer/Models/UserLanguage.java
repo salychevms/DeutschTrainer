@@ -15,15 +15,15 @@ public class UserLanguage {
     @JoinColumn(name = "user_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
-    private Users users;
+    private Users user;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "language_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private Language language;
 
-    public UserLanguage(Users users, Language language) {
-        this.users = users;
+    public UserLanguage(Users user, Language language) {
+        this.user = user;
         this.language = language;
     }
 
@@ -40,11 +40,11 @@ public class UserLanguage {
     }
 
     public Users getUser() {
-        return users;
+        return user;
     }
 
-    public void setUser(Users users) {
-        this.users = users;
+    public void setUser(Users user) {
+        this.user = user;
     }
 
     public Language getLanguage() {
@@ -59,7 +59,7 @@ public class UserLanguage {
     public String toString() {
         return "UserLanguage{" +
                 "id=" + id + '\'' +
-                ", users=" + users + '\'' +
+                ", users=" + user + '\'' +
                 ", language=" + language + '\'' +
                 '}';
     }
