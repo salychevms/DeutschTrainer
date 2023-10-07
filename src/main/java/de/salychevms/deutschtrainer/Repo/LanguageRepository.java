@@ -2,7 +2,6 @@ package de.salychevms.deutschtrainer.Repo;
 
 import de.salychevms.deutschtrainer.Models.Language;
 import jakarta.transaction.Transactional;
-import org.apache.commons.codec.language.bm.Lang;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
