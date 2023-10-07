@@ -27,7 +27,7 @@ public class Users {
     public Users(String userName, Date registrationDate) {
         this.userName = userName;
         this.registrationDate = registrationDate;
-        this.admin=false;
+        this.admin = false;
     }
 
     public Long getId() {

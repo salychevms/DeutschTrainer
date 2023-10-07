@@ -11,6 +11,9 @@ public class Language {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
+    @Column(name = "identifier", nullable = false, unique = true)
+    private String identifier;
+
     public Language() {
     }
 
@@ -34,11 +37,20 @@ public class Language {
         this.name = name;
     }
 
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
     @Override
     public String toString() {
         return "Language{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
+                ", identifier='" + name + '\'' +
                 '}';
     }
 }
