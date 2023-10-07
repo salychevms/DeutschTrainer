@@ -10,14 +10,16 @@ public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_generator")
     private Long id;
-    @Column(name = "username", nullable = false, unique = true)
+    @Column(name = "username", unique = true)
     private String userName;
-    @Column(name = "telegram_id", unique = true)
+    @Column(name = "telegram_id", nullable = false, unique = true)
     private String telegramId;
     @Column(name = "phone_number", unique = true)
     private String phoneNumber;
     @Column(name = "registration_date", nullable = false)
     private Date registrationDate;
+    @Column(name = "admin")
+    private boolean admin;
 
     public Users() {
     }
@@ -25,6 +27,7 @@ public class Users {
     public Users(String userName, Date registrationDate) {
         this.userName = userName;
         this.registrationDate = registrationDate;
+        this.admin=false;
     }
 
     public Long getId() {
@@ -67,6 +70,14 @@ public class Users {
         this.registrationDate = registrationDate;
     }
 
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
+    }
+
     @Override
     public String toString() {
         return "Users{" +
@@ -75,6 +86,7 @@ public class Users {
                 ", userName='" + userName + '\'' +
                 ", registrationDate=" + registrationDate +
                 ", phoneNumber='" + phoneNumber + '\'' +
+                ", admin='" + admin + '\'' +
                 '}';
     }
 }

@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UsersRepository extends JpaRepository<Users, Long> {
     @Transactional
-    Users findByUserName(String userName);
+    Users findByTelegramId(String userName);
 }
