@@ -60,4 +60,20 @@ public class UserDictionaryController {
             return MainDictionaryWord.map(MainDictionary::getWord).orElse(null);
         }return null;
     }
+
+    public boolean deleteCoupleById(Long userDictionaryId){
+        Optional<UserDictionary> delete=userDictionaryRepository.findById(userDictionaryId);
+        if(userDictionaryId.describeConstable().isPresent()){
+            userDictionaryRepository.deleteById(userDictionaryId);
+            return true;
+        }else return false;
+    }
+
+    public boolean deleteAll(){
+        List<UserDictionary> deleteAll=userDictionaryRepository.findAll();
+        if(!deleteAll.isEmpty()){
+            userDictionaryRepository.deleteAll();
+            return true;
+        }else return false;
+    }
 }
