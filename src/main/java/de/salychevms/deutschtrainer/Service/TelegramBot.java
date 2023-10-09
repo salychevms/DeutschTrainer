@@ -52,13 +52,43 @@ public class TelegramBot extends TelegramLongPollingBot {
                     usersController.createNewUser(userName);
                     if (usersController.registeredOr(userName)) {
                         sendMessage(chatId, "You're already registered!");
-                    } else
+                        try {
+                            execute(globalMenu(chatId, userName));
+                        } catch (TelegramApiException e) {
+                            throw new RuntimeException(e);
+                        }
+                    } else {
                         sendMessage(chatId, "Sorry! Something bad happened! Write \"/start\" and try again!");
-                } else sendMessage(chatId, "You're already registered!");
+                        try {
+                            execute((registration(chatId)));
+                        } catch (TelegramApiException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                } else {
+                    sendMessage(chatId, "You're already registered!");
+                    try {
+                        execute(globalMenu(chatId, userName));
+                    } catch (TelegramApiException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             } else if (callBackData.equals("/aboutRegistration")) {
                 if (!usersController.registeredOr(userName)) {
                     sendMessage(chatId, "You have to registered before using this bot!\nYou have to just click \"Registration\"!");
-                } else sendMessage(chatId, "You're already registered!");
+                    try {
+                        execute((registration(chatId)));
+                    } catch (TelegramApiException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    sendMessage(chatId, "You're already registered!");
+                    try {
+                        execute(globalMenu(chatId, userName));
+                    } catch (TelegramApiException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
         } else if (update.hasMessage()) {
             Message message = update.getMessage();
@@ -74,12 +104,60 @@ public class TelegramBot extends TelegramLongPollingBot {
                         } catch (TelegramApiException e) {
                             throw new RuntimeException(e);
                         }
+                    } else {
+                        try {
+                            execute(globalMenu(chatId, userName));
+                        } catch (TelegramApiException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 } else {
                     sendMessage(chatId, "Sorry! It does not works.");
                 }
             }
         }
+    }
+
+    private SendMessage globalMenu(long chatId, String userName) {
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+        //button "Training"
+        InlineKeyboardButton trainingButton = new InlineKeyboardButton("Training");
+        trainingButton.setCallbackData("/training");
+        //button "Statistic"
+        InlineKeyboardButton statisticButton = new InlineKeyboardButton("Statistic");
+        statisticButton.setCallbackData("/statistic");
+        //button "Settings"
+        InlineKeyboardButton settingsButton = new InlineKeyboardButton("Settings");
+        settingsButton.setCallbackData("/settings");
+        //button "Info"
+        InlineKeyboardButton infoButton = new InlineKeyboardButton("Info");
+        infoButton.setCallbackData("/info");
+        //position from left to right
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+        List<InlineKeyboardButton> row3 = new ArrayList<>();
+        List<InlineKeyboardButton> row4 = new ArrayList<>();
+        //
+        row1.add(trainingButton);
+        row2.add(statisticButton);
+        row3.add(settingsButton);
+        row4.add(infoButton);
+        //position from up to down
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        rows.add(row1);
+        rows.add(row2);
+        rows.add(row3);
+        rows.add(row4);
+        //save buttons in the markup variable
+        keyboardMarkup.setKeyboard(rows);
+        //prepare to send
+        String msg = "Hi" + userName + "! Why don't we practice our words?\n";
+        SendMessage toSend = new SendMessage();
+        toSend.setChatId(chatId);
+        toSend.setText(msg);
+        toSend.setReplyMarkup(keyboardMarkup);
+        //send
+        return toSend;
     }
 
     private SendMessage registration(long chatId) {
@@ -109,7 +187,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         toSend.setText(msg);
         toSend.setReplyMarkup(keyboardMarkup);
         return toSend;
-
     }
 
     private void sendMessage(long chatId, String toSend) {
