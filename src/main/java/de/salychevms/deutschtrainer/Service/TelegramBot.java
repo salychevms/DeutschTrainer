@@ -12,14 +12,11 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
-
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
-
     final BotConfig config;
     final UsersController usersController;
     private long chatId;
@@ -47,72 +44,56 @@ public class TelegramBot extends TelegramLongPollingBot {
             CallbackQuery callbackQuery = update.getCallbackQuery();
             String callBackData = callbackQuery.getData();
 
-            if (callBackData.equals("/registration")) {
-                if (!usersController.registeredOr(userName)) {
+            //if user exists
+            if (usersController.registeredOr(userName)) {
+                if (callBackData.equals("/registration")) {
+                    sendMessage(chatId, "You're already registered!");
+                    sendGlobalKeyboard(chatId, userName);
+                } else if (callBackData.equals("/aboutRegistration")) {
+                    sendMessage(chatId, "You're already registered!");
+                    sendGlobalKeyboard(chatId, userName);
+                }
+
+                //if user doesn't exist
+            } else if (!usersController.registeredOr(userName)) {
+                if (callBackData.equals("/registration")) {
                     usersController.createNewUser(userName);
                     if (usersController.registeredOr(userName)) {
                         sendMessage(chatId, "You're already registered!");
-                        try {
-                            execute(globalMenu(chatId, userName));
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    } else {
-                        sendMessage(chatId, "Sorry! Something bad happened! Write \"/start\" and try again!");
-                        try {
-                            execute((registration(chatId)));
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                } else {
-                    sendMessage(chatId, "You're already registered!");
-                    try {
-                        execute(globalMenu(chatId, userName));
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
+                        sendGlobalKeyboard(chatId, userName);
+                    } else sendMessage(chatId, "Oooopsie! Sorry, something wrong happened..." +
+                            "\nWrite \"/start\" and try again!!");
+                } else if (callBackData.equals("/aboutRegistration")) {
+                    sendRegistrationKeyboard(chatId, "You have to register!");
                 }
-            } else if (callBackData.equals("/aboutRegistration")) {
-                if (!usersController.registeredOr(userName)) {
-                    sendMessage(chatId, "You have to registered before using this bot!\nYou have to just click \"Registration\"!");
-                    try {
-                        execute((registration(chatId)));
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                } else {
-                    sendMessage(chatId, "You're already registered!");
-                    try {
-                        execute(globalMenu(chatId, userName));
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
+            } else sendMessage(chatId, "Oooopsie! Sorry, something wrong happened..." +
+                    "\nWrite \"/start\" and try again!!");
+
+            //check global commands
         } else if (update.hasMessage()) {
             Message message = update.getMessage();
             if (message.hasText()) {
                 String messageText = message.getText();
                 chatId = message.getChatId();
                 userName = message.getChat().getUserName() != null ? message.getChat().getUserName() : "NONAME";
-                if (messageText.equals("/start")) {
-                    sendMessage(chatId, "Hi, " + userName + "! You activated this bot.");
-                    if (!usersController.registeredOr(userName)) {
-                        try {
-                            execute(registration(chatId));
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
+
+                if (!usersController.registeredOr(userName)) {
+                    //if user sent /start
+                    if (messageText.equals("/start")) {
+                        sendMessage(chatId, "Hi, " + userName + "! You activated this bot.");
+                        //give start menu
+                        sendRegistrationKeyboard(chatId, "You have to register.");
+                        //if something unusual happened
                     } else {
-                        try {
-                            execute(globalMenu(chatId, userName));
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
+                        sendMessage(chatId, "Sorry! It does not works.\nSend command: \"/start\" again, please!");
                     }
-                } else {
-                    sendMessage(chatId, "Sorry! It does not works.");
+                    //if user already exists give global menu
+                } else if (usersController.registeredOr(userName)) {
+                    if (messageText.equals("/start")) {
+                        sendMessage(chatId, "I'm here!!! Did someone call me???\n");
+                    }
+                    //give global menu
+                    sendGlobalKeyboard(chatId, userName);
                 }
             }
         }
@@ -151,7 +132,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         //save buttons in the markup variable
         keyboardMarkup.setKeyboard(rows);
         //prepare to send
-        String msg = "Hi" + userName + "! Why don't we practice our words?\n";
+        String msg = "Hi, " + userName + "! Why don't we practice new words?\n";
         SendMessage toSend = new SendMessage();
         toSend.setChatId(chatId);
         toSend.setText(msg);
@@ -160,8 +141,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         return toSend;
     }
 
-    private SendMessage registration(long chatId) {
-        String msg = "You're not registered before!\nPlease, register to use";
+    private SendMessage registration(long chatId, String msg) {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //button "Registration"
         InlineKeyboardButton button = new InlineKeyboardButton("Registration");
@@ -183,10 +163,27 @@ public class TelegramBot extends TelegramLongPollingBot {
         keyboardMarkup.setKeyboard(rows);
 
         SendMessage toSend = new SendMessage();
-        toSend.setChatId(chatId);
         toSend.setText(msg);
+        toSend.setChatId(chatId);
         toSend.setReplyMarkup(keyboardMarkup);
+
         return toSend;
+    }
+
+    private void sendGlobalKeyboard(long chatId, String userName) {
+        try {
+            execute(globalMenu(chatId, userName));
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void sendRegistrationKeyboard(long chatId, String msg) {
+        try {
+            execute(registration(chatId, msg));
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void sendMessage(long chatId, String toSend) {
