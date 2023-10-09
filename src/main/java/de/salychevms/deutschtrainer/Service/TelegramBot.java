@@ -46,14 +46,40 @@ public class TelegramBot extends TelegramLongPollingBot {
 
             //if user exists
             if (usersController.registeredOr(userName)) {
+                //reg keyboard
                 if (callBackData.equals("/registration")) {
                     sendMessage(chatId, "You're already registered!");
                     sendGlobalKeyboard(chatId, userName);
                 } else if (callBackData.equals("/aboutRegistration")) {
                     sendMessage(chatId, "You're already registered!");
                     sendGlobalKeyboard(chatId, userName);
-                }
+                    //info keyboard
+                } else if (callBackData.equals("/userInfo")) {
+                    sendMessage(chatId, "About User:\n" + usersController.findUserByUsername(userName).toString());
+                    sendInfoMenu(chatId);
+                } else if (callBackData.equals("/aboutThisBot")) {
 
+                } else if (callBackData.equals("/infoMenuGoBack")) {
+                    sendGlobalKeyboard(chatId, userName);
+                    //main menu keyboard
+                } else if (callBackData.equals("/training")) {
+
+                } else if (callBackData.equals("/statistic")) {
+
+                } else if (callBackData.equals("/settings")) {
+                    sendSettingsKeyboard(chatId);
+                } else if (callBackData.equals("/info")) {
+                    sendInfoMenu(chatId);
+                    //settings menu keyboard
+                } else if (callBackData.equals("/changeName")) {
+
+                } else if (callBackData.equals("/changeSurname")) {
+
+                } else if (callBackData.equals("/setNewLanguage")) {
+
+                } else if (callBackData.equals("/settingsMenuGoBack")) {
+                    sendGlobalKeyboard(chatId, userName);
+                }
                 //if user doesn't exist
             } else if (!usersController.registeredOr(userName)) {
                 if (callBackData.equals("/registration")) {
@@ -141,13 +167,93 @@ public class TelegramBot extends TelegramLongPollingBot {
         return toSend;
     }
 
+    private SendMessage settingsMenu(long chatId) {
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+        //button "change Name"
+        InlineKeyboardButton changeNameButton = new InlineKeyboardButton("Change Name");
+        changeNameButton.setCallbackData("/changeName");
+        //button "change Surname"
+        InlineKeyboardButton changeSurnameButton = new InlineKeyboardButton("Change Surname");
+        changeSurnameButton.setCallbackData("/changeSurname");
+        //button "set new language"
+        InlineKeyboardButton setNewLanguageButton = new InlineKeyboardButton("Set New Language");
+        setNewLanguageButton.setCallbackData("/SetNewLanguage");
+        //button "settings menu go back"
+        InlineKeyboardButton goBackButton = new InlineKeyboardButton("<< go back");
+        goBackButton.setCallbackData("/settingsMenuGoBack");
+        //position from left to right
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+        List<InlineKeyboardButton> row3 = new ArrayList<>();
+        List<InlineKeyboardButton> row4 = new ArrayList<>();
+        //
+        row1.add(changeNameButton);
+        row2.add(changeSurnameButton);
+        row3.add(setNewLanguageButton);
+        row4.add(goBackButton);
+        //position from up to down
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        rows.add(row1);
+        rows.add(row2);
+        rows.add(row3);
+        rows.add(row4);
+        //save buttons in the markup variable
+        keyboardMarkup.setKeyboard(rows);
+        //prepare to send
+        String msg = "User settings:";
+        SendMessage toSend = new SendMessage();
+        toSend.setChatId(chatId);
+        toSend.setText(msg);
+        toSend.setReplyMarkup(keyboardMarkup);
+        //send
+        return toSend;
+    }
+
+    private SendMessage infoMenu(long chatId) {
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+        //button "User Info"
+        InlineKeyboardButton userInfoButton = new InlineKeyboardButton("User Info");
+        userInfoButton.setCallbackData("/userInfo");
+        //button "About This Bot"
+        InlineKeyboardButton aboutBotButton = new InlineKeyboardButton("About This Bot");
+        aboutBotButton.setCallbackData("/aboutThisBot");
+        //button "About This Bot"
+        InlineKeyboardButton goBackButton = new InlineKeyboardButton("<< go back");
+        goBackButton.setCallbackData("/infoMenuGoBack");
+        //position from left to right
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+        List<InlineKeyboardButton> row3 = new ArrayList<>();
+
+        //
+        row1.add(userInfoButton);
+        row2.add(aboutBotButton);
+        row3.add(goBackButton);
+        //position from up to down
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        rows.add(row1);
+        rows.add(row2);
+        rows.add(row3);
+
+        //save buttons in the markup variable
+        keyboardMarkup.setKeyboard(rows);
+        //prepare to send
+        String msg = "You can read more about:";
+        SendMessage toSend = new SendMessage();
+        toSend.setChatId(chatId);
+        toSend.setText(msg);
+        toSend.setReplyMarkup(keyboardMarkup);
+        //send
+        return toSend;
+    }
+
     private SendMessage registration(long chatId, String msg) {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //button "Registration"
         InlineKeyboardButton button = new InlineKeyboardButton("Registration");
         button.setCallbackData("/registration");
         //button "About registration"
-        InlineKeyboardButton button1 = new InlineKeyboardButton("About registration");
+        InlineKeyboardButton button1 = new InlineKeyboardButton("About Registration");
         button1.setCallbackData("/aboutRegistration");
         //positions
         List<InlineKeyboardButton> row = new ArrayList<>();
@@ -170,9 +276,25 @@ public class TelegramBot extends TelegramLongPollingBot {
         return toSend;
     }
 
+    private void sendSettingsKeyboard(long chatId) {
+        try {
+            execute(settingsMenu(chatId));
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private void sendGlobalKeyboard(long chatId, String userName) {
         try {
             execute(globalMenu(chatId, userName));
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void sendInfoMenu(long chatId) {
+        try {
+            execute(infoMenu(chatId));
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }

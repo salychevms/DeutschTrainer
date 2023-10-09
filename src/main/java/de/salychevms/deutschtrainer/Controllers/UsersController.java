@@ -33,6 +33,10 @@ public class UsersController {
         return usersRepository.findById(id);
     }
 
+    public Optional<Users> findUserByUsername(String userName) {
+        return Optional.ofNullable(usersRepository.findByUserName(userName));
+    }
+
     public List<Users> findAllUsers() {
         return usersRepository.findAll();
     }
@@ -65,23 +69,23 @@ public class UsersController {
                 update.setAdmin(true);
                 usersRepository.save(update);
                 return true;
-            }else return false;
-        }else return false;
+            } else return false;
+        } else return false;
     }
 
-    public boolean deleteUserById(Long id){
-        Optional<Users> user=usersRepository.findById(id);
-        if(user.isPresent()){
+    public boolean deleteUserById(Long id) {
+        Optional<Users> user = usersRepository.findById(id);
+        if (user.isPresent()) {
             usersRepository.deleteById(id);
             return true;
-        }else return false;
+        } else return false;
     }
 
-    public boolean deleteAllUsers(){
-        List<Users> deleted=usersRepository.findAll();
-        if(!deleted.isEmpty()){
+    public boolean deleteAllUsers() {
+        List<Users> deleted = usersRepository.findAll();
+        if (!deleted.isEmpty()) {
             usersRepository.deleteAll();
             return true;
-        }else return false;
+        } else return false;
     }
 }
