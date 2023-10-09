@@ -8,8 +8,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UsersRepository extends JpaRepository<Users, Long> {
     @Transactional
-    Users findByTelegramId(String userName);
+    Users findByUserName(String userName);
 
     @Transactional
-    Users findByUserName(String name);
+    Users findByName(String name);
+
+    @Transactional
+    Users findBySurname(String surname);
 }

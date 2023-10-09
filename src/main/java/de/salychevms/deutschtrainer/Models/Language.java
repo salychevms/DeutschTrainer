@@ -48,7 +48,7 @@ public class Language {
     @Override
     public String toString() {
         return "Language{" +
-                "id=" + id +
+                "id=" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", identifier='" + name + '\'' +
                 '}';

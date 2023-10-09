@@ -17,14 +17,14 @@ public class UsersController {
     }
 
     public boolean registeredOr(String userName) {
-        Users user = usersRepository.findByTelegramId(userName);
+        Users user = usersRepository.findByUserName(userName);
         return user != null;
     }
 
     public void createNewUser(String userName) {
         Users newUser = new Users();
-        newUser.setTelegramId(userName);
         newUser.setUserName(userName);
+        newUser.setName(userName);
         newUser.setRegistrationDate(new Date());
         usersRepository.save(newUser);
     }
@@ -41,7 +41,7 @@ public class UsersController {
         Optional<Users> user = usersRepository.findById(id);
         if (user.isPresent()) {
             Users update = user.get();
-            update.setUserName(name);
+            update.setName(name);
             usersRepository.save(update);
             return true;
         } else return false;

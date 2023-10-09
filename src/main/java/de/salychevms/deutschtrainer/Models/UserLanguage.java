@@ -9,7 +9,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Table(name = "user_languages")
 public class UserLanguage {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_language_generator")
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)

@@ -10,10 +10,12 @@ public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_generator")
     private Long id;
-    @Column(name = "username", unique = true)
+    @Column(name = "name")
+    private String name;
+    @Column(name = "surname")
+    private String surname;
+    @Column(name = "user_name", nullable = false, unique = true)
     private String userName;
-    @Column(name = "telegram_id", nullable = false, unique = true)
-    private String telegramId;
     @Column(name = "phone_number", unique = true)
     private String phoneNumber;
     @Column(name = "registration_date", nullable = false)
@@ -38,20 +40,28 @@ public class Users {
         this.id = id;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
     public String getUserName() {
         return userName;
     }
 
     public void setUserName(String userName) {
         this.userName = userName;
-    }
-
-    public String getTelegramId() {
-        return telegramId;
-    }
-
-    public void setTelegramId(String telegramId) {
-        this.telegramId = telegramId;
     }
 
     public String getPhoneNumber() {
@@ -81,12 +91,13 @@ public class Users {
     @Override
     public String toString() {
         return "Users{" +
-                "id=" + id +
-                ", telegramId='" + telegramId + '\'' +
+                "id=" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
                 ", userName='" + userName + '\'' +
-                ", registrationDate=" + registrationDate +
                 ", phoneNumber='" + phoneNumber + '\'' +
-                ", admin='" + admin + '\'' +
+                ", registrationDate=" + registrationDate +
+                ", admin=" + admin +
                 '}';
     }
 }
