@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -72,9 +73,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                     sendInfoMenu(chatId);
                     //settings menu keyboard
                 } else if (callBackData.equals("/changeName")) {
-
+                    sendMessage(chatId, "Enter /sendName=NAME, where NAME is your new name!");
                 } else if (callBackData.equals("/changeSurname")) {
-
+                    sendMessage(chatId, "Enter /sendSurname=SURNAME, where SURNAME is your new name!");
                 } else if (callBackData.equals("/setNewLanguage")) {
 
                 } else if (callBackData.equals("/settingsMenuGoBack")) {
@@ -117,9 +118,44 @@ public class TelegramBot extends TelegramLongPollingBot {
                 } else if (usersController.registeredOr(userName)) {
                     if (messageText.equals("/start")) {
                         sendMessage(chatId, "I'm here!!! Did someone call me???\n");
+                        //give global menu
+                        sendGlobalKeyboard(chatId, userName);
+                        //global menu
+                    } else if (messageText.equals("/training")) {
+
+                    } else if (messageText.equals("/statistic")) {
+
+                    } else if (messageText.equals("/settings")) {
+                        sendSettingsKeyboard(chatId);
+                    } else if (messageText.equals("/info")) {
+                        sendInfoMenu(chatId);
+                    } else if (messageText.startsWith("/sendName=")) {
+                        String newName = messageText.substring("/sendName=".length());
+                        boolean status = usersController.updateNameByUserName(userName, newName);
+                        if (status) {
+                            sendMessage(chatId, "New " + userName + "'s name \""
+                                    + usersController.findUserByUsername(userName).get().getName()
+                                    + "\" is successfully have been saved.");
+                            sendSettingsKeyboard(chatId);
+                        } else {
+                            sendMessage(chatId, "Something bad happened! Try again, please!");
+                            sendSettingsKeyboard(chatId);
+                        }
+                    } else if (messageText.startsWith("/sendSurname=")) {
+                        String newSurname = messageText.substring("/sendSurname".length());
+                        boolean status = usersController.updateSurnameByUserName(userName, newSurname);
+                        if (status) {
+                            sendMessage(chatId, "New " + userName + "'s surname \""
+                                    + usersController.findUserByUsername(userName).get().getSurname()
+                                    + "\" is successfully have been saved.");
+                            sendSettingsKeyboard(chatId);
+                        } else {
+                            sendMessage(chatId, "Something bad happened! Try again, please!");
+                            sendSettingsKeyboard(chatId);
+                        }
+                    } else if (messageText.equals("/setNewLanguage")) {
+
                     }
-                    //give global menu
-                    sendGlobalKeyboard(chatId, userName);
                 }
             }
         }

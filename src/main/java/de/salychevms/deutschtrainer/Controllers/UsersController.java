@@ -41,11 +41,21 @@ public class UsersController {
         return usersRepository.findAll();
     }
 
-    public boolean updateUserName(Long id, String name) {
-        Optional<Users> user = usersRepository.findById(id);
+    public boolean updateNameByUserName(String userName, String name) {
+        Optional<Users> user = Optional.ofNullable(usersRepository.findByUserName(userName));
         if (user.isPresent()) {
             Users update = user.get();
             update.setName(name);
+            usersRepository.save(update);
+            return true;
+        } else return false;
+    }
+
+    public boolean updateSurnameByUserName(String userName, String surname) {
+        Optional<Users> user = Optional.ofNullable(usersRepository.findByUserName(userName));
+        if (user.isPresent()) {
+            Users update = user.get();
+            update.setSurname(surname);
             usersRepository.save(update);
             return true;
         } else return false;
