@@ -5,6 +5,7 @@ import de.salychevms.deutschtrainer.Controllers.UsersController;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -44,54 +45,24 @@ public class TelegramBot extends TelegramLongPollingBot {
         if (update.hasCallbackQuery()) {
             CallbackQuery callbackQuery = update.getCallbackQuery();
             String callBackData = callbackQuery.getData();
-
             //if user exists
             if (usersController.registeredOr(userName)) {
                 //reg keyboard
                 if (callBackData.equals("/registration")) {
-                    sendMessage(chatId, "You're already registered!");
-                    sendGlobalKeyboard(chatId, userName);
+                    editKeyboard(update.getCallbackQuery(), globalMenu(), "You're already registered!");
                 } else if (callBackData.equals("/aboutRegistration")) {
-                    sendMessage(chatId, "You're already registered!");
-                    sendGlobalKeyboard(chatId, userName);
-                    //info keyboard
-                } else if (callBackData.equals("/userInfo")) {
-                    sendMessage(chatId, "About User:\n" + usersController.findUserByUsername(userName).toString());
-                    sendInfoMenu(chatId);
-                } else if (callBackData.equals("/aboutThisBot")) {
-
-                } else if (callBackData.equals("/infoMenuGoBack")) {
-                    sendGlobalKeyboard(chatId, userName);
-                    //main menu keyboard
-                } else if (callBackData.equals("/training")) {
-
-                } else if (callBackData.equals("/statistic")) {
-
-                } else if (callBackData.equals("/settings")) {
-                    sendSettingsKeyboard(chatId);
-                } else if (callBackData.equals("/info")) {
-                    sendInfoMenu(chatId);
-                    //settings menu keyboard
-                } else if (callBackData.equals("/changeName")) {
-                    sendMessage(chatId, "Enter /sendName=NAME, where NAME is your new name!");
-                } else if (callBackData.equals("/changeSurname")) {
-                    sendMessage(chatId, "Enter /sendSurname=SURNAME, where SURNAME is your new name!");
-                } else if (callBackData.equals("/setNewLanguage")) {
-
-                } else if (callBackData.equals("/settingsMenuGoBack")) {
-                    sendGlobalKeyboard(chatId, userName);
+                    editKeyboard(update.getCallbackQuery(), globalMenu(), "You're already registered!");
                 }
                 //if user doesn't exist
             } else if (!usersController.registeredOr(userName)) {
                 if (callBackData.equals("/registration")) {
                     usersController.createNewUser(userName);
                     if (usersController.registeredOr(userName)) {
-                        sendMessage(chatId, "You're already registered!");
-                        sendGlobalKeyboard(chatId, userName);
+                        editKeyboard(update.getCallbackQuery(), globalMenu(), "Successfully! You're registered!");
                     } else sendMessage(chatId, "Oooopsie! Sorry, something wrong happened..." +
                             "\nWrite \"/start\" and try again!!");
                 } else if (callBackData.equals("/aboutRegistration")) {
-                    sendRegistrationKeyboard(chatId, "You have to register!");
+                    editKeyboard(update.getCallbackQuery(), registration(), "You have to registered!\n Please, push *Registration* in this menu.");
                 }
             } else sendMessage(chatId, "Oooopsie! Sorry, something wrong happened..." +
                     "\nWrite \"/start\" and try again!!");
@@ -109,7 +80,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     if (messageText.equals("/start")) {
                         sendMessage(chatId, "Hi, " + userName + "! You activated this bot.");
                         //give start menu
-                        sendRegistrationKeyboard(chatId, "You have to register.");
+                        sendKeyboard(registration(), chatId, "You have to register.");
                         //if something unusual happened
                     } else {
                         sendMessage(chatId, "Sorry! It does not works.\nSend command: \"/start\" again, please!");
@@ -117,51 +88,17 @@ public class TelegramBot extends TelegramLongPollingBot {
                     //if user already exists give global menu
                 } else if (usersController.registeredOr(userName)) {
                     if (messageText.equals("/start")) {
-                        sendMessage(chatId, "I'm here!!! Did someone call me???\n");
+                        //sendMessage(chatId, "I'm here!!! Did someone call me???\n");
                         //give global menu
-                        sendGlobalKeyboard(chatId, userName);
+                        sendKeyboard(globalMenu(), chatId, "I'm here!!! Did someone call me???\n");
                         //global menu
-                    } else if (messageText.equals("/training")) {
-
-                    } else if (messageText.equals("/statistic")) {
-
-                    } else if (messageText.equals("/settings")) {
-                        sendSettingsKeyboard(chatId);
-                    } else if (messageText.equals("/info")) {
-                        sendInfoMenu(chatId);
-                    } else if (messageText.startsWith("/sendName=")) {
-                        String newName = messageText.substring("/sendName=".length());
-                        boolean status = usersController.updateNameByUserName(userName, newName);
-                        if (status) {
-                            sendMessage(chatId, "New " + userName + "'s name \""
-                                    + usersController.findUserByUsername(userName).get().getName()
-                                    + "\" is successfully have been saved.");
-                            sendSettingsKeyboard(chatId);
-                        } else {
-                            sendMessage(chatId, "Something bad happened! Try again, please!");
-                            sendSettingsKeyboard(chatId);
-                        }
-                    } else if (messageText.startsWith("/sendSurname=")) {
-                        String newSurname = messageText.substring("/sendSurname".length());
-                        boolean status = usersController.updateSurnameByUserName(userName, newSurname);
-                        if (status) {
-                            sendMessage(chatId, "New " + userName + "'s surname \""
-                                    + usersController.findUserByUsername(userName).get().getSurname()
-                                    + "\" is successfully have been saved.");
-                            sendSettingsKeyboard(chatId);
-                        } else {
-                            sendMessage(chatId, "Something bad happened! Try again, please!");
-                            sendSettingsKeyboard(chatId);
-                        }
-                    } else if (messageText.equals("/setNewLanguage")) {
-
                     }
                 }
             }
         }
     }
 
-    private SendMessage globalMenu(long chatId, String userName) {
+    private InlineKeyboardMarkup globalMenu() {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //button "Training"
         InlineKeyboardButton trainingButton = new InlineKeyboardButton("Training");
@@ -193,17 +130,10 @@ public class TelegramBot extends TelegramLongPollingBot {
         rows.add(row4);
         //save buttons in the markup variable
         keyboardMarkup.setKeyboard(rows);
-        //prepare to send
-        String msg = "Hi, " + userName + "! Why don't we practice new words?\n";
-        SendMessage toSend = new SendMessage();
-        toSend.setChatId(chatId);
-        toSend.setText(msg);
-        toSend.setReplyMarkup(keyboardMarkup);
-        //send
-        return toSend;
+        return keyboardMarkup;
     }
 
-    private SendMessage settingsMenu(long chatId) {
+    private InlineKeyboardMarkup settingsMenu() {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //button "change Name"
         InlineKeyboardButton changeNameButton = new InlineKeyboardButton("Change Name");
@@ -235,17 +165,10 @@ public class TelegramBot extends TelegramLongPollingBot {
         rows.add(row4);
         //save buttons in the markup variable
         keyboardMarkup.setKeyboard(rows);
-        //prepare to send
-        String msg = "User settings:";
-        SendMessage toSend = new SendMessage();
-        toSend.setChatId(chatId);
-        toSend.setText(msg);
-        toSend.setReplyMarkup(keyboardMarkup);
-        //send
-        return toSend;
+        return keyboardMarkup;
     }
 
-    private SendMessage infoMenu(long chatId) {
+    private InlineKeyboardMarkup infoMenu() {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //button "User Info"
         InlineKeyboardButton userInfoButton = new InlineKeyboardButton("User Info");
@@ -273,17 +196,10 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         //save buttons in the markup variable
         keyboardMarkup.setKeyboard(rows);
-        //prepare to send
-        String msg = "You can read more about:";
-        SendMessage toSend = new SendMessage();
-        toSend.setChatId(chatId);
-        toSend.setText(msg);
-        toSend.setReplyMarkup(keyboardMarkup);
-        //send
-        return toSend;
+        return keyboardMarkup;
     }
 
-    private SendMessage registration(long chatId, String msg) {
+    private InlineKeyboardMarkup registration() {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //button "Registration"
         InlineKeyboardButton button = new InlineKeyboardButton("Registration");
@@ -303,42 +219,33 @@ public class TelegramBot extends TelegramLongPollingBot {
         rows.add(row1);
 
         keyboardMarkup.setKeyboard(rows);
-
-        SendMessage toSend = new SendMessage();
-        toSend.setText(msg);
-        toSend.setChatId(chatId);
-        toSend.setReplyMarkup(keyboardMarkup);
-
-        return toSend;
+        return keyboardMarkup;
     }
 
-    private void sendSettingsKeyboard(long chatId) {
+    private void sendKeyboard(InlineKeyboardMarkup keyboardMarkup, long chatId, String msg) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText(msg);
+        message.setReplyMarkup(keyboardMarkup);
         try {
-            execute(settingsMenu(chatId));
+            execute(message);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void sendGlobalKeyboard(long chatId, String userName) {
-        try {
-            execute(globalMenu(chatId, userName));
-        } catch (TelegramApiException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    private void editKeyboard(CallbackQuery callbackQuery, InlineKeyboardMarkup keyboardMarkup, String msg) {
+        long messageId = callbackQuery.getMessage().getMessageId();
+        long chatId=callbackQuery.getMessage().getChatId();
 
-    private void sendInfoMenu(long chatId) {
-        try {
-            execute(infoMenu(chatId));
-        } catch (TelegramApiException e) {
-            throw new RuntimeException(e);
-        }
-    }
+        EditMessageText message = new EditMessageText();
 
-    private void sendRegistrationKeyboard(long chatId, String msg) {
+        message.setChatId(chatId);
+        message.setMessageId((int) messageId);
+        message.setText(msg);
+        message.setReplyMarkup(keyboardMarkup);
         try {
-            execute(registration(chatId, msg));
+            execute(message);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
