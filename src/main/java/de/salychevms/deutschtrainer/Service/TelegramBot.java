@@ -2,6 +2,7 @@ package de.salychevms.deutschtrainer.Service;
 
 import de.salychevms.deutschtrainer.Config.BotConfig;
 import de.salychevms.deutschtrainer.Controllers.UsersController;
+import de.salychevms.deutschtrainer.Models.Users;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -16,6 +17,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
@@ -52,13 +54,31 @@ public class TelegramBot extends TelegramLongPollingBot {
                     editKeyboard(update.getCallbackQuery(), globalMenu(), "You're already registered!");
                 } else if (callBackData.equals("/aboutRegistration")) {
                     editKeyboard(update.getCallbackQuery(), globalMenu(), "You're already registered!");
+                } else if (callBackData.equals("/training")) {
+
+                } else if (callBackData.equals("/statistic")) {
+
+                } else if (callBackData.equals("/settings")) {
+                    editKeyboard(update.getCallbackQuery(), settingsMenu(), "Settings");
+                } else if (callBackData.equals("/info")) {
+                    editKeyboard(update.getCallbackQuery(), infoMenu(), "Info");
+                } else if (callBackData.equals("/userInfo")) {
+                    editKeyboard(update.getCallbackQuery(), infoMenu(), sendUserInfo(userName) + "\n\nInfo");
+                } else if (callBackData.equals("/aboutThisBot")) {
+                    editKeyboard(update.getCallbackQuery(), infoMenu(), "I hope this bot will help me and people to study german words very fast!"
+                            + "\nThis bot is free and also it's my opportunity to get new experience as a program developer."
+                            + "\nAll questions you can send me on my email: salychevms@gmail.com."
+                            + "\nGood luck and have fun! =)" + "\n\nInfo");
+                } else if (callBackData.equals("/mainMenu")) {
+                    editKeyboard(update.getCallbackQuery(), globalMenu(), "I'm here!!! Did someone call me???\n\nMain menu");
                 }
                 //if user doesn't exist
             } else if (!usersController.registeredOr(userName)) {
                 if (callBackData.equals("/registration")) {
                     usersController.createNewUser(userName);
                     if (usersController.registeredOr(userName)) {
-                        editKeyboard(update.getCallbackQuery(), globalMenu(), "Successfully! You're registered!");
+                        sendMessage(chatId, "Successfully! You're registered!");
+                        editKeyboard(update.getCallbackQuery(), globalMenu(), "Main menu");
                     } else sendMessage(chatId, "Oooopsie! Sorry, something wrong happened..." +
                             "\nWrite \"/start\" and try again!!");
                 } else if (callBackData.equals("/aboutRegistration")) {
@@ -90,7 +110,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     if (messageText.equals("/start")) {
                         //sendMessage(chatId, "I'm here!!! Did someone call me???\n");
                         //give global menu
-                        sendKeyboard(globalMenu(), chatId, "I'm here!!! Did someone call me???\n");
+                        sendKeyboard(globalMenu(), chatId, "I'm here!!! Did someone call me???\n\nMain menu");
                         //global menu
                     }
                 }
@@ -145,8 +165,8 @@ public class TelegramBot extends TelegramLongPollingBot {
         InlineKeyboardButton setNewLanguageButton = new InlineKeyboardButton("Set New Language");
         setNewLanguageButton.setCallbackData("/SetNewLanguage");
         //button "settings menu go back"
-        InlineKeyboardButton goBackButton = new InlineKeyboardButton("<< go back");
-        goBackButton.setCallbackData("/settingsMenuGoBack");
+        InlineKeyboardButton goBackButton = new InlineKeyboardButton("<< main menu");
+        goBackButton.setCallbackData("/mainMenu");
         //position from left to right
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         List<InlineKeyboardButton> row2 = new ArrayList<>();
@@ -177,8 +197,8 @@ public class TelegramBot extends TelegramLongPollingBot {
         InlineKeyboardButton aboutBotButton = new InlineKeyboardButton("About This Bot");
         aboutBotButton.setCallbackData("/aboutThisBot");
         //button "About This Bot"
-        InlineKeyboardButton goBackButton = new InlineKeyboardButton("<< go back");
-        goBackButton.setCallbackData("/infoMenuGoBack");
+        InlineKeyboardButton goBackButton = new InlineKeyboardButton("<< main menu");
+        goBackButton.setCallbackData("/mainMenu");
         //position from left to right
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         List<InlineKeyboardButton> row2 = new ArrayList<>();
@@ -236,7 +256,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private void editKeyboard(CallbackQuery callbackQuery, InlineKeyboardMarkup keyboardMarkup, String msg) {
         long messageId = callbackQuery.getMessage().getMessageId();
-        long chatId=callbackQuery.getMessage().getChatId();
+        long chatId = callbackQuery.getMessage().getChatId();
 
         EditMessageText message = new EditMessageText();
 
@@ -260,6 +280,14 @@ public class TelegramBot extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    private String sendUserInfo(String userName) {
+        return "User: " + userName
+                + "\nUser id: " + usersController.findUserByUsername(userName).get().getId()
+                + "\nFirstname: " + usersController.findUserByUsername(userName).get().getName()
+                + "\nLastname: " + usersController.findUserByUsername(userName).get().getSurname()
+                + "\nPhone: " + usersController.findUserByUsername(userName).get().getPhoneNumber()
+                + "\nRegistration date: " + usersController.findUserByUsername(userName).get().getRegistrationDate();
     }
 }
