@@ -16,13 +16,14 @@ public class UsersController {
         this.usersRepository = usersRepository;
     }
 
-    public boolean registeredOr(String userName) {
-        Users user = usersRepository.findByUserName(userName);
+    public boolean registeredOr(Long telegramId) {
+        Users user = usersRepository.findByTelegramId(telegramId);
         return user != null;
     }
 
-    public void createNewUser(String userName) {
+    public void createNewUser(Long telegramId, String userName) {
         Users newUser = new Users();
+        newUser.setTelegramId(telegramId);
         newUser.setUserName(userName);
         newUser.setName(userName);
         newUser.setRegistrationDate(new Date());
@@ -31,6 +32,10 @@ public class UsersController {
 
     public Optional<Users> findUserById(Long id) {
         return usersRepository.findById(id);
+    }
+
+    public Optional<Users> findUserByTelegramId(Long telegramId) {
+        return Optional.ofNullable(usersRepository.findByTelegramId(telegramId));
     }
 
     public Optional<Users> findUserByUsername(String userName) {

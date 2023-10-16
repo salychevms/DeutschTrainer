@@ -10,6 +10,8 @@ public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_generator")
     private Long id;
+    @Column(name = "telegram_id", nullable = false, unique = true)
+    private Long telegramId;
     @Column(name = "name")
     private String name;
     @Column(name = "surname")
@@ -26,9 +28,10 @@ public class Users {
     public Users() {
     }
 
-    public Users(String userName, Date registrationDate) {
+    public Users(Long telegramId, String userName, Date registrationDate) {
         this.userName = userName;
         this.registrationDate = registrationDate;
+        this.telegramId = telegramId;
         this.admin = false;
     }
 
@@ -88,10 +91,19 @@ public class Users {
         this.admin = admin;
     }
 
+    public Long getTelegramId() {
+        return telegramId;
+    }
+
+    public void setTelegramId(Long telegramId) {
+        this.telegramId = telegramId;
+    }
+
     @Override
     public String toString() {
         return "Users{" +
                 "id=" + id + '\'' +
+                ", telegramId=" + telegramId + '\'' +
                 ", name='" + name + '\'' +
                 ", surname='" + surname + '\'' +
                 ", userName='" + userName + '\'' +

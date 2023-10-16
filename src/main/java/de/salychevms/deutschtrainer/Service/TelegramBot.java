@@ -16,9 +16,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
@@ -26,6 +24,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     final UsersController usersController;
     private long chatId;
     private String userName;
+    private long telegramId;
 
     public TelegramBot(BotConfig config, UsersController usersController) {
         this.config = config;
@@ -52,8 +51,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                 String messageText = message.getText();
                 chatId = message.getChatId();
                 userName = message.getChat().getUserName() != null ? message.getChat().getUserName() : "NONAME";
+                telegramId = (message.getFrom().getId());
 
-                if (!usersController.registeredOr(userName)) {
+                if (!usersController.registeredOr(telegramId)) {
                     //if user sent /start
                     if (messageText.equals("/start")) {
                         //give start menu
@@ -63,7 +63,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         sendMessage(chatId, "Sorry! It does not works.\nSend command: \"/start\" again, please!");
                     }
                     //if user already exists give global menu
-                } else if (usersController.registeredOr(userName)) {
+                } else if (usersController.registeredOr(telegramId)) {
                     if (messageText.equals("/start")) {
                         //sendMessage(chatId, "I'm here!!! Did someone call me???\n");
                         //give global menu
@@ -76,7 +76,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             CallbackQuery callbackQuery = update.getCallbackQuery();
             String callBackData = callbackQuery.getData();
             //if user exists
-            if (usersController.registeredOr(userName)) {
+            if (usersController.registeredOr(telegramId)) {
                 //reg keyboard
                 if (callBackData.equals("/training")) {
                     editKeyboard(update.getCallbackQuery(), trainingMenu(), "Training");
@@ -87,7 +87,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 } else if (callBackData.equals("/info")) {
                     editKeyboard(update.getCallbackQuery(), infoMenu(), "Info");
                 } else if (callBackData.equals("/userInfo")) {
-                    editKeyboard(update.getCallbackQuery(), infoMenu(), sendUserInfo(userName) + "\n\nInfo");
+                    editKeyboard(update.getCallbackQuery(), infoMenu(), sendUserInfo(telegramId) + "\n\nInfo");
                 } else if (callBackData.equals("/aboutThisBot")) {
                     editKeyboard(update.getCallbackQuery(), infoMenu(), "I hope this bot will help me and people to study german words very fast!"
                             + "\nThis bot is free and also it's my opportunity to get new experience as a program developer."
@@ -95,7 +95,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                             + "\nGood luck and have fun! =)" + "\n\nInfo");
                 } else if (callBackData.equals("/changeName")) {
                     editMessage(callbackQuery, "Change Name");
-                    sendMessage(chatId,"enter new name");
+                    sendMessage(chatId, "enter new name");
                 } else if (callBackData.equals("/changeSurname")) {
 
                 } else if (callBackData.equals("/setNewLanguage")) {
@@ -104,10 +104,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                     editKeyboard(update.getCallbackQuery(), globalMenu(), "I'm here!!! Did someone call me???\n\nMain menu");
                 }
                 //if user doesn't exist
-            } else if (!usersController.registeredOr(userName)) {
+            } else if (!usersController.registeredOr(telegramId)) {
                 if (callBackData.equals("/registration")) {
-                    usersController.createNewUser(userName);
-                    if (usersController.registeredOr(userName)) {
+                    usersController.createNewUser(telegramId, userName);
+                    if (usersController.registeredOr(telegramId)) {
                         editKeyboard(update.getCallbackQuery(), globalMenu(), "Successfully! You're registered!" + "\n\nMain menu");
                     } else sendMessage(chatId, "Oooopsie! Sorry, something wrong happened..." +
                             "\nWrite \"/start\" and try again!!");
@@ -339,12 +339,13 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    private String sendUserInfo(String userName) {
+    private String sendUserInfo(long telegramId) {
         return "User: " + userName
-                + "\nUser id: " + usersController.findUserByUsername(userName).get().getId()
-                + "\nFirstname: " + usersController.findUserByUsername(userName).get().getName()
-                + "\nLastname: " + usersController.findUserByUsername(userName).get().getSurname()
-                + "\nPhone: " + usersController.findUserByUsername(userName).get().getPhoneNumber()
-                + "\nRegistration date: " + usersController.findUserByUsername(userName).get().getRegistrationDate();
+                + "\nUser id: " + usersController.findUserByTelegramId(telegramId).get().getId()
+                + "\nTelegram id: " + usersController.findUserByTelegramId(telegramId).get().getTelegramId()
+                + "\nFirstname: " + usersController.findUserByTelegramId(telegramId).get().getName()
+                + "\nLastname: " + usersController.findUserByTelegramId(telegramId).get().getSurname()
+                + "\nPhone: " + usersController.findUserByTelegramId(telegramId).get().getPhoneNumber()
+                + "\nRegistration date: " + usersController.findUserByTelegramId(telegramId).get().getRegistrationDate();
     }
 }

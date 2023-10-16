@@ -15,4 +15,7 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
 
     @Transactional
     Users findBySurname(String surname);
+
+    @Transactional
+    Users findByTelegramId(Long telegramId);
 }
