@@ -25,7 +25,6 @@ public class UsersController {
         Users newUser = new Users();
         newUser.setTelegramId(telegramId);
         newUser.setUserName(userName);
-        newUser.setName(userName);
         newUser.setRegistrationDate(new Date());
         usersRepository.save(newUser);
     }

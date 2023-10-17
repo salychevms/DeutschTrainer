@@ -2,7 +2,6 @@ package de.salychevms.deutschtrainer.Service;
 
 import de.salychevms.deutschtrainer.Config.BotConfig;
 import de.salychevms.deutschtrainer.Controllers.UsersController;
-import de.salychevms.deutschtrainer.Models.Users;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -22,9 +21,6 @@ import java.util.List;
 public class TelegramBot extends TelegramLongPollingBot {
     final BotConfig config;
     final UsersController usersController;
-    private long chatId;
-    private String userName;
-    private long telegramId;
 
     public TelegramBot(BotConfig config, UsersController usersController) {
         this.config = config;
@@ -44,37 +40,37 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         Message message = update.getMessage();
+        List<Long> queue = new ArrayList<>();
         //check message
         //check global commands
-        if (update.hasMessage()) {
-            if (message.hasText()) {
-                String messageText = message.getText();
-                chatId = message.getChatId();
-                userName = message.getChat().getUserName() != null ? message.getChat().getUserName() : "NONAME";
-                telegramId = (message.getFrom().getId());
-
-                if (!usersController.registeredOr(telegramId)) {
-                    //if user sent /start
-                    if (messageText.equals("/start")) {
-                        //give start menu
-                        sendKeyboard(registration(), chatId, "You activated this bot." + "\nYou have to register.");
-                        //if something unusual happened
-                    } else {
-                        sendMessage(chatId, "Sorry! It does not works.\nSend command: \"/start\" again, please!");
-                    }
-                    //if user already exists give global menu
-                } else if (usersController.registeredOr(telegramId)) {
-                    if (messageText.equals("/start")) {
-                        //sendMessage(chatId, "I'm here!!! Did someone call me???\n");
-                        //give global menu
-                        sendKeyboard(globalMenu(), chatId, "I'm here!!! Did someone call me???\n\nMain menu");
-                        //global menu
-                    }
+        if (update.hasMessage() && message.hasText()) {
+            String messageText = message.getText();
+            String userName = message.getChat().getUserName() != null ? message.getChat().getUserName() : "NONAME";
+            long chatId = message.getChatId();
+            long telegramId = (message.getFrom().getId());
+            if (!usersController.registeredOr(telegramId)) {
+                //if user sent /start
+                if (messageText.equals("/start")) {
+                    //give start menu
+                    sendKeyboard(registration(), chatId, "You activated this bot." + "\nYou have to register.");
+                    //if something unusual happened
+                } else {
+                    sendMessage(chatId, "Sorry! It does not works.\nSend command: \"/start\" again, please!");
+                }
+                //if user already exists give global menu
+            } else if (usersController.registeredOr(telegramId)) {
+                if (messageText.equals("/start")) {
+                    //give global menu
+                    sendKeyboard(globalMenu(), chatId, "I'm here!!! Did someone call me???\n\nMain menu");
+                    //global menu
                 }
             }
         } else if (update.hasCallbackQuery()) {
             CallbackQuery callbackQuery = update.getCallbackQuery();
             String callBackData = callbackQuery.getData();
+            long chatId = callbackQuery.getMessage().getChatId();
+            long telegramId = callbackQuery.getFrom().getId();
+            String userName = callbackQuery.getMessage().getChat().getUserName();
             //if user exists
             if (usersController.registeredOr(telegramId)) {
                 //reg keyboard
@@ -340,7 +336,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private String sendUserInfo(long telegramId) {
-        return "User: " + userName
+        return "User: " + usersController.findUserByTelegramId(telegramId).get().getUserName()
                 + "\nUser id: " + usersController.findUserByTelegramId(telegramId).get().getId()
                 + "\nTelegram id: " + usersController.findUserByTelegramId(telegramId).get().getTelegramId()
                 + "\nFirstname: " + usersController.findUserByTelegramId(telegramId).get().getName()
