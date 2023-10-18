@@ -45,8 +45,8 @@ public class UsersController {
         return usersRepository.findAll();
     }
 
-    public boolean updateNameByUserName(String userName, String name) {
-        Optional<Users> user = Optional.ofNullable(usersRepository.findByUserName(userName));
+    public boolean updateNameByTelegramID(long telegramId, String name) {
+        Optional<Users> user = Optional.ofNullable(usersRepository.findByTelegramId(telegramId));
         if (user.isPresent()) {
             Users update = user.get();
             update.setName(name);
@@ -55,8 +55,8 @@ public class UsersController {
         } else return false;
     }
 
-    public boolean updateSurnameByUserName(String userName, String surname) {
-        Optional<Users> user = Optional.ofNullable(usersRepository.findByUserName(userName));
+    public boolean updateSurnameByTelegramId(long telegramId, String surname) {
+        Optional<Users> user = Optional.ofNullable(usersRepository.findByTelegramId(telegramId));
         if (user.isPresent()) {
             Users update = user.get();
             update.setSurname(surname);
@@ -65,8 +65,8 @@ public class UsersController {
         } else return false;
     }
 
-    public boolean updatePhoneNumber(Long id, String number) {
-        Optional<Users> user = usersRepository.findById(id);
+    public boolean updatePhoneNumberByTelegramId(Long telegramId, String number) {
+        Optional<Users> user = Optional.ofNullable(usersRepository.findByTelegramId(telegramId));
         if (user.isPresent()) {
             Users update = user.get();
             update.setPhoneNumber(number);

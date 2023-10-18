@@ -16,7 +16,7 @@ public class LanguageController {
     }
 
     public boolean createLanguage(String name, String identifier) {
-        if (languageRepository.findByIdentifier(identifier).isEmpty()
+        if (languageRepository.findLanguageByIdentifier(identifier).isEmpty()
                 && languageRepository.findByName(name).isEmpty()) {
             Language language = new Language();
             language.setIdentifier(identifier);
@@ -26,10 +26,12 @@ public class LanguageController {
         } else return false;
     }
 
-    public Optional<Language> getLanguage(String identifier) {
-        if (languageRepository.findByIdentifier(identifier).isPresent()) {
-            return languageRepository.findByName(identifier);
-        } else return Optional.empty();
+    public Optional<Language> getById(Long languageId) {
+        return languageRepository.findById(languageId);
+    }
+
+    public Optional<Language> getLanguageByIdentifier(String identifier) {
+        return languageRepository.findLanguageByIdentifier(identifier);
     }
 
     public List<Language> getAll(){
@@ -37,7 +39,7 @@ public class LanguageController {
     }
 
     public boolean deleteLanguage(String identifier){
-        Optional<Language> language=languageRepository.findByIdentifier(identifier);
+        Optional<Language> language=languageRepository.findLanguageByIdentifier(identifier);
         if(language.isPresent()){
             languageRepository.deleteById(language.get().getId());
             return true;

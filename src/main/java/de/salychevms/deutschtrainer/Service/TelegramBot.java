@@ -1,7 +1,12 @@
 package de.salychevms.deutschtrainer.Service;
 
 import de.salychevms.deutschtrainer.Config.BotConfig;
+import de.salychevms.deutschtrainer.Controllers.LanguageController;
+import de.salychevms.deutschtrainer.Controllers.MessageHistoryController;
+import de.salychevms.deutschtrainer.Controllers.UserLanguageController;
 import de.salychevms.deutschtrainer.Controllers.UsersController;
+import de.salychevms.deutschtrainer.Models.Language;
+import de.salychevms.deutschtrainer.Models.Users;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -15,16 +20,24 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
     final BotConfig config;
     final UsersController usersController;
+    final LanguageController languageController;
+    final UserLanguageController userLanguageController;
+    final MessageHistoryController messageHistoryController;
 
-    public TelegramBot(BotConfig config, UsersController usersController) {
+    public TelegramBot(BotConfig config, UsersController usersController, LanguageController languageController, UserLanguageController userLanguageController, MessageHistoryController messageHistoryController) {
         this.config = config;
         this.usersController = usersController;
+        this.languageController = languageController;
+        this.userLanguageController = userLanguageController;
+        this.messageHistoryController = messageHistoryController;
     }
 
     @Override
@@ -37,15 +50,15 @@ public class TelegramBot extends TelegramLongPollingBot {
         return config.getToken();
     }
 
+    List<String> queue = new ArrayList<>();
+
     @Override
     public void onUpdateReceived(Update update) {
         Message message = update.getMessage();
-        List<Long> queue = new ArrayList<>();
         //check message
         //check global commands
         if (update.hasMessage() && message.hasText()) {
             String messageText = message.getText();
-            String userName = message.getChat().getUserName() != null ? message.getChat().getUserName() : "NONAME";
             long chatId = message.getChatId();
             long telegramId = (message.getFrom().getId());
             if (!usersController.registeredOr(telegramId)) {
@@ -63,6 +76,29 @@ public class TelegramBot extends TelegramLongPollingBot {
                     //give global menu
                     sendKeyboard(globalMenu(), chatId, "I'm here!!! Did someone call me???\n\nMain menu");
                     //global menu
+                } else if (!queue.isEmpty()) {
+                    Iterator<String> iterator = queue.iterator();
+                    while (iterator.hasNext()) {
+                        String item = iterator.next();
+                        if (item.startsWith(String.valueOf(telegramId))) {
+                            String userText = item.substring(String.valueOf(telegramId).length());
+                            if (userText.equals("/changeName")) {
+                                usersController.updateNameByTelegramID(telegramId, messageText);
+                                iterator.remove();
+                                sendKeyboard(settingsMenu(), chatId, "New name has been saved! \""
+                                        + messageText
+                                        + "\"" + "\n\nSetting");
+                                break;
+                            } else if (userText.equals("/changeSurname")) {
+                                usersController.updateSurnameByTelegramId(telegramId, messageText);
+                                iterator.remove();
+                                sendKeyboard(settingsMenu(), chatId, "New surname has been saved! \""
+                                        + messageText
+                                        + "\"" + "\n\nSetting");
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         } else if (update.hasCallbackQuery()) {
@@ -85,16 +121,72 @@ public class TelegramBot extends TelegramLongPollingBot {
                 } else if (callBackData.equals("/userInfo")) {
                     editKeyboard(update.getCallbackQuery(), infoMenu(), sendUserInfo(telegramId) + "\n\nInfo");
                 } else if (callBackData.equals("/aboutThisBot")) {
-                    editKeyboard(update.getCallbackQuery(), infoMenu(), "I hope this bot will help me and people to study german words very fast!"
-                            + "\nThis bot is free and also it's my opportunity to get new experience as a program developer."
-                            + "\nAll questions you can send me on my email:\nsalychevms@gmail.com."
-                            + "\nGood luck and have fun! =)" + "\n\nInfo");
+                    editKeyboard(update.getCallbackQuery(), infoMenu(), """
+                            I hope this bot will help me and people to study german words very fast!
+                            This bot is free and also it's my opportunity to get new experience as a program developer.
+                            All questions you can send me on my email:
+                            salychevms@gmail.com.
+                            Good luck and have fun! =)
+
+                            Info""");
                 } else if (callBackData.equals("/changeName")) {
                     editMessage(callbackQuery, "Change Name");
                     sendMessage(chatId, "enter new name");
+                    queue.add(telegramId + callBackData);
                 } else if (callBackData.equals("/changeSurname")) {
-
+                    editMessage(callbackQuery, "Change Surname");
+                    sendMessage(chatId, "enter new surname");
+                    queue.add(telegramId + callBackData);
+                    //if I pressed button "set new language"
                 } else if (callBackData.equals("/setNewLanguage")) {
+                    //I get all identifiers by my id
+                    List<String> identifiers = userLanguageController.getAllLanguagesByTelegramId(telegramId);
+                    //I set all identifiers in one string
+                    String identifierString = String.join(" / ", identifiers);
+                    //I send this string to my editMessage
+                    editKeyboard(callbackQuery, setLanguageMenu(), "You already learn:\n"
+                            + identifierString
+                            + "\n\nSet Language");
+
+                    //if I press "germanDE"
+                } else if (callBackData.equals("/germanDE")) {
+                    //I get language id by identifier
+                    Optional<Language> language = languageController.getLanguageByIdentifier("DE");
+                    //if this language is absent I create this language with this identifier
+                    if (language.isEmpty()) {
+                        languageController.createLanguage("german", "DE");
+                        editKeyboard(callbackQuery, setLanguageMenu(), """
+                                Language: german "DE" has been created.
+
+                                Set Language""");
+                    }
+                    //when this language is exists I get all my languages by my id
+                    List<String> identifiers = userLanguageController.getAllLanguagesByTelegramId(telegramId);
+                    boolean found=false;
+                    //and check this language in my language list
+                    for (String str : identifiers) {
+                        if (str.equals("DE")) {
+                            found=true;
+                            break;
+                        }
+                    }
+                    //if this language doesn't exist
+                    if (!found) {
+                        System.out.println("exist=0");//////////////////////////////////////////////////////////////////
+                        //I save this language in my language list
+                        userLanguageController.createUserLanguage(telegramId, language.get().getId());
+                        editKeyboard(callbackQuery, setLanguageMenu(), """
+                                Language: german "DE" has been added.
+
+                                Set Language""");
+                        //if it is existed I sent to my editMessage information I already learn
+                    } else {
+                        System.out.println("exist");//////////////////////////////////////////////////////////////////
+                        editKeyboard(callbackQuery, setLanguageMenu(), """
+                                You have already learn "DE".
+
+                                Set Language""");
+                    }
 
                 } else if (callBackData.equals("/mainMenu")) {
                     editKeyboard(update.getCallbackQuery(), globalMenu(), "I'm here!!! Did someone call me???\n\nMain menu");
@@ -104,7 +196,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                 if (callBackData.equals("/registration")) {
                     usersController.createNewUser(telegramId, userName);
                     if (usersController.registeredOr(telegramId)) {
-                        editKeyboard(update.getCallbackQuery(), globalMenu(), "Successfully! You're registered!" + "\n\nMain menu");
+                        editKeyboard(update.getCallbackQuery(), globalMenu(), """
+                                Successfully! You're registered!
+
+                                Main menu""");
                     } else sendMessage(chatId, "Oooopsie! Sorry, something wrong happened..." +
                             "\nWrite \"/start\" and try again!!");
                 } else if (callBackData.equals("/aboutRegistration")) {
@@ -113,6 +208,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             } else sendMessage(chatId, "Oooopsie! Sorry, something wrong happened..." +
                     "\nWrite \"/start\" and try again!!");
         }
+
     }
 
     private InlineKeyboardMarkup statisticMenu() {
@@ -200,7 +296,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         changeSurnameButton.setCallbackData("/changeSurname");
         //button "set new language"
         InlineKeyboardButton setNewLanguageButton = new InlineKeyboardButton("Set New Language");
-        setNewLanguageButton.setCallbackData("/SetNewLanguage");
+        setNewLanguageButton.setCallbackData("/setNewLanguage");
         //button "settings menu go back"
         InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<< main menu");
         goToMainMenuButton.setCallbackData("/mainMenu");
@@ -279,6 +375,36 @@ public class TelegramBot extends TelegramLongPollingBot {
         return keyboardMarkup;
     }
 
+    private InlineKeyboardMarkup setLanguageMenu() {
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+        //button
+        InlineKeyboardButton userInfoButton = new InlineKeyboardButton("\"DE\" German");
+        userInfoButton.setCallbackData("/germanDE");
+        //button
+        InlineKeyboardButton goToSettingsMenuButton = new InlineKeyboardButton("< settings menu");
+        goToSettingsMenuButton.setCallbackData("/settings");
+        //button
+        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<< main menu");
+        goToMainMenuButton.setCallbackData("/mainMenu");
+        //position from left to right
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+        List<InlineKeyboardButton> row3 = new ArrayList<>();
+        //
+        row1.add(userInfoButton);
+        row2.add(goToSettingsMenuButton);
+        row3.add(goToMainMenuButton);
+        //position from up to down
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        rows.add(row1);
+        rows.add(row2);
+        rows.add(row3);
+
+        //save buttons in the markup variable
+        keyboardMarkup.setKeyboard(rows);
+        return keyboardMarkup;
+    }
+
     private void sendKeyboard(InlineKeyboardMarkup keyboardMarkup, long chatId, String msg) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
@@ -336,12 +462,13 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private String sendUserInfo(long telegramId) {
-        return "User: " + usersController.findUserByTelegramId(telegramId).get().getUserName()
-                + "\nUser id: " + usersController.findUserByTelegramId(telegramId).get().getId()
-                + "\nTelegram id: " + usersController.findUserByTelegramId(telegramId).get().getTelegramId()
-                + "\nFirstname: " + usersController.findUserByTelegramId(telegramId).get().getName()
-                + "\nLastname: " + usersController.findUserByTelegramId(telegramId).get().getSurname()
-                + "\nPhone: " + usersController.findUserByTelegramId(telegramId).get().getPhoneNumber()
-                + "\nRegistration date: " + usersController.findUserByTelegramId(telegramId).get().getRegistrationDate();
+        Optional<Users> user=usersController.findUserByTelegramId(telegramId);
+        return user.map(users -> "User: " + users.getUserName()
+                + "\nUser id: " + users.getId()
+                + "\nTelegram id: " + users.getTelegramId()
+                + "\nFirstname: " + users.getName()
+                + "\nLastname: " + users.getSurname()
+                + "\nPhone: " + users.getPhoneNumber()
+                + "\nRegistration date: " + users.getRegistrationDate()).orElse(null);
     }
 }

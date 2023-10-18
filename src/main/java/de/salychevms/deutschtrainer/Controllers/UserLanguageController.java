@@ -6,8 +6,10 @@ import de.salychevms.deutschtrainer.Models.Users;
 import de.salychevms.deutschtrainer.Repo.LanguageRepository;
 import de.salychevms.deutschtrainer.Repo.UserLanguageRepository;
 import de.salychevms.deutschtrainer.Repo.UsersRepository;
+import org.hibernate.Hibernate;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,36 +25,30 @@ public class UserLanguageController {
         this.languageRepository = languageRepository;
     }
 
-    public boolean createUserLanguage(Long userId, Long languageId) {
-        Optional<Users> user = usersRepository.findById(userId);
-        if (user.isPresent()) {
+    public void createUserLanguage(Long telegramId, Long languageId) {
+        Optional<Users> user = Optional.ofNullable(usersRepository.findByTelegramId(telegramId));
             Optional<Language> language = languageRepository.findById(languageId);
-            if (language.isEmpty()) {
                 UserLanguage userLanguage = new UserLanguage();
                 userLanguage.setUser(user.get());
                 userLanguage.setLanguage(language.get());
                 userLanguageRepository.save(userLanguage);
-                return true;
-            } else return false;
-        } else return false;
     }
 
-    public Optional<UserLanguage> getUserLanguageByUserIdAndLanguageId(Long userId, Long languageId) {
-        return userLanguageRepository.findAllByUserIdAndLanguageId(userId, languageId);
+    public List<String> getAllLanguagesByTelegramId(Long telegramId) {
+        List<String> identifiers = new ArrayList<>();
+        List<UserLanguage> languages = userLanguageRepository.findAllByUser_TelegramId(telegramId);
+        for (UserLanguage item : languages) {
+
+            identifiers.add(item.getLanguage().getIdentifier());
+        }
+        if (identifiers.isEmpty()) {
+            identifiers.add("no one yet.");
+        }
+        return identifiers;
     }
 
-    public List<UserLanguage> getAllUserLanguages() {
-        List<UserLanguage> list = userLanguageRepository.findAll();
-        if (!list.isEmpty()) {
-            return list;
-        } else return null;
-    }
-
-    public List<UserLanguage> getAllByUserId(Long userId) {
-        List<UserLanguage> list = userLanguageRepository.findAllByUserId(userId);
-        if (!list.isEmpty()) {
-            return list;
-        } else return null;
+    public List<UserLanguage> getAllByUserId(Long telegramId) {
+        return userLanguageRepository.findAllByUser_TelegramId(telegramId);
     }
 
     public List<UserLanguage> getAllByLanguageId(Long languageId) {
