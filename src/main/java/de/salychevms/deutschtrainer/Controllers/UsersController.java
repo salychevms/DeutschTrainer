@@ -75,6 +75,11 @@ public class UsersController {
         } else return false;
     }
 
+    public boolean getAmdinStatus(Long telegramId){
+        Optional<Users> user=usersRepository.findById(telegramId);
+        return user.map(Users::isAdmin).orElse(false);
+    }
+
     public boolean updateAdminStatusOn(Long id) {
         Optional<Users> user = usersRepository.findById(id);
         if (user.isPresent()) {

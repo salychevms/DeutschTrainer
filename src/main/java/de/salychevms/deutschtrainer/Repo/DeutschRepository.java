@@ -11,6 +11,6 @@ import java.util.Optional;
 @Repository
 public interface DeutschRepository extends JpaRepository<Deutsch, Long> {
     @Transactional
-    Optional<Deutsch> findByDeWord(String word);
+    Optional<Deutsch> findByDeWordIgnoreCase(String word);
 
 }

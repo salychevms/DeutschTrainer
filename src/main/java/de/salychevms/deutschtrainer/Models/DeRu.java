@@ -1,7 +1,11 @@
 package de.salychevms.deutschtrainer.Models;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "de_ru")
 public class DeRu {
@@ -20,30 +24,6 @@ public class DeRu {
 
     public DeRu(Long deutschId, Long russianId) {
         this.deutschId = deutschId;
-        this.russianId = russianId;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getDeutschId() {
-        return deutschId;
-    }
-
-    public void setDeutschId(Long deutschId) {
-        this.deutschId = deutschId;
-    }
-
-    public Long getRussianId() {
-        return russianId;
-    }
-
-    public void setRussianId(Long russianId) {
         this.russianId = russianId;
     }
 

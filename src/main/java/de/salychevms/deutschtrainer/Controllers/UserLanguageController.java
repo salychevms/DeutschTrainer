@@ -38,7 +38,6 @@ public class UserLanguageController {
         List<String> identifiers = new ArrayList<>();
         List<UserLanguage> languages = userLanguageRepository.findAllByUser_TelegramId(telegramId);
         for (UserLanguage item : languages) {
-
             identifiers.add(item.getLanguage().getIdentifier());
         }
         if (identifiers.isEmpty()) {

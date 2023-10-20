@@ -1,12 +1,10 @@
 package de.salychevms.deutschtrainer.Service;
 
 import de.salychevms.deutschtrainer.Config.BotConfig;
-import de.salychevms.deutschtrainer.Controllers.LanguageController;
-import de.salychevms.deutschtrainer.Controllers.MessageHistoryController;
-import de.salychevms.deutschtrainer.Controllers.UserLanguageController;
-import de.salychevms.deutschtrainer.Controllers.UsersController;
+import de.salychevms.deutschtrainer.Controllers.*;
 import de.salychevms.deutschtrainer.Models.Language;
 import de.salychevms.deutschtrainer.Models.Users;
+import de.salychevms.deutschtrainer.Repo.DeutschRepository;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -31,13 +29,20 @@ public class TelegramBot extends TelegramLongPollingBot {
     final LanguageController languageController;
     final UserLanguageController userLanguageController;
     final MessageHistoryController messageHistoryController;
+    final DeutschController deutschController;
+    final RussianController russianController;
+    final DeRuController deRuController;
 
-    public TelegramBot(BotConfig config, UsersController usersController, LanguageController languageController, UserLanguageController userLanguageController, MessageHistoryController messageHistoryController) {
+    public TelegramBot(BotConfig config, UsersController usersController, LanguageController languageController, UserLanguageController userLanguageController, MessageHistoryController messageHistoryController,
+                       DeutschController deutschController, RussianController russianController, DeRuController deRuController) {
         this.config = config;
         this.usersController = usersController;
         this.languageController = languageController;
         this.userLanguageController = userLanguageController;
         this.messageHistoryController = messageHistoryController;
+        this.deutschController = deutschController;
+        this.russianController = russianController;
+        this.deRuController = deRuController;
     }
 
     @Override
@@ -55,8 +60,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         Message message = update.getMessage();
-        //check message
-        //check global commands
+        String addWordsIdentifier = null;
         if (update.hasMessage() && message.hasText()) {
             String messageText = message.getText();
             long chatId = message.getChatId();
@@ -72,9 +76,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                 }
                 //if user already exists give global menu
             } else if (usersController.registeredOr(telegramId)) {
+                boolean adminStatus = usersController.findUserByTelegramId(telegramId).get().isAdmin();
                 if (messageText.equals("/start")) {
                     //give global menu
-                    sendKeyboard(globalMenu(), chatId, "I'm here!!! Did someone call me???\n\nMain menu");
+                    sendKeyboard(globalMenu(adminStatus), chatId, "I'm here!!! Did someone call me???\n\nMain menu");
                     //global menu
                 } else if (!queue.isEmpty()) {
                     Iterator<String> iterator = queue.iterator();
@@ -96,6 +101,13 @@ public class TelegramBot extends TelegramLongPollingBot {
                                         + messageText
                                         + "\"" + "\n\nSetting");
                                 break;
+                            } else if (userText.equals("/addWordAdmin")) {
+                                Long germanWord = deutschController.createNewWord(messageText);
+                                List<Long> russianTranslate = russianController.createNewWord(messageText);
+                                List<Long> pairs = deRuController.createNewPairs(germanWord, russianTranslate);
+                                String result = deRuController.getAllWordPairsByPairId(germanWord, pairs);
+                                sendKeyboard(adminLanguagesMenu(), chatId, result);
+                                queue=null;
                             }
                         }
                     }
@@ -109,6 +121,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             String userName = callbackQuery.getMessage().getChat().getUserName();
             //if user exists
             if (usersController.registeredOr(telegramId)) {
+                boolean adminStatus = usersController.findUserByTelegramId(telegramId).get().isAdmin();
                 //reg keyboard
                 if (callBackData.equals("/training")) {
                     editKeyboard(update.getCallbackQuery(), trainingMenu(), "Training");
@@ -118,6 +131,26 @@ public class TelegramBot extends TelegramLongPollingBot {
                     editKeyboard(update.getCallbackQuery(), settingsMenu(), "Settings");
                 } else if (callBackData.equals("/info")) {
                     editKeyboard(update.getCallbackQuery(), infoMenu(), "Info");
+                } else if (callBackData.equals("/adminMenu")) {
+                    editKeyboard(update.getCallbackQuery(), adminMenu(), "Amin Menu");
+                } else if (callBackData.equals("/languagesAdmin")) {
+                    editKeyboard(update.getCallbackQuery(), adminLanguagesMenu(), "Language Menu");
+                } else if (callBackData.equals("/russianSettings")) {
+                    editKeyboard(update.getCallbackQuery(), addWordsMenu(), "Add Words Menu\nRU - russian");
+                } else if (callBackData.equals("/germanSettings")) {
+                    editKeyboard(update.getCallbackQuery(), addWordsMenu(), "Add Words Menu\nDE - german");
+                } else if (callBackData.equals("/addWordAdmin")) {
+                    editMessage(callbackQuery, """
+                            A Very Important Description:
+                            New record should looks like **der Hund // собака**.
+                            If a word has several meanings write please with **/**.
+                            For example: **laufen // идти/бежать**.
+                            Please, enter new german nouns only with article.
+                            For example: **das Haus**.
+                            Write an article from small letter: **der/die/das**.
+                            A word from big letter: **Haus/Hund/Ampel.**""");
+                    sendMessage(chatId, "enter a pair word");
+                    queue.add(telegramId + callBackData);
                 } else if (callBackData.equals("/userInfo")) {
                     editKeyboard(update.getCallbackQuery(), infoMenu(), sendUserInfo(telegramId) + "\n\nInfo");
                 } else if (callBackData.equals("/aboutThisBot")) {
@@ -154,6 +187,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     Optional<Language> language = languageController.getLanguageByIdentifier("DE");
                     //if this language is absent I create this language with this identifier
                     if (language.isEmpty()) {
+                        languageController.createLanguage("russian", "RU");
                         languageController.createLanguage("german", "DE");
                         editKeyboard(callbackQuery, setLanguageMenu(), """
                                 Language: german "DE" has been created.
@@ -162,17 +196,16 @@ public class TelegramBot extends TelegramLongPollingBot {
                     }
                     //when this language is exists I get all my languages by my id
                     List<String> identifiers = userLanguageController.getAllLanguagesByTelegramId(telegramId);
-                    boolean found=false;
+                    boolean found = false;
                     //and check this language in my language list
                     for (String str : identifiers) {
                         if (str.equals("DE")) {
-                            found=true;
+                            found = true;
                             break;
                         }
                     }
                     //if this language doesn't exist
-                    if (!found) {
-                        System.out.println("exist=0");//////////////////////////////////////////////////////////////////
+                    if (!found && language.isPresent()) {
                         //I save this language in my language list
                         userLanguageController.createUserLanguage(telegramId, language.get().getId());
                         editKeyboard(callbackQuery, setLanguageMenu(), """
@@ -180,8 +213,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
                                 Set Language""");
                         //if it is existed I sent to my editMessage information I already learn
-                    } else {
-                        System.out.println("exist");//////////////////////////////////////////////////////////////////
+                    } else if (found && language.isPresent()) {
                         editKeyboard(callbackQuery, setLanguageMenu(), """
                                 You have already learn "DE".
 
@@ -189,14 +221,14 @@ public class TelegramBot extends TelegramLongPollingBot {
                     }
 
                 } else if (callBackData.equals("/mainMenu")) {
-                    editKeyboard(update.getCallbackQuery(), globalMenu(), "I'm here!!! Did someone call me???\n\nMain menu");
+                    editKeyboard(update.getCallbackQuery(), globalMenu(adminStatus), "I'm here!!! Did someone call me???\n\nMain menu");
                 }
                 //if user doesn't exist
             } else if (!usersController.registeredOr(telegramId)) {
                 if (callBackData.equals("/registration")) {
                     usersController.createNewUser(telegramId, userName);
                     if (usersController.registeredOr(telegramId)) {
-                        editKeyboard(update.getCallbackQuery(), globalMenu(), """
+                        editKeyboard(update.getCallbackQuery(), globalMenu(false), """
                                 Successfully! You're registered!
 
                                 Main menu""");
@@ -209,6 +241,90 @@ public class TelegramBot extends TelegramLongPollingBot {
                     "\nWrite \"/start\" and try again!!");
         }
 
+    }
+
+    private InlineKeyboardMarkup addWordsMenu() {
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+        //button "main menu
+        InlineKeyboardButton addOneWordButton = new InlineKeyboardButton("Add Word");
+        addOneWordButton.setCallbackData("/addWordAdmin");
+        //button "main menu
+        InlineKeyboardButton addListButton = new InlineKeyboardButton("Add Words From List");
+        addListButton.setCallbackData("/addListAdmin");
+        //button "main menu
+        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<< main menu");
+        goToMainMenuButton.setCallbackData("/mainMenu");
+        ////position from left to right
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+        List<InlineKeyboardButton> row3 = new ArrayList<>();
+        //
+        row1.add(addOneWordButton);
+        row2.add(addListButton);
+        row3.add(goToMainMenuButton);
+        //position from up to down
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        rows.add(row1);
+        rows.add(row2);
+        rows.add(row3);
+        //save buttons in the markup variable
+        keyboardMarkup.setKeyboard(rows);
+        return keyboardMarkup;
+    }
+
+    private InlineKeyboardMarkup adminMenu() {
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+        //button "main menu
+        InlineKeyboardButton languagesButton = new InlineKeyboardButton("Languages");
+        languagesButton.setCallbackData("/languagesAdmin");
+
+        //button "main menu
+        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<< main menu");
+        goToMainMenuButton.setCallbackData("/mainMenu");
+        ////position from left to right
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+        //
+        row1.add(languagesButton);
+        row2.add(goToMainMenuButton);
+        //position from up to down
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        rows.add(row1);
+        rows.add(row2);
+        //save buttons in the markup variable
+        keyboardMarkup.setKeyboard(rows);
+        return keyboardMarkup;
+    }
+
+    private InlineKeyboardMarkup adminLanguagesMenu() {
+        List<Language> languages = languageController.getAll();
+        List<String> languageNames = new ArrayList<>();
+        for (Language item : languages) {
+            languageNames.add(item.getName());
+        }
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        for (String item : languageNames) {
+            InlineKeyboardButton button = new InlineKeyboardButton();
+            List<InlineKeyboardButton> buttons = new ArrayList<>();
+            button.setText(item);
+            /* CallbackData constructor:  "/"+item+"Settings"  ==>>  /russianSettings*/
+            button.setCallbackData("/" + item + "Settings");
+            buttons.add(button);
+            rows.add(buttons);
+        }
+        //button "main menu
+        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<< main menu");
+        goToMainMenuButton.setCallbackData("/mainMenu");
+        ////position from left to right
+        List<InlineKeyboardButton> row = new ArrayList<>();
+        //
+        row.add(goToMainMenuButton);
+        //position from up to down
+        rows.add(row);
+        //save buttons in the markup variable
+        keyboardMarkup.setKeyboard(rows);
+        return keyboardMarkup;
     }
 
     private InlineKeyboardMarkup statisticMenu() {
@@ -251,7 +367,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         return keyboardMarkup;
     }
 
-    private InlineKeyboardMarkup globalMenu() {
+    private InlineKeyboardMarkup globalMenu(boolean ifAdmin) {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //button "Training"
         InlineKeyboardButton trainingButton = new InlineKeyboardButton("Training");
@@ -265,22 +381,33 @@ public class TelegramBot extends TelegramLongPollingBot {
         //button "Info"
         InlineKeyboardButton infoButton = new InlineKeyboardButton("Info");
         infoButton.setCallbackData("/info");
+        //========for admin========
+        InlineKeyboardButton adminMenuButton = new InlineKeyboardButton("Admin Menu");
+        adminMenuButton.setCallbackData("/adminMenu");
         //position from left to right
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         List<InlineKeyboardButton> row2 = new ArrayList<>();
         List<InlineKeyboardButton> row3 = new ArrayList<>();
         List<InlineKeyboardButton> row4 = new ArrayList<>();
+        //========for admin========
+        List<InlineKeyboardButton> adminRow = new ArrayList<>();
         //
         row1.add(trainingButton);
         row2.add(statisticButton);
         row3.add(settingsButton);
         row4.add(infoButton);
+        //========for admin========
+        adminRow.add(adminMenuButton);
         //position from up to down
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         rows.add(row1);
         rows.add(row2);
         rows.add(row3);
         rows.add(row4);
+        //========for admin========
+        if (ifAdmin) {
+            rows.add(adminRow);
+        }
         //save buttons in the markup variable
         keyboardMarkup.setKeyboard(rows);
         return keyboardMarkup;
@@ -462,7 +589,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private String sendUserInfo(long telegramId) {
-        Optional<Users> user=usersController.findUserByTelegramId(telegramId);
+        Optional<Users> user = usersController.findUserByTelegramId(telegramId);
         return user.map(users -> "User: " + users.getUserName()
                 + "\nUser id: " + users.getId()
                 + "\nTelegram id: " + users.getTelegramId()
