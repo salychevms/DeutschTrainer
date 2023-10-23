@@ -1,6 +1,6 @@
-package de.salychevms.deutschtrainer.Config;
+package de.salychevms.deutschtrainer.BotConfig;
 
-import de.salychevms.deutschtrainer.Service.TelegramBot;
+import de.salychevms.deutschtrainer.BotService.TelegramBot;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;

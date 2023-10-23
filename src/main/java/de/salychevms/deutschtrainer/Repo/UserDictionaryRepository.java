@@ -10,9 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserDictionaryRepository extends JpaRepository<UserDictionary, Long> {
-    @Transactional
     Optional<UserDictionary> findWordByUserLanguageIdAndWordId(Long userLanguageId, Long MainDictionaryId);
 
-    @Transactional
     List<UserDictionary> findAllWordsByUserLanguageId(Long userLanguageId);
 }

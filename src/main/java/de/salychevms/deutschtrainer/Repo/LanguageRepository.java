@@ -8,8 +8,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 @Repository
 public interface LanguageRepository extends JpaRepository<Language, Long> {
-    @Transactional
     Optional<Language> findByName(String name);
-    @Transactional
     Optional<Language> findLanguageByIdentifier(String identifier);
 }

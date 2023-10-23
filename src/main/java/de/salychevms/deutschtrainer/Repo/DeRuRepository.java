@@ -11,7 +11,6 @@ import java.util.Optional;
 
 @Repository
 public interface DeRuRepository extends JpaRepository<DeRu, Long> {
-    @Transactional
     Optional<DeRu> getByDeutschIdAndRussianId(Long germanId, Long russianId);
 
 }

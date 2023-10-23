@@ -1,4 +1,4 @@
-package de.salychevms.deutschtrainer.Config;
+package de.salychevms.deutschtrainer.BotConfig;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;

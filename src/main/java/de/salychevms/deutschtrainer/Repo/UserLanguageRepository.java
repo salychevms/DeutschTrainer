@@ -12,15 +12,12 @@ import java.util.Optional;
 
 @Repository
 public interface UserLanguageRepository extends JpaRepository<UserLanguage, Long> {
-    @Transactional
     ///WARNING! this annotation helps to get the data from language.table
     @EntityGraph(attributePaths = "language")
     List<UserLanguage> findAllByUser_TelegramId(Long telegramId);
 
-    @Transactional
     List<UserLanguage> findAllByLanguageId(Long languageId);
 
-    @Transactional
     List<UserLanguage> findAllByLanguageName(String name);
 
 }

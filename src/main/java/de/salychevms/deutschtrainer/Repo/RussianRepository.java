@@ -9,6 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface RussianRepository extends JpaRepository<Russian, Long> {
-@Transactional
     Optional<Russian> findByRuWordIgnoreCase(String ruWord);
 }

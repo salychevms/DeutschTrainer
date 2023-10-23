@@ -10,10 +10,8 @@ import java.util.List;
 
 @Repository
 public interface MessageHistoryRepository extends JpaRepository<MessageHistory, Long> {
-    @Transactional
     List<MessageHistory> findMessageHistoriesByUser(Users user);
 
-    @Transactional
     List<MessageHistory> findAllByChatId(Long chatId);
 
 

@@ -1,10 +1,9 @@
-package de.salychevms.deutschtrainer.Service;
+package de.salychevms.deutschtrainer.BotService;
 
-import de.salychevms.deutschtrainer.Config.BotConfig;
+import de.salychevms.deutschtrainer.BotConfig.BotConfig;
 import de.salychevms.deutschtrainer.Controllers.*;
 import de.salychevms.deutschtrainer.Models.Language;
 import de.salychevms.deutschtrainer.Models.Users;
-import de.salychevms.deutschtrainer.Repo.DeutschRepository;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -81,7 +80,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     //give global menu
                     sendKeyboard(globalMenu(adminStatus), chatId, "I'm here!!! Did someone call me???\n\nMain menu");
                     //global menu
-                } else if (!queue.isEmpty()) {
+                } else if (queue!=null) {
                     Iterator<String> iterator = queue.iterator();
                     while (iterator.hasNext()) {
                         String item = iterator.next();
@@ -102,12 +101,16 @@ public class TelegramBot extends TelegramLongPollingBot {
                                         + "\"" + "\n\nSetting");
                                 break;
                             } else if (userText.equals("/addWordAdmin")) {
+                                iterator.remove();
+                                //create one german word
                                 Long germanWord = deutschController.createNewWord(messageText);
-                                List<Long> russianTranslate = russianController.createNewWord(messageText);
-                                List<Long> pairs = deRuController.createNewPairs(germanWord, russianTranslate);
+                                //create a lot of russian word
+                                List<Long> russianTranslate = russianController.createNewWords(messageText);
+                                //create pairs of words
+                                List<Long> pairs = deRuController.createPairs(germanWord, russianTranslate);
                                 String result = deRuController.getAllWordPairsByPairId(germanWord, pairs);
                                 sendKeyboard(adminLanguagesMenu(), chatId, result);
-                                queue=null;
+                                break;
                             }
                         }
                     }
@@ -152,16 +155,16 @@ public class TelegramBot extends TelegramLongPollingBot {
                     sendMessage(chatId, "enter a pair word");
                     queue.add(telegramId + callBackData);
                 } else if (callBackData.equals("/userInfo")) {
-                    editKeyboard(update.getCallbackQuery(), infoMenu(), sendUserInfo(telegramId) + "\n\nInfo");
+                    editKeyboard(update.getCallbackQuery(), globalMenu(adminStatus), sendUserInfo(telegramId) + "\n\nMain menu");
                 } else if (callBackData.equals("/aboutThisBot")) {
-                    editKeyboard(update.getCallbackQuery(), infoMenu(), """
+                    editKeyboard(update.getCallbackQuery(), globalMenu(adminStatus), """
                             I hope this bot will help me and people to study german words very fast!
                             This bot is free and also it's my opportunity to get new experience as a program developer.
                             All questions you can send me on my email:
                             salychevms@gmail.com.
                             Good luck and have fun! =)
 
-                            Info""");
+                            Main menu""");
                 } else if (callBackData.equals("/changeName")) {
                     editMessage(callbackQuery, "Change Name");
                     sendMessage(chatId, "enter new name");
@@ -235,7 +238,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                     } else sendMessage(chatId, "Oooopsie! Sorry, something wrong happened..." +
                             "\nWrite \"/start\" and try again!!");
                 } else if (callBackData.equals("/aboutRegistration")) {
-                    editKeyboard(update.getCallbackQuery(), registration(), "You have to register!\n\nPlease, push *Registration* in this menu.");
+                    if (!callbackQuery.getMessage().getText().equals("You have to register!\n\nPlease, push *Registration* in this menu.")) {
+                        editKeyboard(update.getCallbackQuery(), registration(), "You have to register!\n\nPlease, push *Registration* in this menu.");
+                    }else editMessage(update.getCallbackQuery(), "You're haven't registered!\nPress /start and get a sign up, please!");
                 }
             } else sendMessage(chatId, "Oooopsie! Sorry, something wrong happened..." +
                     "\nWrite \"/start\" and try again!!");

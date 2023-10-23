@@ -2,6 +2,7 @@ package de.salychevms.deutschtrainer.Controllers;
 
 import de.salychevms.deutschtrainer.Models.Users;
 import de.salychevms.deutschtrainer.Repo.UsersRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
@@ -12,6 +13,7 @@ import java.util.Optional;
 public class UsersController {
     final UsersRepository usersRepository;
 
+    @Autowired
     public UsersController(UsersRepository usersRepository) {
         this.usersRepository = usersRepository;
     }
@@ -55,14 +57,13 @@ public class UsersController {
         } else return false;
     }
 
-    public boolean updateSurnameByTelegramId(long telegramId, String surname) {
+    public void updateSurnameByTelegramId(long telegramId, String surname) {
         Optional<Users> user = Optional.ofNullable(usersRepository.findByTelegramId(telegramId));
         if (user.isPresent()) {
             Users update = user.get();
             update.setSurname(surname);
             usersRepository.save(update);
-            return true;
-        } else return false;
+        }
     }
 
     public boolean updatePhoneNumberByTelegramId(Long telegramId, String number) {
@@ -75,8 +76,8 @@ public class UsersController {
         } else return false;
     }
 
-    public boolean getAmdinStatus(Long telegramId){
-        Optional<Users> user=usersRepository.findById(telegramId);
+    public boolean getAmdinStatus(Long telegramId) {
+        Optional<Users> user = usersRepository.findById(telegramId);
         return user.map(Users::isAdmin).orElse(false);
     }
 

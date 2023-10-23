@@ -3,10 +3,8 @@ package de.salychevms.deutschtrainer.Controllers;
 import de.salychevms.deutschtrainer.Models.Language;
 import de.salychevms.deutschtrainer.Models.UserLanguage;
 import de.salychevms.deutschtrainer.Models.Users;
-import de.salychevms.deutschtrainer.Repo.LanguageRepository;
 import de.salychevms.deutschtrainer.Repo.UserLanguageRepository;
-import de.salychevms.deutschtrainer.Repo.UsersRepository;
-import org.hibernate.Hibernate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -16,22 +14,24 @@ import java.util.Optional;
 @RestController
 public class UserLanguageController {
     final UserLanguageRepository userLanguageRepository;
-    final UsersRepository usersRepository;
-    final LanguageRepository languageRepository;
+    final UsersController usersController;
+    final LanguageController languageController;
 
-    public UserLanguageController(UserLanguageRepository userLanguageRepository, UsersRepository usersRepository, LanguageRepository languageRepository) {
+    @Autowired
+    public UserLanguageController(UserLanguageRepository userLanguageRepository, UsersController usersController, LanguageController languageController) {
         this.userLanguageRepository = userLanguageRepository;
-        this.usersRepository = usersRepository;
-        this.languageRepository = languageRepository;
+
+        this.usersController = usersController;
+        this.languageController = languageController;
     }
 
     public void createUserLanguage(Long telegramId, Long languageId) {
-        Optional<Users> user = Optional.ofNullable(usersRepository.findByTelegramId(telegramId));
-            Optional<Language> language = languageRepository.findById(languageId);
-                UserLanguage userLanguage = new UserLanguage();
-                userLanguage.setUser(user.get());
-                userLanguage.setLanguage(language.get());
-                userLanguageRepository.save(userLanguage);
+        Optional<Users> user = (usersController.findUserByTelegramId(telegramId));
+        Optional<Language> language = languageController.getById(languageId);
+        UserLanguage userLanguage = new UserLanguage();
+        userLanguage.setUser(user.get());
+        userLanguage.setLanguage(language.get());
+        userLanguageRepository.save(userLanguage);
     }
 
     public List<String> getAllLanguagesByTelegramId(Long telegramId) {

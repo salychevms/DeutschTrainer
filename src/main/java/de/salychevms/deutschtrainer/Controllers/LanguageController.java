@@ -2,6 +2,7 @@ package de.salychevms.deutschtrainer.Controllers;
 
 import de.salychevms.deutschtrainer.Models.Language;
 import de.salychevms.deutschtrainer.Repo.LanguageRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Optional;
 public class LanguageController {
     final LanguageRepository languageRepository;
 
+    @Autowired
     public LanguageController(LanguageRepository languageRepository) {
         this.languageRepository = languageRepository;
     }
@@ -34,22 +36,22 @@ public class LanguageController {
         return languageRepository.findLanguageByIdentifier(identifier);
     }
 
-    public List<Language> getAll(){
+    public List<Language> getAll() {
         return languageRepository.findAll();
     }
 
-    public boolean deleteLanguage(String identifier){
-        Optional<Language> language=languageRepository.findLanguageByIdentifier(identifier);
-        if(language.isPresent()){
+    public boolean deleteLanguage(String identifier) {
+        Optional<Language> language = languageRepository.findLanguageByIdentifier(identifier);
+        if (language.isPresent()) {
             languageRepository.deleteById(language.get().getId());
             return true;
-        }else return false;
+        } else return false;
     }
 
-    public boolean deleteAll(){
-        if(!languageRepository.findAll().isEmpty()) {
+    public boolean deleteAll() {
+        if (!languageRepository.findAll().isEmpty()) {
             languageRepository.deleteAll();
             return true;
-        }else return false;
+        } else return false;
     }
 }

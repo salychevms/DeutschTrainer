@@ -7,15 +7,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UsersRepository extends JpaRepository<Users, Long> {
-    @Transactional
     Users findByUserName(String userName);
 
-    @Transactional
     Users findByName(String name);
 
-    @Transactional
     Users findBySurname(String surname);
 
-    @Transactional
     Users findByTelegramId(Long telegramId);
 }
