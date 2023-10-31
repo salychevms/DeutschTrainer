@@ -5,6 +5,7 @@ import de.salychevms.deutschtrainer.Repo.DeRuRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,5 +25,14 @@ public class DeRuService {
     @Transactional
     public Optional<DeRu> findById(Long id) {
         return deRuRepository.findById(id);
+    }
+
+    @Transactional
+    public List<DeRu> findAllByDeutschId(Long germanId) {
+        return deRuRepository.getAllByDeutschId(germanId);
+    }
+    @Transactional
+    public List<DeRu> findAllByRussianId(Long russianId) {
+        return deRuRepository.getAllByRussianId(russianId);
     }
 }

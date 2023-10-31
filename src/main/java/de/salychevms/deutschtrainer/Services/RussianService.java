@@ -1,10 +1,12 @@
 package de.salychevms.deutschtrainer.Services;
 
+import de.salychevms.deutschtrainer.Models.Deutsch;
 import de.salychevms.deutschtrainer.Models.Russian;
 import de.salychevms.deutschtrainer.Repo.RussianRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -27,5 +29,10 @@ public class RussianService {
         if(exist.isEmpty()){
             return russianRepository.save(new Russian(word)).getId();
         }else return null;
+    }
+
+    @Transactional
+    public List<Russian> findWordsContaining(String russian){
+        return russianRepository.findByRuWordContainingIgnoreCase(russian);
     }
 }

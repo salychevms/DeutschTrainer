@@ -1,5 +1,6 @@
 package de.salychevms.deutschtrainer.Controllers;
 
+import de.salychevms.deutschtrainer.Models.Deutsch;
 import de.salychevms.deutschtrainer.Models.Russian;
 import de.salychevms.deutschtrainer.Services.RussianService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,7 @@ import java.util.List;
 
 @RestController
 public class RussianController {
-    final RussianService russianService;
+    private final RussianService russianService;
 
     @Autowired
     public RussianController(RussianService russianService) {
@@ -32,4 +33,9 @@ public class RussianController {
     public Russian findById(Long id) {
         return russianService.findById(id);
     }
+
+    public List<Russian> findAllRussianWords(String russian){
+        return russianService.findWordsContaining(russian);
+    }
+
 }

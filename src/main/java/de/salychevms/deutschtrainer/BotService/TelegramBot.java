@@ -23,14 +23,14 @@ import java.util.Optional;
 
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
-    final BotConfig config;
-    final UsersController usersController;
-    final LanguageController languageController;
-    final UserLanguageController userLanguageController;
-    final MessageHistoryController messageHistoryController;
-    final DeutschController deutschController;
-    final RussianController russianController;
-    final DeRuController deRuController;
+    private final BotConfig config;
+    private final UsersController usersController;
+    private final LanguageController languageController;
+    private final UserLanguageController userLanguageController;
+    private final MessageHistoryController messageHistoryController;
+    private final DeutschController deutschController;
+    private final RussianController russianController;
+    private final DeRuController deRuController;
 
     public TelegramBot(BotConfig config, UsersController usersController, LanguageController languageController, UserLanguageController userLanguageController, MessageHistoryController messageHistoryController,
                        DeutschController deutschController, RussianController russianController, DeRuController deRuController) {
@@ -80,7 +80,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     //give global menu
                     sendKeyboard(globalMenu(adminStatus), chatId, "I'm here!!! Did someone call me???\n\nMain menu");
                     //global menu
-                } else if (queue!=null) {
+                } else if (queue != null) {
                     Iterator<String> iterator = queue.iterator();
                     while (iterator.hasNext()) {
                         String item = iterator.next();
@@ -111,6 +111,17 @@ public class TelegramBot extends TelegramLongPollingBot {
                                 String result = deRuController.getAllWordPairsByPairId(germanWord, pairs);
                                 sendKeyboard(adminLanguagesMenu(), chatId, result);
                                 break;
+                            } else if (userText.equals("/addNewWords")) {
+                                iterator.remove();
+                                List<String> allPairs = deRuController.getWordsToUser(messageText);
+                                if (!allPairs.isEmpty()) {
+                                    sendKeyboard(getWordsMenu(allPairs), chatId,
+                                            "You entered a word: " + messageText + "\nYou can choose one to learn.");
+                                } else sendKeyboard(trainingMenu(), chatId, """
+                                        This word doesn't exist! Sorry try another one word
+                                        or send me email with your word list.
+
+                                        Training""");
                             }
                         }
                     }
@@ -128,6 +139,16 @@ public class TelegramBot extends TelegramLongPollingBot {
                 //reg keyboard
                 if (callBackData.equals("/training")) {
                     editKeyboard(update.getCallbackQuery(), trainingMenu(), "Training");
+                } else if (callBackData.equals("/addNewWords")) {
+                    editMessage(callbackQuery, """
+                            You can enter a word (include nouns with/out an article)
+                            and you get all existing translations for this word.
+                            Also you will get all existing cognate words with translation.
+                            E.g. *Haus* returns *das Haus // дом* and another word(s)
+                            *der Hausmeister // управдом*
+                            """);
+                    sendMessage(chatId, "enter a german or russian word");
+                    queue.add(telegramId + callBackData);
                 } else if (callBackData.equals("/statistic")) {
                     editKeyboard(update.getCallbackQuery(), statisticMenu(), "Statistic");
                 } else if (callBackData.equals("/settings")) {
@@ -225,6 +246,8 @@ public class TelegramBot extends TelegramLongPollingBot {
 
                 } else if (callBackData.equals("/mainMenu")) {
                     editKeyboard(update.getCallbackQuery(), globalMenu(adminStatus), "I'm here!!! Did someone call me???\n\nMain menu");
+                } else if (callBackData.startsWith("/Offer=")) {
+
                 }
                 //if user doesn't exist
             } else if (!usersController.registeredOr(telegramId)) {
@@ -240,7 +263,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                 } else if (callBackData.equals("/aboutRegistration")) {
                     if (!callbackQuery.getMessage().getText().equals("You have to register!\n\nPlease, push *Registration* in this menu.")) {
                         editKeyboard(update.getCallbackQuery(), registration(), "You have to register!\n\nPlease, push *Registration* in this menu.");
-                    }else editMessage(update.getCallbackQuery(), "You're haven't registered!\nPress /start and get a sign up, please!");
+                    } else
+                        editMessage(update.getCallbackQuery(), "You're haven't registered!\nPress /start and get a sign up, please!");
                 }
             } else sendMessage(chatId, "Oooopsie! Sorry, something wrong happened..." +
                     "\nWrite \"/start\" and try again!!");
@@ -301,6 +325,38 @@ public class TelegramBot extends TelegramLongPollingBot {
         return keyboardMarkup;
     }
 
+    private InlineKeyboardMarkup getWordsMenu(List<String> wordCollection) {
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        for (String item : wordCollection) {
+            InlineKeyboardButton button = new InlineKeyboardButton();
+            List<InlineKeyboardButton> buttons = new ArrayList<>();
+            button.setText(item);
+            /* CallbackData constructor:  "/Offer="+item  ==>>  /Offer=rennen // бегать*/
+            button.setCallbackData("/Offer=" + item);
+            buttons.add(button);
+            rows.add(buttons);
+        }
+        //button
+        InlineKeyboardButton goToTrainingMenuButton = new InlineKeyboardButton("< training menu");
+        goToTrainingMenuButton.setCallbackData("/training");
+        //button
+        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<< main menu");
+        goToMainMenuButton.setCallbackData("/mainMenu");
+        ////position from left to right
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+        //
+        row1.add(goToTrainingMenuButton);
+        row2.add(goToMainMenuButton);
+        rows.add(row1);
+        rows.add(row2);
+        //save buttons in the markup variable
+        keyboardMarkup.setKeyboard(rows);
+        return keyboardMarkup;
+
+    }
+
     private InlineKeyboardMarkup adminLanguagesMenu() {
         List<Language> languages = languageController.getAll();
         List<String> languageNames = new ArrayList<>();
@@ -354,19 +410,25 @@ public class TelegramBot extends TelegramLongPollingBot {
         //button "Daily"
         InlineKeyboardButton dailyTrainingButton = new InlineKeyboardButton("Daily Training");
         dailyTrainingButton.setCallbackData("/dailyTraining");
+        //button "Add new"
+        InlineKeyboardButton addNewWordsButton = new InlineKeyboardButton("Add New Words");
+        addNewWordsButton.setCallbackData("/addNewWords");
         //button "main menu
         InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<< main menu");
         goToMainMenuButton.setCallbackData("/mainMenu");
         ////position from left to right
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         List<InlineKeyboardButton> row2 = new ArrayList<>();
+        List<InlineKeyboardButton> row3 = new ArrayList<>();
         //
         row1.add(dailyTrainingButton);
-        row2.add(goToMainMenuButton);
+        row2.add(addNewWordsButton);
+        row3.add(goToMainMenuButton);
         //position from up to down
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         rows.add(row1);
         rows.add(row2);
+        rows.add(row3);
         //save buttons in the markup variable
         keyboardMarkup.setKeyboard(rows);
         return keyboardMarkup;

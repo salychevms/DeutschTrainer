@@ -5,6 +5,7 @@ import de.salychevms.deutschtrainer.Repo.DeutschRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -27,5 +28,10 @@ public class DeutschService {
         if (exist.isEmpty()) {
             return deutschRepository.save(new Deutsch(word)).getId();
         } else return null;
+    }
+
+    @Transactional
+    public List<Deutsch> findWordsContaining(String german){
+        return deutschRepository.findAllByDeWordIsContainingIgnoreCase(german);
     }
 }

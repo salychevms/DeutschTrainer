@@ -5,11 +5,12 @@ import de.salychevms.deutschtrainer.Services.DeutschService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
 public class DeutschController {
-    final DeutschService deutschService;
+    private final DeutschService deutschService;
 
     @Autowired
     public DeutschController(DeutschService deutschService) {
@@ -23,6 +24,10 @@ public class DeutschController {
 
     public Deutsch findById(Long id){
         return deutschService.findById(id);
+    }
+
+    public List<Deutsch> findAllDeutschWords(String german){
+        return deutschService.findWordsContaining(german);
     }
 
 }
