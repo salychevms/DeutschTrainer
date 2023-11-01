@@ -17,5 +17,4 @@ public interface DeRuRepository extends JpaRepository<DeRu, Long> {
     List<DeRu> getAllByDeutschId(Long id);
 
     List<DeRu> getAllByRussianId(Long id);
-
 }

@@ -34,4 +34,9 @@ public class DeutschService {
     public List<Deutsch> findWordsContaining(String german){
         return deutschRepository.findAllByDeWordIsContainingIgnoreCase(german);
     }
+
+    @Transactional
+    public Optional<Deutsch> findByWord(String word){
+        return deutschRepository.findByDeWord(word);
+    }
 }

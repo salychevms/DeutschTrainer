@@ -14,22 +14,22 @@ public class UserDictionary {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_dictionary_generator")
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY,optional = false)
-    @JoinColumn(name = "user_language_id")
+    @JoinColumn(name = "user_language")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private UserLanguage userLanguage;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "main_dictionary_id")
+    @JoinColumn(name = "pair")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
-    private Deutsch word;
+    private DeRu pair;
     @Column(name = "date_added")
     private Date dateAdded;
 
     public UserDictionary(){}
-    public UserDictionary(UserLanguage userLanguage, Deutsch word, Date dateAdded){
+    public UserDictionary(UserLanguage userLanguage, DeRu pair, Date dateAdded){
         this.userLanguage=userLanguage;
-        this.word=word;
+        this.pair=pair;
         this.dateAdded = dateAdded;
     }
 
@@ -49,12 +49,12 @@ public class UserDictionary {
         this.userLanguage = userLanguage;
     }
 
-    public Deutsch getWord() {
-        return word;
+    public DeRu getPair() {
+        return pair;
     }
 
-    public void setWord(Deutsch word) {
-        this.word = word;
+    public void setPair(DeRu pair) {
+        this.pair = pair;
     }
 
     public Date getDateAdded() {
@@ -70,7 +70,7 @@ public class UserDictionary {
         return "UserDictionary{" +
                 "id=" + id +'\'' +
                 ", userLanguage=" + userLanguage +'\'' +
-                ", word=" + word +'\'' +
+                ", pair=" + pair +'\'' +
                 ", additionDate=" + dateAdded +'\'' +
                 '}';
     }

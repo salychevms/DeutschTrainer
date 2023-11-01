@@ -35,4 +35,9 @@ public class RussianService {
     public List<Russian> findWordsContaining(String russian){
         return russianRepository.findByRuWordContainingIgnoreCase(russian);
     }
+
+    @Transactional
+    public Optional<Russian> findByWord(String word){
+        return russianRepository.findByRuWord(word);
+    }
 }

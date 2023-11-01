@@ -13,5 +13,7 @@ import java.util.Optional;
 public interface RussianRepository extends JpaRepository<Russian, Long> {
     Optional<Russian> findByRuWordIgnoreCase(String ruWord);
 
+    Optional<Russian> findByRuWord(String word);
+
     List<Russian> findByRuWordContainingIgnoreCase(String word);
 }

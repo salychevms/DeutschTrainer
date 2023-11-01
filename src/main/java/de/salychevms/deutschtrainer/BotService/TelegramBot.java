@@ -2,8 +2,7 @@ package de.salychevms.deutschtrainer.BotService;
 
 import de.salychevms.deutschtrainer.BotConfig.BotConfig;
 import de.salychevms.deutschtrainer.Controllers.*;
-import de.salychevms.deutschtrainer.Models.Language;
-import de.salychevms.deutschtrainer.Models.Users;
+import de.salychevms.deutschtrainer.Models.*;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -31,9 +30,10 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final DeutschController deutschController;
     private final RussianController russianController;
     private final DeRuController deRuController;
+    private final UserDictionaryController userDictionaryController;
 
     public TelegramBot(BotConfig config, UsersController usersController, LanguageController languageController, UserLanguageController userLanguageController, MessageHistoryController messageHistoryController,
-                       DeutschController deutschController, RussianController russianController, DeRuController deRuController) {
+                       DeutschController deutschController, RussianController russianController, DeRuController deRuController, UserDictionaryController userDictionaryController) {
         this.config = config;
         this.usersController = usersController;
         this.languageController = languageController;
@@ -42,6 +42,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         this.deutschController = deutschController;
         this.russianController = russianController;
         this.deRuController = deRuController;
+        this.userDictionaryController = userDictionaryController;
     }
 
     @Override
@@ -113,6 +114,20 @@ public class TelegramBot extends TelegramLongPollingBot {
                                 break;
                             } else if (userText.equals("/addNewWords")) {
                                 iterator.remove();
+                                if (deRuController.isItGerman(messageText)) {
+                                    List<String> searchList = deRuController.getWordsWhichUserLooksFor(messageText, "DE");
+                                    sendKeyboard(getSearchWordMenu(searchList, messageText, "no"), chatId,
+                                            "You entered a word: " + messageText + "\nYou can choose one word and get all existing translations.");
+                                } else if (deRuController.isItRussian(messageText)) {
+                                    List<String> searchList = deRuController.getWordsWhichUserLooksFor(messageText, "RU");
+                                    sendKeyboard(getSearchWordMenu(searchList, messageText, "no"), chatId,
+                                            "You entered a word: " + messageText + "\nYou can choose one word and get all existing translations.");
+                                } else sendKeyboard(trainingMenu(), chatId, """
+                                        This word doesn't exist! Sorry try another one word
+                                        or send me email with your word list.
+
+                                        Training""");
+                             /*   iterator.remove();
                                 List<String> allPairs = deRuController.getWordsToUser(messageText);
                                 if (!allPairs.isEmpty()) {
                                     sendKeyboard(getWordsMenu(allPairs), chatId,
@@ -122,6 +137,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                                         or send me email with your word list.
 
                                         Training""");
+                            */
                             }
                         }
                     }
@@ -149,6 +165,36 @@ public class TelegramBot extends TelegramLongPollingBot {
                             """);
                     sendMessage(chatId, "enter a german or russian word");
                     queue.add(telegramId + callBackData);
+                } else if (callBackData.startsWith("/SearchOffer=")) {
+                    String[] selectedWord = callBackData.split("=");
+                    List<String> translationList;
+                    if (deRuController.isItGerman(selectedWord[1])) {
+                        translationList = deRuController.getTranslations(selectedWord[1], "DE");
+                        sendKeyboard(getSearchWordMenu(translationList, selectedWord[1], "yes"), chatId,
+                                "\nYou can choose one word and get all existing translations for the word:\n" + selectedWord[2]);
+                    } else if (deRuController.isItRussian(selectedWord[1])) {
+                        translationList = deRuController.getTranslations(selectedWord[1], "RU");
+                        sendKeyboard(getSearchWordMenu(translationList, selectedWord[1], "yes"), chatId,
+                                "\nYou can choose one word and get all existing translations for the word:\n" + selectedWord[2]);
+                    }
+                } else if (callBackData.startsWith("/TranslationsOffer=")) {
+                    String[] selectedWord = callBackData.split("=");
+                    Optional<Deutsch> deutsch = Optional.of(new Deutsch());
+                    Optional<Russian> russian = Optional.of(new Russian());
+                    if (deRuController.isItGerman(selectedWord[1]) && deRuController.isItRussian(selectedWord[2])) {
+                        deutsch = deutschController.findByWord(selectedWord[1]);
+                        russian = russianController.findByWord(selectedWord[2]);
+                    } else if (deRuController.isItGerman(selectedWord[2]) && deRuController.isItRussian(selectedWord[1])) {
+                        deutsch = deutschController.findByWord(selectedWord[2]);
+                        russian = russianController.findByWord(selectedWord[1]);
+                    }
+                    if (deutsch.isPresent() && russian.isPresent()) {
+                        Optional<DeRu> pair = deRuController.getPairByGermanIdAndRussianId(deutsch.get().getId(), russian.get().getId());
+                        pair.ifPresent(deRu -> userDictionaryController.saveNewPair(telegramId, "DE", deRu));
+                        sendKeyboard(addWordsMenu(), chatId, "You added one pair:\n" + deutsch.get().getDeWord() + " = " + russian.get().getWord());
+                    }
+                } else if (callBackData.equals("/toSearchOffer")) {
+
                 } else if (callBackData.equals("/statistic")) {
                     editKeyboard(update.getCallbackQuery(), statisticMenu(), "Statistic");
                 } else if (callBackData.equals("/settings")) {
@@ -325,21 +371,34 @@ public class TelegramBot extends TelegramLongPollingBot {
         return keyboardMarkup;
     }
 
-    private InlineKeyboardMarkup getWordsMenu(List<String> wordCollection) {
+    private InlineKeyboardMarkup getSearchWordMenu(List<String> wordCollection, String translatableWord, String isTranslate) {
+        final String YES = "yes";
+        final String NO = "no";
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        //button
+        InlineKeyboardButton goToTrainingMenuButton = new InlineKeyboardButton();
         for (String item : wordCollection) {
             InlineKeyboardButton button = new InlineKeyboardButton();
             List<InlineKeyboardButton> buttons = new ArrayList<>();
             button.setText(item);
-            /* CallbackData constructor:  "/Offer="+item  ==>>  /Offer=rennen // бегать*/
-            button.setCallbackData("/Offer=" + item);
+            /* CallbackData constructor:
+            for search words: "/SearchOffer="+item  ==>>  /SearchOffer=rennen
+            for translate words: "/TranslationsOffer="+item  ==>>  /TranslationsOffer=rennen */
+            if (isTranslate.equalsIgnoreCase(NO)) {
+                //a user looks for a word and can choose from the word list, also we get a translatable word for the next step
+                button.setCallbackData("/SearchOffer=" + item + "=" + translatableWord);
+                goToTrainingMenuButton = new InlineKeyboardButton("< training menu");
+                goToTrainingMenuButton.setCallbackData("/training");
+            } else if (isTranslate.equalsIgnoreCase(YES)) {
+                //this step get to a user a lot of translations for the search word
+                button.setCallbackData("/TranslationsOffer=" + item + "=" + translatableWord);
+                goToTrainingMenuButton = new InlineKeyboardButton("< back");
+                goToTrainingMenuButton.setCallbackData("/toSearchOffer");
+            }
             buttons.add(button);
             rows.add(buttons);
         }
-        //button
-        InlineKeyboardButton goToTrainingMenuButton = new InlineKeyboardButton("< training menu");
-        goToTrainingMenuButton.setCallbackData("/training");
         //button
         InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<< main menu");
         goToMainMenuButton.setCallbackData("/mainMenu");

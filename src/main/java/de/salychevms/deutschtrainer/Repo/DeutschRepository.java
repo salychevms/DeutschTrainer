@@ -12,6 +12,8 @@ import java.util.Optional;
 public interface DeutschRepository extends JpaRepository<Deutsch, Long> {
     Optional<Deutsch> findByDeWordIgnoreCase(String word);
 
+    Optional<Deutsch> findByDeWord(String word);
+
     List<Deutsch> findAllByDeWordIsContainingIgnoreCase(String word);
 
 }

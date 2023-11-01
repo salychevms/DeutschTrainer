@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class RussianController {
@@ -36,6 +37,10 @@ public class RussianController {
 
     public List<Russian> findAllRussianWords(String russian){
         return russianService.findWordsContaining(russian);
+    }
+
+    public Optional<Russian> findByWord(String word){
+        return russianService.findByWord(word);
     }
 
 }

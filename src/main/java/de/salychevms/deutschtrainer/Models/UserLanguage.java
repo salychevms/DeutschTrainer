@@ -16,12 +16,12 @@ public class UserLanguage {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_language_generator")
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "users", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private Users user;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "language_id", nullable = false)
+    @JoinColumn(name = "language", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private Language language;

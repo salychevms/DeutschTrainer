@@ -30,4 +30,8 @@ public class DeutschController {
         return deutschService.findWordsContaining(german);
     }
 
+    public Optional<Deutsch> findByWord(String word){
+        return deutschService.findByWord(word);
+    }
+
 }

@@ -9,5 +9,5 @@ import java.util.Optional;
 @Repository
 public interface LanguageRepository extends JpaRepository<Language, Long> {
     Optional<Language> findByName(String name);
-    Optional<Language> findLanguageByIdentifier(String identifier);
+    Optional<Language> findLanguageByIdentifierIgnoreCase(String identifier);
 }

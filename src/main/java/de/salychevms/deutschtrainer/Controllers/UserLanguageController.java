@@ -46,37 +46,8 @@ public class UserLanguageController {
         return identifiers;
     }
 
-    public List<UserLanguage> getAllByUserId(Long telegramId) {
-        return userLanguageRepository.findAllByUser_TelegramId(telegramId);
+    public Optional<UserLanguage> getByUserIdAndLanguageId(Long userId, Long languageId){
+        return userLanguageRepository.findByUserIdAndLanguageId(userId, languageId);
     }
 
-    public List<UserLanguage> getAllByLanguageId(Long languageId) {
-        List<UserLanguage> list = userLanguageRepository.findAllByLanguageId(languageId);
-        if (!list.isEmpty()) {
-            return list;
-        } else return null;
-    }
-
-    public List<UserLanguage> getAllByLanguageName(String languageName) {
-        List<UserLanguage> list = userLanguageRepository.findAllByLanguageName(languageName);
-        if (!list.isEmpty()) {
-            return list;
-        } else return null;
-    }
-
-    public boolean deleteAll() {
-        List<UserLanguage> list = userLanguageRepository.findAll();
-        if (!list.isEmpty()) {
-            userLanguageRepository.deleteAll();
-            return true;
-        } else return false;
-    }
-
-    public boolean deleteUserLanguageById(Long id) {
-        Optional<UserLanguage> language = userLanguageRepository.findById(id);
-        if (language.isPresent()) {
-            userLanguageRepository.deleteById(id);
-            return true;
-        } else return false;
-    }
 }

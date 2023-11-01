@@ -28,6 +28,11 @@ public class DeRuService {
     }
 
     @Transactional
+    public Optional<DeRu> findByGermanIdAndRussianId(Long germanId, Long russianId){
+        return deRuRepository.getByDeutschIdAndRussianId(germanId, russianId);
+    }
+
+    @Transactional
     public List<DeRu> findAllByDeutschId(Long germanId) {
         return deRuRepository.getAllByDeutschId(germanId);
     }
