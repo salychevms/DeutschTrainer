@@ -27,7 +27,7 @@ public class DeutschService {
         Optional<Deutsch> exist = deutschRepository.findByDeWordIgnoreCase(word);
         if (exist.isEmpty()) {
             return deutschRepository.save(new Deutsch(word)).getId();
-        } else return null;
+        } else return exist.get().getId();
     }
 
     @Transactional

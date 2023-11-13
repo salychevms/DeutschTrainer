@@ -2,23 +2,23 @@ package de.salychevms.deutschtrainer.BotService;
 
 import de.salychevms.deutschtrainer.BotConfig.BotConfig;
 import de.salychevms.deutschtrainer.Controllers.*;
+import de.salychevms.deutschtrainer.Emojies.EmojiGive;
 import de.salychevms.deutschtrainer.Models.*;
+import de.salychevms.deutschtrainer.Training.TrainingController;
+import de.salychevms.deutschtrainer.Training.TrainingPair;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.*;
 
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
@@ -26,23 +26,33 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final UsersController usersController;
     private final LanguageController languageController;
     private final UserLanguageController userLanguageController;
-    private final MessageHistoryController messageHistoryController;
     private final DeutschController deutschController;
     private final RussianController russianController;
     private final DeRuController deRuController;
+    private final UserStatisticController userStatisticController;
     private final UserDictionaryController userDictionaryController;
+    private final TrainingController trainingController;
 
-    public TelegramBot(BotConfig config, UsersController usersController, LanguageController languageController, UserLanguageController userLanguageController, MessageHistoryController messageHistoryController,
-                       DeutschController deutschController, RussianController russianController, DeRuController deRuController, UserDictionaryController userDictionaryController) {
+    private List<String> queue = new ArrayList<>();
+    private List<TrainingPair> learningList = new ArrayList<>();
+    private List<TrainingPair> failList = new ArrayList<>();
+    private List<TrainingPair> repeatList = new ArrayList<>();
+
+    public TelegramBot(BotConfig config, UsersController usersController, LanguageController languageController,
+                       UserLanguageController userLanguageController, DeutschController deutschController,
+                       RussianController russianController, DeRuController deRuController,
+                       UserStatisticController userStatisticController, UserDictionaryController userDictionaryController,
+                       TrainingController trainingController) {
         this.config = config;
         this.usersController = usersController;
         this.languageController = languageController;
         this.userLanguageController = userLanguageController;
-        this.messageHistoryController = messageHistoryController;
         this.deutschController = deutschController;
         this.russianController = russianController;
         this.deRuController = deRuController;
+        this.userStatisticController = userStatisticController;
         this.userDictionaryController = userDictionaryController;
+        this.trainingController = trainingController;
     }
 
     @Override
@@ -54,8 +64,6 @@ public class TelegramBot extends TelegramLongPollingBot {
     public String getBotToken() {
         return config.getToken();
     }
-
-    List<String> queue = new ArrayList<>();
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -79,7 +87,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 boolean adminStatus = usersController.findUserByTelegramId(telegramId).get().isAdmin();
                 if (messageText.equals("/start")) {
                     //give global menu
-                    sendKeyboard(globalMenu(adminStatus), chatId, "I'm here!!! Did someone call me???\n\nMain menu");
+                    sendKeyboard(globalMenu(adminStatus), chatId, EmojiGive.germanFlag + "\n\nI'm here!!! Did someone call me???\n\nMain menu");
                     //global menu
                 } else if (queue != null) {
                     Iterator<String> iterator = queue.iterator();
@@ -122,22 +130,13 @@ public class TelegramBot extends TelegramLongPollingBot {
                                     List<String> searchList = deRuController.getWordsWhichUserLooksFor(messageText, "RU");
                                     sendKeyboard(getSearchWordMenu(searchList, messageText, "no"), chatId,
                                             "You entered a word: " + messageText + "\nYou can choose one word and get all existing translations.");
-                                } else sendKeyboard(trainingMenu(), chatId, """
-                                        This word doesn't exist! Sorry try another one word
-                                        or send me email with your word list.
+                                } else
+                                    sendKeyboard(trainingMenu(userStatisticController.getAllStatisticWithNewWords().size()), chatId, """
+                                            This word doesn't exist! Sorry try another one word
+                                            or send me email with your word list.
 
-                                        Training""");
-                             /*   iterator.remove();
-                                List<String> allPairs = deRuController.getWordsToUser(messageText);
-                                if (!allPairs.isEmpty()) {
-                                    sendKeyboard(getWordsMenu(allPairs), chatId,
-                                            "You entered a word: " + messageText + "\nYou can choose one to learn.");
-                                } else sendKeyboard(trainingMenu(), chatId, """
-                                        This word doesn't exist! Sorry try another one word
-                                        or send me email with your word list.
-
-                                        Training""");
-                            */
+                                            TrainingController""");
+                                break;
                             }
                         }
                     }
@@ -154,7 +153,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 boolean adminStatus = usersController.findUserByTelegramId(telegramId).get().isAdmin();
                 //reg keyboard
                 if (callBackData.equals("/training")) {
-                    editKeyboard(update.getCallbackQuery(), trainingMenu(), "Training");
+                    editKeyboard(update.getCallbackQuery(), trainingMenu(userStatisticController.getAllStatisticWithNewWords().size()), "Training");
                 } else if (callBackData.equals("/addNewWords")) {
                     editMessage(callbackQuery, """
                             You can enter a word (include nouns with/out an article)
@@ -190,11 +189,80 @@ public class TelegramBot extends TelegramLongPollingBot {
                     }
                     if (deutsch.isPresent() && russian.isPresent()) {
                         Optional<DeRu> pair = deRuController.getPairByGermanIdAndRussianId(deutsch.get().getId(), russian.get().getId());
-                        pair.ifPresent(deRu -> userDictionaryController.saveNewPair(telegramId, "DE", deRu));
-                        sendKeyboard(addWordsMenu(), chatId, "You added one pair:\n" + deutsch.get().getDeWord() + " = " + russian.get().getWord());
+                        pair.ifPresent(deRu -> userStatisticController.saveNewPairInStatistic(userDictionaryController.saveNewPair(telegramId, "DE", deRu)));
+                        sendKeyboard(trainingMenu(userStatisticController.getAllStatisticWithNewWords().size()), chatId, "You added one pair:\n" + deutsch.get().getDeWord() + " = " + russian.get().getWord());
                     }
                 } else if (callBackData.equals("/toSearchOffer")) {
 
+                } else if (callBackData.startsWith("/Trainings=")) {
+                    if (callBackData.equals("/Trainings=/StartLearningTraining")) {
+                        learningList = trainingController.createLearningList();
+                        TrainingPair pair = learningList.get(0);
+                        learningList.remove(pair);
+                        editKeyboard(callbackQuery,
+                                trainingController.getTestKeyboard(pair, "/Trainings=/LearningTraining=/DeRuId=:"),
+                                getHeaderForTraining(pair.getGerman().getDeWord()));
+                    } else if (callBackData.equals("/Trainings=/StartRepeatTraining")) {
+                        repeatList = trainingController.createTrainingRepeatList();
+                        TrainingPair pair = repeatList.get(0);
+                        repeatList.remove(pair);
+                        editKeyboard(callbackQuery,
+                                trainingController.getTestKeyboard(pair, "/Trainings=/RepeatTraining=/DeRuId=:"),
+                                getHeaderForTraining(pair.getGerman().getDeWord()));
+                    } else if (callBackData.equals("/Trainings=/StartFailsTraining")) {
+                        failList = trainingController.createTrainingFailList();
+                        TrainingPair pair = failList.get(0);
+                        failList.remove(pair);
+                        editKeyboard(callbackQuery,
+                                trainingController.getTestKeyboard(pair, "/Trainings=/FailsTraining=/DeRuId=:"),
+                                getHeaderForTraining(pair.getGerman().getDeWord()));
+                    } else if (callBackData.startsWith("/Trainings=/LearningTraining=/DeRuId=:")) {
+                        String result = trainingController.getAnswerFromUser(callBackData);
+                        if (learningList.isEmpty()) {
+                            editKeyboard(callbackQuery, null, result + "\n\nYou're finished the learning!");
+                            sendMessage(chatId, EmojiGive.oK);
+                            sendKeyboard(trainingMenu(userStatisticController.getAllStatisticWithNewWords().size()), chatId, "Training:");
+                        } else {
+                            TrainingPair pair = learningList.get(0);
+                            learningList.remove(pair);
+                            editKeyboard(callbackQuery, null, result);
+                            sendKeyboard(trainingController.getTestKeyboard(pair, "/Trainings=/LearningTraining=/DeRuId=:"),
+                                    chatId, getHeaderForTraining(pair.getGerman().getDeWord()));
+                        }
+                    } else if (callBackData.startsWith("/Trainings=/RepeatTraining=/DeRuId=:")) {
+                        String result = trainingController.getAnswerFromUser(callBackData);
+                        if (repeatList.isEmpty()) {
+                            editKeyboard(callbackQuery, null, result + "\n\nYou're finished the training!");
+                            sendMessage(chatId, EmojiGive.oK);
+                            sendKeyboard(trainingMenu(userStatisticController.getAllStatisticWithNewWords().size()), chatId, "Training:");
+                        } else {
+                            TrainingPair pair = repeatList.get(0);
+                            repeatList.remove(pair);
+                            editKeyboard(callbackQuery, null, result);
+                            sendKeyboard(trainingController.getTestKeyboard(pair, "/Trainings=/RepeatTraining=/DeRuId=:"),
+                                    chatId, getHeaderForTraining(pair.getGerman().getDeWord()));
+                        }
+                    } else if (callBackData.startsWith("/Trainings=/FailsTraining=/DeRuId=:")) {
+                        String result = trainingController.getAnswerFromUser(callBackData);
+                        if (failList.isEmpty()) {
+                            editKeyboard(callbackQuery, null, result + "\n\nYou're finished the fails training!");
+                            sendMessage(chatId, EmojiGive.oK);
+                            sendKeyboard(trainingMenu(userStatisticController.getAllStatisticWithNewWords().size()), chatId, "Training:");
+                        } else {
+                            TrainingPair pair = failList.get(0);
+                            failList.remove(pair);
+                            editKeyboard(callbackQuery, null, result);
+                            sendKeyboard(trainingController.getTestKeyboard(pair, "/Trainings=/FailsTraining=/DeRuId=:"),
+                                    chatId, getHeaderForTraining(pair.getGerman().getDeWord()));
+                        }
+                    } else if (callBackData.startsWith("/Trainings=/FinishAllTrainings")) {
+                        editKeyboard(callbackQuery, null, "Training was interrupted!");
+                        sendMessage(chatId, EmojiGive.thinkingFace);
+                        sendKeyboard(trainingMenu(userStatisticController.getAllStatisticWithNewWords().size()), chatId, "Training");
+                        learningList.clear();
+                        repeatList.clear();
+                        failList.clear();
+                    }
                 } else if (callBackData.equals("/statistic")) {
                     editKeyboard(update.getCallbackQuery(), statisticMenu(), "Statistic");
                 } else if (callBackData.equals("/settings")) {
@@ -202,7 +270,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 } else if (callBackData.equals("/info")) {
                     editKeyboard(update.getCallbackQuery(), infoMenu(), "Info");
                 } else if (callBackData.equals("/adminMenu")) {
-                    editKeyboard(update.getCallbackQuery(), adminMenu(), "Amin Menu");
+                    editKeyboard(update.getCallbackQuery(), adminMenu(), "Admin Menu");
                 } else if (callBackData.equals("/languagesAdmin")) {
                     editKeyboard(update.getCallbackQuery(), adminLanguagesMenu(), "Language Menu");
                 } else if (callBackData.equals("/russianSettings")) {
@@ -221,6 +289,41 @@ public class TelegramBot extends TelegramLongPollingBot {
                             A word from big letter: **Haus/Hund/Ampel.**""");
                     sendMessage(chatId, "enter a pair word");
                     queue.add(telegramId + callBackData);
+                } else if (callBackData.equals("/addListAdmin")) {
+                    List<String> wordList = new ArrayList<>();
+                    File file = new File("C:\\Develop\\Learning\\DeutschTrainer\\src\\main\\resources\\content.list");
+                    try (Scanner scanner = new Scanner(file)) {
+                        while (scanner.hasNextLine()) {
+                            String string = scanner.nextLine();
+                            wordList.add(string);
+                        }
+                    } catch (FileNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                    boolean create = false;
+                    editKeyboard(update.getCallbackQuery(), null, "Words have been saved: ");
+                    if (!wordList.isEmpty()) {
+                        create = true;
+                        for (String str : wordList) {
+                            if (!str.isEmpty()) {
+                                //create one german word
+                                Long germanWord = deutschController.createNewWord(str);
+                                //create a lot of russian word
+                                List<Long> russianTranslate = russianController.createNewWords(str);
+                                //create pairs of words
+                                List<Long> pairs = deRuController.createPairs(germanWord, russianTranslate);
+                                String result = deRuController.getAllWordPairsByPairId(germanWord, pairs);
+                                sendMessage(chatId, result);
+                            }
+                        }
+                    }
+                    if (create) {
+                        sendMessage(chatId, "Successfully!");
+                        sendKeyboard(globalMenu(adminStatus), chatId, EmojiGive.germanFlag + "\n\nI'm here!!! Did someone call me???\n\nMain menu");
+                    } else {
+                        sendMessage(chatId, "You haven't new words, or the list is empty!");
+                        sendKeyboard(globalMenu(adminStatus), chatId, EmojiGive.germanFlag + "\n\nI'm here!!! Did someone call me???\n\nMain menu");
+                    }
                 } else if (callBackData.equals("/userInfo")) {
                     editKeyboard(update.getCallbackQuery(), globalMenu(adminStatus), sendUserInfo(telegramId) + "\n\nMain menu");
                 } else if (callBackData.equals("/aboutThisBot")) {
@@ -291,7 +394,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     }
 
                 } else if (callBackData.equals("/mainMenu")) {
-                    editKeyboard(update.getCallbackQuery(), globalMenu(adminStatus), "I'm here!!! Did someone call me???\n\nMain menu");
+                    editKeyboard(update.getCallbackQuery(), globalMenu(adminStatus), EmojiGive.germanFlag + "\n\nI'm here!!! Did someone call me???\n\nMain menu");
                 } else if (callBackData.startsWith("/Offer=")) {
 
                 }
@@ -316,6 +419,16 @@ public class TelegramBot extends TelegramLongPollingBot {
                     "\nWrite \"/start\" and try again!!");
         }
 
+    }
+
+    private String getHeaderForTraining(String word) {
+        int count = word.length();
+        StringBuilder stripe = new StringBuilder();
+        for (int i = 0; i < count; i++) {
+            stripe.append("=");
+        }
+        stripe.append("=");
+        return stripe + "\n\n" + word + "\n\n" + stripe;
     }
 
     private InlineKeyboardMarkup addWordsMenu() {
@@ -464,11 +577,24 @@ public class TelegramBot extends TelegramLongPollingBot {
         return keyboardMarkup;
     }
 
-    private InlineKeyboardMarkup trainingMenu() {
+    private InlineKeyboardMarkup trainingMenu(int newWordsCount) {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+        //position from up to down
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        if (newWordsCount != 0) {
+            //button "Daily"
+            InlineKeyboardButton learningNewWordsTrainingButton = new InlineKeyboardButton("Learning New Words");
+            learningNewWordsTrainingButton.setCallbackData("/Trainings=/StartLearningTraining");
+            List<InlineKeyboardButton> row = new ArrayList<>();
+            row.add(learningNewWordsTrainingButton);
+            rows.add(row);
+        }
         //button "Daily"
-        InlineKeyboardButton dailyTrainingButton = new InlineKeyboardButton("Daily Training");
-        dailyTrainingButton.setCallbackData("/dailyTraining");
+        InlineKeyboardButton repeatWordsTrainingButton = new InlineKeyboardButton("Repeat Training");
+        repeatWordsTrainingButton.setCallbackData("/Trainings=/StartRepeatTraining");
+        //button "Daily"
+        InlineKeyboardButton failsTrainingButton = new InlineKeyboardButton("Fails Training");
+        failsTrainingButton.setCallbackData("/Trainings=/StartFailsTraining");
         //button "Add new"
         InlineKeyboardButton addNewWordsButton = new InlineKeyboardButton("Add New Words");
         addNewWordsButton.setCallbackData("/addNewWords");
@@ -479,15 +605,17 @@ public class TelegramBot extends TelegramLongPollingBot {
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         List<InlineKeyboardButton> row2 = new ArrayList<>();
         List<InlineKeyboardButton> row3 = new ArrayList<>();
+        List<InlineKeyboardButton> row4 = new ArrayList<>();
         //
-        row1.add(dailyTrainingButton);
-        row2.add(addNewWordsButton);
-        row3.add(goToMainMenuButton);
+        row1.add(repeatWordsTrainingButton);
+        row2.add(failsTrainingButton);
+        row3.add(addNewWordsButton);
+        row4.add(goToMainMenuButton);
         //position from up to down
-        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         rows.add(row1);
         rows.add(row2);
         rows.add(row3);
+        rows.add(row4);
         //save buttons in the markup variable
         keyboardMarkup.setKeyboard(rows);
         return keyboardMarkup;

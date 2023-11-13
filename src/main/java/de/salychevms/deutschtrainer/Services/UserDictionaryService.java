@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserDictionaryService {
@@ -16,11 +18,27 @@ public class UserDictionaryService {
     }
 
     @Transactional
-    public void saveNewPair(UserLanguage userLanguage, DeRu pair){
+    public UserDictionary saveNewPair(UserLanguage userLanguage, DeRu pair){
         UserDictionary userDictionary=new UserDictionary();
         userDictionary.setUserLanguage(userLanguage);
         userDictionary.setPair(pair);
         userDictionary.setDateAdded(new Date());
         userDictionaryRepository.save(userDictionary);
+        return userDictionary;
+    }
+
+    @Transactional
+    public Optional<UserDictionary> findById(Long id){
+        return userDictionaryRepository.findById(id);
+    }
+
+    @Transactional
+    public Optional<UserDictionary> getUserDictionaryByPairId(Long id){
+        return userDictionaryRepository.getUserDictionaryByPairId(id);
+    }
+
+    @Transactional
+    public List<UserDictionary> getAll() {
+        return userDictionaryRepository.findAll();
     }
 }

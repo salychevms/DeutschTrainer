@@ -1,6 +1,5 @@
 package de.salychevms.deutschtrainer.Controllers;
 
-import de.salychevms.deutschtrainer.Models.Deutsch;
 import de.salychevms.deutschtrainer.Models.Russian;
 import de.salychevms.deutschtrainer.Services.RussianService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +20,7 @@ public class RussianController {
 
     public List<Long> createNewWords(String data) {
         String[] parts = data.split(" // ");
+        System.out.println("ge: "+parts[0]+"\nru: "+parts[1]);/////////////////////////////////////////////////////////////////////////////////////////////////////
         List<String> translations = List.of(parts[1].split("/"));
         List<Long> russianList = new ArrayList<>();
         for (String item : translations) {
@@ -43,4 +43,11 @@ public class RussianController {
         return russianService.findByWord(word);
     }
 
+    public List<Russian> get3RandomRussian(){
+        return russianService.get3RandomRussian();
+    }
+
+    public Optional<Russian> get1RandomRussian(){
+        return russianService.get1RandomRussian();
+    }
 }

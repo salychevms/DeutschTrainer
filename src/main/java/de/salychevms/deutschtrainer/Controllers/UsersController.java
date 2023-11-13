@@ -39,14 +39,6 @@ public class UsersController {
         return Optional.ofNullable(usersRepository.findByTelegramId(telegramId));
     }
 
-    public Optional<Users> findUserByUsername(String userName) {
-        return Optional.ofNullable(usersRepository.findByUserName(userName));
-    }
-
-    public List<Users> findAllUsers() {
-        return usersRepository.findAll();
-    }
-
     public boolean updateNameByTelegramID(long telegramId, String name) {
         Optional<Users> user = Optional.ofNullable(usersRepository.findByTelegramId(telegramId));
         if (user.isPresent()) {

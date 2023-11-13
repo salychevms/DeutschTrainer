@@ -40,4 +40,8 @@ public class DeRuService {
     public List<DeRu> findAllByRussianId(Long russianId) {
         return deRuRepository.getAllByRussianId(russianId);
     }
+    @Transactional
+    public Optional<DeRu> findPairById(Long id) {
+        return deRuRepository.findById(id);
+    }
 }

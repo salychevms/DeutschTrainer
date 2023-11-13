@@ -1,6 +1,5 @@
 package de.salychevms.deutschtrainer.Services;
 
-import de.salychevms.deutschtrainer.Models.Deutsch;
 import de.salychevms.deutschtrainer.Models.Russian;
 import de.salychevms.deutschtrainer.Repo.RussianRepository;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,7 @@ public class RussianService {
         Optional<Russian> exist=russianRepository.findByRuWordIgnoreCase(word);
         if(exist.isEmpty()){
             return russianRepository.save(new Russian(word)).getId();
-        }else return null;
+        }else return exist.get().getId();
     }
 
     @Transactional
@@ -39,5 +38,15 @@ public class RussianService {
     @Transactional
     public Optional<Russian> findByWord(String word){
         return russianRepository.findByRuWord(word);
+    }
+
+    @Transactional
+    public List<Russian> get3RandomRussian(){
+        return russianRepository.find3RandomRussian();
+    }
+
+    @Transactional
+    public Optional<Russian> get1RandomRussian(){
+        return russianRepository.find1RandomRussian();
     }
 }

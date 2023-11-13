@@ -29,7 +29,7 @@ public class DeRu {
 
     @Override
     public String toString() {
-        return "DeRu{" +
+        return "De-Ru pair{" +
                 "id=" + id + '\'' +
                 ", deutschId=" + deutschId + '\'' +
                 ", russianId=" + russianId + '\'' +

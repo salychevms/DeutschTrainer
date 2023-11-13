@@ -69,8 +69,8 @@ public class UserDictionary {
     public String toString() {
         return "UserDictionary{" +
                 "id=" + id +'\'' +
-                ", userLanguage=" + userLanguage +'\'' +
-                ", pair=" + pair +'\'' +
+                ", userLanguage=" + userLanguage.getId() +'\'' +
+                ", pair=" + pair.getId() +'\'' +
                 ", additionDate=" + dateAdded +'\'' +
                 '}';
     }

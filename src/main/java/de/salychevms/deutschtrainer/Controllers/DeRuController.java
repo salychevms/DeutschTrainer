@@ -106,4 +106,7 @@ public class DeRuController {
     public Optional<DeRu> getPairByGermanIdAndRussianId(Long germanId, Long russianId){
         return deRuService.findByGermanIdAndRussianId(germanId,russianId);
     }
+    public Optional<DeRu> getDeRuById(Long id){
+        return deRuService.findPairById(id);
+    }
 }
