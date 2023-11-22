@@ -16,30 +16,49 @@ public class TrainingController {
     private final UserDictionaryController userDictionaryController;
     private final DeutschController deutschController;
     private final RussianController russianController;
+    private final UserLanguageController userLanguageController;
+    private final UsersController usersController;
+    private final LanguageController languageController;
 
-    public TrainingController(UserStatisticController userStatisticController, DeRuController deRuController, UserDictionaryController userDictionaryController, DeutschController deutschController, RussianController russianController) {
+    public TrainingController(UserStatisticController userStatisticController, DeRuController deRuController, UserDictionaryController userDictionaryController, DeutschController deutschController, RussianController russianController, UserLanguageController userLanguageController, UsersController usersController, LanguageController languageController) {
         this.userStatisticController = userStatisticController;
         this.deRuController = deRuController;
         this.userDictionaryController = userDictionaryController;
         this.deutschController = deutschController;
         this.russianController = russianController;
+        this.userLanguageController = userLanguageController;
+        this.usersController = usersController;
+        this.languageController = languageController;
     }
 
     private TrainingPair createNewPair(UserStatistic statisticInfo, UserDictionary userPair, DeRu compareWith, Deutsch german, Russian russian) {
         return new TrainingPair(userPair, compareWith, statisticInfo, german, russian);
     }
 
-    public List<TrainingPair> createTrainingRepeatList() {
+    public List<TrainingPair> createTrainingRepeatList(Long telegramId) {
         List<TrainingPair> trainingPairList = new ArrayList<>();
-        List<UserStatistic> statisticList = userStatisticController.getAllStatisticWithIterationsAllAsc();
-        for (UserStatistic statisticItem : statisticList) {
-            Optional<UserDictionary> userPair = userDictionaryController.getById(statisticItem.getWord().getId());
-            if (userPair.isPresent()) {
-                Optional<DeRu> compareWith = deRuController.getDeRuById(userPair.get().getPair().getId());
-                if (compareWith.isPresent()) {
-                    Deutsch german = deutschController.findById(compareWith.get().getDeutschId());
-                    Russian russian = russianController.findById(compareWith.get().getRussianId());
-                    trainingPairList.add(createNewPair(statisticItem, userPair.get(), compareWith.get(), german, russian));
+        Optional<Users> user = usersController.findUserByTelegramId(telegramId);
+        Optional<Language> language = languageController.getLanguageByIdentifier("DE");
+        Optional<UserLanguage> userLanguage;
+        Long userLanguageId;
+        if (user.isPresent() && language.isPresent()) {
+            userLanguage = userLanguageController.getByUserIdAndLanguageId(user.get().getId(), language.get().getId());
+            if (userLanguage.isPresent()) {
+                userLanguageId = userLanguage.get().getId();
+                List<UserStatistic> statisticList = userStatisticController.getAllStatisticWithIterationsAllAsc();
+                for (UserStatistic statisticItem : statisticList) {
+                    Long statisticLanguageId = getUserLangByUserStatistic(statisticItem).getId();
+                    if (statisticLanguageId.equals(userLanguageId)) {
+                        Optional<UserDictionary> userPair = userDictionaryController.getById(statisticItem.getWord().getId());
+                        if (userPair.isPresent()) {
+                            Optional<DeRu> compareWith = deRuController.getDeRuById(userPair.get().getPair().getId());
+                            if (compareWith.isPresent()) {
+                                Deutsch german = deutschController.findById(compareWith.get().getDeutschId());
+                                Russian russian = russianController.findById(compareWith.get().getRussianId());
+                                trainingPairList.add(createNewPair(statisticItem, userPair.get(), compareWith.get(), german, russian));
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -49,17 +68,32 @@ public class TrainingController {
         return trainingPairList;
     }
 
-    public List<TrainingPair> createTrainingFailList() {
+    public List<TrainingPair> createTrainingFailList(Long telegramId) {
         List<TrainingPair> trainingFailList = new ArrayList<>();
-        List<UserStatistic> statisticList = userStatisticController.getAllStatisticWithFailsAllDesc();
-        for (UserStatistic statisticItem : statisticList) {
-            Optional<UserDictionary> userPair = userDictionaryController.getById(statisticItem.getWord().getId());
-            if (userPair.isPresent()) {
-                Optional<DeRu> compareWith = deRuController.getDeRuById(userPair.get().getPair().getId());
-                if (compareWith.isPresent()) {
-                    Deutsch german = deutschController.findById(compareWith.get().getDeutschId());
-                    Russian russian = russianController.findById(compareWith.get().getRussianId());
-                    trainingFailList.add(createNewPair(statisticItem, userPair.get(), compareWith.get(), german, russian));
+        Optional<Users> user = usersController.findUserByTelegramId(telegramId);
+        Optional<Language> language = languageController.getLanguageByIdentifier("DE");
+        Optional<UserLanguage> userLanguage;
+        Long userLanguageId;
+        if (user.isPresent() && language.isPresent()) {
+            userLanguage = userLanguageController.getByUserIdAndLanguageId(user.get().getId(), language.get().getId());
+            if (userLanguage.isPresent()) {
+                userLanguageId = userLanguage.get().getId();
+                List<UserStatistic> statisticList = userStatisticController.getAllStatisticWithFailsAllDesc();
+                for (UserStatistic statisticItem : statisticList) {
+                    if (statisticItem.getFailsAll() != null) {
+                        Long statisticLanguageId = getUserLangByUserStatistic(statisticItem).getId();
+                        if (statisticLanguageId.equals(userLanguageId)) {
+                            Optional<UserDictionary> userPair = userDictionaryController.getById(statisticItem.getWord().getId());
+                            if (userPair.isPresent()) {
+                                Optional<DeRu> compareWith = deRuController.getDeRuById(userPair.get().getPair().getId());
+                                if (compareWith.isPresent()) {
+                                    Deutsch german = deutschController.findById(compareWith.get().getDeutschId());
+                                    Russian russian = russianController.findById(compareWith.get().getRussianId());
+                                    trainingFailList.add(createNewPair(statisticItem, userPair.get(), compareWith.get(), german, russian));
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -69,22 +103,35 @@ public class TrainingController {
         return trainingFailList;
     }
 
-    public List<TrainingPair> createLearningList() {
+    public List<TrainingPair> createLearningList(Long telegramId) {
         List<TrainingPair> learningPairList = new ArrayList<>();
-        List<UserStatistic> statisticList = userStatisticController.getAllStatisticWithNewWords();
-        for (UserStatistic statisticItem : statisticList) {
-            Optional<UserDictionary> userPair = userDictionaryController.getById(statisticItem.getWord().getId());
-            if (userPair.isPresent()) {
-                Optional<DeRu> compareWith = deRuController.getDeRuById(userPair.get().getPair().getId());
-                if (compareWith.isPresent()) {
-                    Deutsch german = deutschController.findById(compareWith.get().getDeutschId());
-                    Russian russian = russianController.findById(compareWith.get().getRussianId());
-                    learningPairList.add(createNewPair(statisticItem, userPair.get(), compareWith.get(), german, russian));
+        Optional<Users> user = usersController.findUserByTelegramId(telegramId);
+        Optional<Language> language = languageController.getLanguageByIdentifier("DE");
+        Optional<UserLanguage> userLanguage;
+        Long userLanguageId;
+        if (user.isPresent() && language.isPresent()) {
+            userLanguage = userLanguageController.getByUserIdAndLanguageId(user.get().getId(), language.get().getId());
+            if (userLanguage.isPresent()) {
+                userLanguageId = userLanguage.get().getId();
+                List<UserStatistic> statisticList = userStatisticController.getAllStatisticWithNewWords();
+                for (UserStatistic statisticItem : statisticList) {
+                    Long statisticLanguageId = getUserLangByUserStatistic(statisticItem).getId();
+                    if (statisticLanguageId.equals(userLanguageId)) {
+                        Optional<UserDictionary> userPair = userDictionaryController.getById(statisticItem.getWord().getId());
+                        if (userPair.isPresent()) {
+                            Optional<DeRu> compareWith = deRuController.getDeRuById(userPair.get().getPair().getId());
+                            if (compareWith.isPresent()) {
+                                Deutsch german = deutschController.findById(compareWith.get().getDeutschId());
+                                Russian russian = russianController.findById(compareWith.get().getRussianId());
+                                learningPairList.add(createNewPair(statisticItem, userPair.get(), compareWith.get(), german, russian));
+                            }
+                        }
+                    }
                 }
             }
-            if (learningPairList.size() >= 25) {
-                learningPairList = learningPairList.subList(0, 24);
-            }
+        }
+        if (learningPairList.size() >= 25) {
+            learningPairList = learningPairList.subList(0, 24);
         }
         return learningPairList;
     }
@@ -136,11 +183,11 @@ public class TrainingController {
             Russian ruFromUser = russianController.findById(userAnswerId);
             Optional<Deutsch> german = deRuController
                     .getDeRuById(correctPairId).flatMap(deRu -> Optional.ofNullable(deutschController.findById(deRu.getDeutschId())));
-            System.out.println("answerId: "+userAnswerId+"\ncorrectPairID: "+correctPairId);//////////////////////////////////////////////////////////////////////////
-            System.out.println("ruCorrectWord: "+ruCorrect.get().getWord()+" id: "+ruCorrect.get().getId());/////////////////////////////////////////////////////////
-            System.out.println("ruFromUser: "+ruFromUser.getWord()+" id: "+ruFromUser.getId());//////////////////////////////////////////////////////////////////////
-            System.out.println("germanWord: "+german.get().getDeWord()+" id: "+german.get().getId());///////////////////////////////////////////////////////////////
-            if(ruCorrect.isPresent() && german.isPresent()){
+            System.out.println("answerId: " + userAnswerId + "\ncorrectPairID: " + correctPairId);//////////////////////////////////////////////////////////////////////////
+            System.out.println("ruCorrectWord: " + ruCorrect.get().getWord() + " id: " + ruCorrect.get().getId());/////////////////////////////////////////////////////////
+            System.out.println("ruFromUser: " + ruFromUser.getWord() + " id: " + ruFromUser.getId());//////////////////////////////////////////////////////////////////////
+            System.out.println("germanWord: " + german.get().getDeWord() + " id: " + german.get().getId());///////////////////////////////////////////////////////////////
+            if (ruCorrect.isPresent() && german.isPresent()) {
                 if (userAnswerId.equals(ruCorrect.get().getId())) {
                     Optional<UserDictionary> forStatistic = userDictionaryController.getUserDictionaryByPairId(correctPairId);
                     forStatistic.ifPresent(userStatisticController::updateAllIterationsAndNewWordStatus);
@@ -193,5 +240,24 @@ public class TrainingController {
             }
         }
         return wrongAnswers;
+    }
+
+    public UserLanguage getUserLangByTgIdAndLangIdentifier(Long telegramId, String languageIdentifier) {
+        Optional<Users> user = usersController.findUserByTelegramId(telegramId);
+        Optional<Language> language = languageController.getLanguageByIdentifier(languageIdentifier);
+        Optional<UserLanguage> userLanguage;
+        if (user.isPresent() && language.isPresent()) {
+            userLanguage = userLanguageController.getByUserIdAndLanguageId(user.get().getId(), language.get().getId());
+            return userLanguage.orElse(null);
+        } else return null;
+    }
+
+    public UserLanguage getUserLangByUserStatistic(UserStatistic userStatistic) {
+        Optional<UserDictionary> userDictionary = userDictionaryController.getById(userStatistic.getWord().getId());
+        if (userDictionary.isPresent()) {
+            Optional<UserLanguage> userLanguage = userLanguageController.getById(userDictionary.get().getUserLanguage().getId());
+            return userLanguage.orElse(null);
+        }
+        return null;
     }
 }
