@@ -77,17 +77,19 @@ public class TelegramBot extends TelegramLongPollingBot {
                 //if user sent /start
                 if (messageText.equals("/start")) {
                     //give start menu
-                    sendKeyboard(registration(), chatId, "You activated this bot." + "\nYou have to register.");
+                    sendKeyboard(registration(), chatId, "Вы активировали бота-тренера." + "\nВы должны зарегистрироваться.");
                     //if something unusual happened
                 } else {
-                    sendMessage(chatId, "Sorry! It does not works.\nSend command: \"/start\" again, please!");
+                    sendMessage(chatId, "Упс! Так не пойдет!\nВведите снова команду \"/start\" пожалуйста!");
                 }
                 //if user already exists give global menu
             } else if (usersController.registeredOr(telegramId)) {
                 boolean adminStatus = usersController.findUserByTelegramId(telegramId).get().isAdmin();
                 if (messageText.equals("/start")) {
                     //give global menu
-                    sendKeyboard(globalMenu(adminStatus), chatId, EmojiGive.germanFlag + "\n\nI'm here!!! Did someone call me???\n\nMain menu");
+                    sendKeyboard(globalMenu(adminStatus), chatId,
+                            EmojiGive.germanFlag + "\n\nЯ тут! Меня кто-то звал???\n\n"
+                                    + EmojiGive.joystick + " Главное меню:");
                     //global menu
                 } else if (queue != null) {
                     Iterator<String> iterator = queue.iterator();
@@ -98,16 +100,16 @@ public class TelegramBot extends TelegramLongPollingBot {
                             if (userText.equals("/changeName")) {
                                 usersController.updateNameByTelegramID(telegramId, messageText);
                                 iterator.remove();
-                                sendKeyboard(settingsMenu(), chatId, "New name has been saved! \""
-                                        + messageText
-                                        + "\"" + "\n\nSetting");
+                                sendKeyboard(settingsMenu(), chatId, "Ваше имя изменено! \""
+                                        + messageText + "\""
+                                        + "\n\n" + EmojiGive.wrench + " Настройки:");
                                 break;
                             } else if (userText.equals("/changeSurname")) {
                                 usersController.updateSurnameByTelegramId(telegramId, messageText);
                                 iterator.remove();
-                                sendKeyboard(settingsMenu(), chatId, "New surname has been saved! \""
-                                        + messageText
-                                        + "\"" + "\n\nSetting");
+                                sendKeyboard(settingsMenu(), chatId, "Ваша фамилия изменена! \""
+                                        + messageText + "\""
+                                        + "\n\n" + EmojiGive.wrench + " Настройки:");
                                 break;
                             } else if (userText.equals("/addWordAdmin")) {
                                 iterator.remove();
@@ -122,21 +124,41 @@ public class TelegramBot extends TelegramLongPollingBot {
                                 break;
                             } else if (userText.equals("/addNewWords")) {
                                 iterator.remove();
-                                if (deRuController.isItGerman(messageText)) {
-                                    List<String> searchList = deRuController.getWordsWhichUserLooksFor(messageText, "DE");
-                                    sendKeyboard(getSearchWordMenu(searchList, messageText, "no"), chatId,
-                                            "You entered a word: " + messageText + "\nYou can choose one word and get all existing translations.");
-                                } else if (deRuController.isItRussian(messageText)) {
-                                    List<String> searchList = deRuController.getWordsWhichUserLooksFor(messageText, "RU");
-                                    sendKeyboard(getSearchWordMenu(searchList, messageText, "no"), chatId,
-                                            "You entered a word: " + messageText + "\nYou can choose one word and get all existing translations.");
+                                if (!messageText.isEmpty()) {
+                                    if (deRuController.isItGerman(messageText)) {
+                                        List<String> searchList = deRuController.getWordsWhichUserLooksFor(messageText, "DE");
+                                        if (!searchList.isEmpty()) {
+                                            sendKeyboard(getSearchWordMenu(searchList, messageText, "no"), chatId,
+                                                    "Вы ввели слово: " + messageText + "\nВыберите одно из преложенных слов " +
+                                                            "\nи получите доступные варианты перевода.");
+                                        } else {
+                                            UserLanguage userLanguage = trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE");
+                                            sendKeyboard(trainingMenu(userLanguage), chatId,
+                                                    "Вы ввели слово: " + messageText +
+                                                            "\nК сожалению ни чего подходящегок этому не нашлось! Попробуйте что-то другое.\n\n" +
+                                                            EmojiGive.gameDie + " Тренировки:");
+                                            break;
+                                        }
+                                    } else if (deRuController.isItRussian(messageText)) {
+                                        List<String> searchList = deRuController.getWordsWhichUserLooksFor(messageText, "RU");
+                                        if (!searchList.isEmpty()) {
+                                            sendKeyboard(getSearchWordMenu(searchList, messageText, "no"), chatId,
+                                                    "You entered a word: " + messageText + "\nВыберите одно из преложенных слов " +
+                                                            "\nи получите доступные варианты перевода.");
+                                        } else {
+                                            UserLanguage userLanguage = trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE");
+                                            sendKeyboard(trainingMenu(userLanguage), chatId,
+                                                    "Вы ввели слово: " + messageText +
+                                                            "\nК сожалению ни чего подходящего к этому не нашлось! Попробуйте что-то другое.\n\n" +
+                                                            EmojiGive.gameDie + " Тренировки:");
+                                            break;
+                                        }
+                                    }
                                 } else {
                                     UserLanguage userLanguage = trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE");
-                                    sendKeyboard(trainingMenu(userLanguage), chatId, """
-                                            This word doesn't exist! Sorry try another one word
-                                            or send me email with your word list.
-
-                                            TrainingController""");
+                                    sendKeyboard(trainingMenu(userLanguage), chatId,
+                                            "Либо вы ни чего не ввели, либо что-то пошло не так...\nИзвините, найдем - починим!\n\n" +
+                                                    EmojiGive.gameDie + " Тренировки:");
                                     break;
                                 }
                             }
@@ -156,16 +178,17 @@ public class TelegramBot extends TelegramLongPollingBot {
                 UserLanguage userLanguage = trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE");
                 //reg keyboard
                 if (callBackData.equals("/training")) {
-                    editKeyboard(update.getCallbackQuery(), trainingMenu(userLanguage), "Training");
+                    editKeyboard(update.getCallbackQuery(), trainingMenu(userLanguage), EmojiGive.gameDie + " Тренировки:");
                 } else if (callBackData.equals("/addNewWords")) {
                     editMessage(callbackQuery, """
-                            You can enter a word (include nouns with/out an article)
-                            and you get all existing translations for this word.
-                            Also you will get all existing cognate words with translation.
-                            E.g. *Haus* returns *das Haus // дом* and another word(s)
-                            *der Hausmeister // управдом*
+                            Вы можете ввести слово (к примеру существительное с/без артикля)
+                            и Вы получите все доступные варианты слов.
+                            Так же Вы получите все доступные варианты перевода.
+                            К примеру: *Haus* вернет *das Haus // дом*,
+                            и другие доступные слова и переводы.
+                            Например: *der Hausmeister // управдом*.
                             """);
-                    sendMessage(chatId, "enter a german or russian word");
+                    sendMessage(chatId, "Введите немецкое или русское слово: ");
                     queue.add(telegramId + callBackData);
                 } else if (callBackData.startsWith("/SearchOffer=")) {
                     String[] selectedWord = callBackData.split("=");
@@ -173,11 +196,11 @@ public class TelegramBot extends TelegramLongPollingBot {
                     if (deRuController.isItGerman(selectedWord[1])) {
                         translationList = deRuController.getTranslations(selectedWord[1], "DE");
                         sendKeyboard(getSearchWordMenu(translationList, selectedWord[1], "yes"), chatId,
-                                "\nYou can choose one word and get all existing translations for the word:\n" + selectedWord[2]);
+                                "\nВы можете выбрать одно слово и получить все доступные переводы:\n" + selectedWord[2]);
                     } else if (deRuController.isItRussian(selectedWord[1])) {
                         translationList = deRuController.getTranslations(selectedWord[1], "RU");
                         sendKeyboard(getSearchWordMenu(translationList, selectedWord[1], "yes"), chatId,
-                                "\nYou can choose one word and get all existing translations for the word:\n" + selectedWord[2]);
+                                "\nВы можете выбрать одно слово и получить все доступные переводы:\n" + selectedWord[2]);
                     }
                 } else if (callBackData.startsWith("/TranslationsOffer=")) {
                     String[] selectedWord = callBackData.split("=");
@@ -192,8 +215,12 @@ public class TelegramBot extends TelegramLongPollingBot {
                     }
                     if (deutsch.isPresent() && russian.isPresent()) {
                         Optional<DeRu> pair = deRuController.getPairByGermanIdAndRussianId(deutsch.get().getId(), russian.get().getId());
-                        pair.ifPresent(deRu -> userStatisticController.saveNewPairInStatistic(userDictionaryController.saveNewPair(telegramId, "DE", deRu)));
-                        sendKeyboard(trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE")), chatId, "You added one pair:\n" + deutsch.get().getDeWord() + " = " + russian.get().getWord());
+                        pair.ifPresent(deRu -> userStatisticController.saveNewPairInStatistic(userDictionaryController.saveNewPair(
+                                telegramId, "DE", deRu)));
+                        sendKeyboard(trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(
+                                        telegramId, "DE")),
+                                chatId,
+                                "Вы добавили пару слов:\n" + deutsch.get().getDeWord() + " = " + russian.get().getWord());
                     }
                 } else if (callBackData.equals("/toSearchOffer")) {
 
@@ -222,9 +249,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                     } else if (callBackData.startsWith("/Trainings=/LearningTraining=/DeRuId=:")) {
                         String result = trainingController.getAnswerFromUser(callBackData);
                         if (learningList.isEmpty()) {
-                            editKeyboard(callbackQuery, null, result + "\n\nYou're finished the learning!");
+                            editKeyboard(callbackQuery, null, result + "\n\nОтлично! Вы завершили обучение!");
                             sendMessage(chatId, EmojiGive.oK);
-                            sendKeyboard(trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE")), chatId, "Training:");
+                            sendKeyboard(trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE")),
+                                    chatId, EmojiGive.gameDie + " Тренировки:");
                         } else {
                             TrainingPair pair = learningList.get(0);
                             learningList.remove(pair);
@@ -235,9 +263,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                     } else if (callBackData.startsWith("/Trainings=/RepeatTraining=/DeRuId=:")) {
                         String result = trainingController.getAnswerFromUser(callBackData);
                         if (repeatList.isEmpty()) {
-                            editKeyboard(callbackQuery, null, result + "\n\nYou're finished the training!");
+                            editKeyboard(callbackQuery, null, result + "\n\nОтлично! Вы завершили тренировку!");
                             sendMessage(chatId, EmojiGive.oK);
-                            sendKeyboard(trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE")), chatId, "Training:");
+                            sendKeyboard(trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE")),
+                                    chatId, EmojiGive.gameDie + " Тренировки:");
                         } else {
                             TrainingPair pair = repeatList.get(0);
                             repeatList.remove(pair);
@@ -248,9 +277,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                     } else if (callBackData.startsWith("/Trainings=/FailsTraining=/DeRuId=:")) {
                         String result = trainingController.getAnswerFromUser(callBackData);
                         if (failList.isEmpty()) {
-                            editKeyboard(callbackQuery, null, result + "\n\nYou're finished the fails training!");
+                            editKeyboard(callbackQuery, null, result + "\n\nОтлично! Вы повторили слова с ошибками!");
                             sendMessage(chatId, EmojiGive.oK);
-                            sendKeyboard(trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE")), chatId, "Training:");
+                            sendKeyboard(trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE")),
+                                    chatId, EmojiGive.gameDie + " Тренировки:");
                         } else {
                             TrainingPair pair = failList.get(0);
                             failList.remove(pair);
@@ -259,27 +289,29 @@ public class TelegramBot extends TelegramLongPollingBot {
                                     chatId, getHeaderForTraining(pair.getGerman().getDeWord()));
                         }
                     } else if (callBackData.startsWith("/Trainings=/FinishAllTrainings")) {
-                        editKeyboard(callbackQuery, null, "Training was interrupted!");
+                        editKeyboard(callbackQuery, null, "Вы прервали занятие! Жаль!" +
+                                "\nНадеюсь Вы вернетесь к обучению как можно скорее!");
                         sendMessage(chatId, EmojiGive.thinkingFace);
-                        sendKeyboard(trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE")), chatId, "Training");
+                        sendKeyboard(trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE")),
+                                chatId, EmojiGive.gameDie + " Тренировки:");
                         learningList.clear();
                         repeatList.clear();
                         failList.clear();
                     }
                 } else if (callBackData.equals("/statistic")) {
-                    editKeyboard(update.getCallbackQuery(), statisticMenu(), "Statistic");
+                    editKeyboard(update.getCallbackQuery(), statisticMenu(), EmojiGive.barChart + " Статистика:");
                 } else if (callBackData.equals("/settings")) {
-                    editKeyboard(update.getCallbackQuery(), settingsMenu(), "Settings");
+                    editKeyboard(update.getCallbackQuery(), settingsMenu(), EmojiGive.wrench + " Настройки:");
                 } else if (callBackData.equals("/info")) {
-                    editKeyboard(update.getCallbackQuery(), infoMenu(), "Info");
+                    editKeyboard(update.getCallbackQuery(), infoMenu(), EmojiGive.clipboard + " Инфо:");
                 } else if (callBackData.equals("/adminMenu")) {
-                    editKeyboard(update.getCallbackQuery(), adminMenu(), "Admin Menu");
+                    editKeyboard(update.getCallbackQuery(), adminMenu(), EmojiGive.lockedWithKey + " Admin Menu:");
                 } else if (callBackData.equals("/languagesAdmin")) {
-                    editKeyboard(update.getCallbackQuery(), adminLanguagesMenu(), "Language Menu");
+                    editKeyboard(update.getCallbackQuery(), adminLanguagesMenu(), "Языковое меню: ");
                 } else if (callBackData.equals("/russianSettings")) {
-                    editKeyboard(update.getCallbackQuery(), addWordsMenu(), "Add Words Menu\nRU - russian");
+                    editKeyboard(update.getCallbackQuery(), addWordsMenu(), "Добавить слова:\nRU - русский");
                 } else if (callBackData.equals("/germanSettings")) {
-                    editKeyboard(update.getCallbackQuery(), addWordsMenu(), "Add Words Menu\nDE - german");
+                    editKeyboard(update.getCallbackQuery(), addWordsMenu(), "Добавить слова:\nDE - немецекий");
                 } else if (callBackData.equals("/addWordAdmin")) {
                     editMessage(callbackQuery, """
                             A Very Important Description:
@@ -290,7 +322,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                             For example: **das Haus**.
                             Write an article from small letter: **der/die/das**.
                             A word from big letter: **Haus/Hund/Ampel.**""");
-                    sendMessage(chatId, "enter a pair word");
+                    sendMessage(chatId, "Введите пару слов: ");
                     queue.add(telegramId + callBackData);
                 } else if (callBackData.equals("/addListAdmin")) {
                     List<String> wordList = new ArrayList<>();
@@ -304,7 +336,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         throw new RuntimeException(e);
                     }
                     boolean create = false;
-                    editKeyboard(update.getCallbackQuery(), null, "Words have been saved: ");
+                    editKeyboard(update.getCallbackQuery(), null, "Слова были сохранены: ");
                     if (!wordList.isEmpty()) {
                         create = true;
                         for (String str : wordList) {
@@ -321,30 +353,32 @@ public class TelegramBot extends TelegramLongPollingBot {
                         }
                     }
                     if (create) {
-                        sendMessage(chatId, "Successfully!");
-                        sendKeyboard(globalMenu(adminStatus), chatId, EmojiGive.germanFlag + "\n\nI'm here!!! Did someone call me???\n\nMain menu");
+                        sendMessage(chatId, "Успешно!");
+                        sendKeyboard(globalMenu(adminStatus), chatId, EmojiGive.germanFlag + "\n\nЯ тут! Меня кто-то звал???\n\n"
+                                + EmojiGive.joystick + " Главное меню:");
                     } else {
-                        sendMessage(chatId, "You haven't new words, or the list is empty!");
-                        sendKeyboard(globalMenu(adminStatus), chatId, EmojiGive.germanFlag + "\n\nI'm here!!! Did someone call me???\n\nMain menu");
+                        sendMessage(chatId, "Нет новых слов или Ваш список пуст!");
+                        sendKeyboard(globalMenu(adminStatus), chatId, EmojiGive.germanFlag + "\n\nЯ тут! Меня кто-то звал???\n\n"
+                                + EmojiGive.joystick + " Главное меню:");
                     }
                 } else if (callBackData.equals("/userInfo")) {
-                    editKeyboard(update.getCallbackQuery(), globalMenu(adminStatus), sendUserInfo(telegramId) + "\n\nMain menu");
+                    editKeyboard(update.getCallbackQuery(), globalMenu(adminStatus), sendUserInfo(telegramId) + "\n\n" + EmojiGive.joystick + " Главное меню:");
                 } else if (callBackData.equals("/aboutThisBot")) {
-                    editKeyboard(update.getCallbackQuery(), globalMenu(adminStatus), """
-                            I hope this bot will help me and people to study german words very fast!
-                            This bot is free and also it's my opportunity to get new experience as a program developer.
-                            All questions you can send me on my email:
-                            salychevms@gmail.com.
-                            Good luck and have fun! =)
-
-                            Main menu""");
+                    editKeyboard(update.getCallbackQuery(), globalMenu(adminStatus),
+                            "Я надеюсь что этот бот поможет людям учить немецкие слова." +
+                                    "Бот бесплатный. Это моя практика как программиста. Да и слова мне самому учить надо!=)" +
+                                    "Так что как говорится \"двух зайцев одним выстрелом\"!" +
+                                    "Любые вопросы, пожелания, проблемы пишем сюда:" +
+                                    "mishanya_k-city@mail.ru." +
+                                    "Удачи в учебе и хорошего настроения! =)\n\n" +
+                                    EmojiGive.joystick + " Главное меню:");
                 } else if (callBackData.equals("/changeName")) {
-                    editMessage(callbackQuery, "Change Name");
-                    sendMessage(chatId, "enter new name");
+                    editMessage(callbackQuery, "Сменить имя:");
+                    sendMessage(chatId, "введите новое имя:");
                     queue.add(telegramId + callBackData);
                 } else if (callBackData.equals("/changeSurname")) {
-                    editMessage(callbackQuery, "Change Surname");
-                    sendMessage(chatId, "enter new surname");
+                    editMessage(callbackQuery, "Сменить фамилию:");
+                    sendMessage(chatId, "введите новую фамилию:");
                     queue.add(telegramId + callBackData);
                     //if I pressed button "set new language"
                 } else if (callBackData.equals("/setNewLanguage")) {
@@ -353,9 +387,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                     //I set all identifiers in one string
                     String identifierString = String.join(" / ", identifiers);
                     //I send this string to my editMessage
-                    editKeyboard(callbackQuery, setLanguageMenu(), "You already learn:\n"
+                    editKeyboard(callbackQuery, setLanguageMenu(), "Вы уже учите:\n"
                             + identifierString
-                            + "\n\nSet Language");
+                            + "\n\nУстановка языка: ");
 
                     //if I press "germanDE"
                 } else if (callBackData.equals("/germanDE")) {
@@ -366,9 +400,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                         languageController.createLanguage("russian", "RU");
                         languageController.createLanguage("german", "DE");
                         editKeyboard(callbackQuery, setLanguageMenu(), """
-                                Language: german "DE" has been created.
+                                Язык: немецкий "DE" был создан.
 
-                                Set Language""");
+                                Установка языка: """);
                     }
                     //when this language is exists I get all my languages by my id
                     List<String> identifiers = userLanguageController.getAllLanguagesByTelegramId(telegramId);
@@ -385,19 +419,21 @@ public class TelegramBot extends TelegramLongPollingBot {
                         //I save this language in my language list
                         userLanguageController.createUserLanguage(telegramId, language.get().getId());
                         editKeyboard(callbackQuery, setLanguageMenu(), """
-                                Language: german "DE" has been added.
+                                Язык: немецкий "DE" был добавлен.
 
-                                Set Language""");
+                                Установка языка:""");
                         //if it is existed I sent to my editMessage information I already learn
                     } else if (found && language.isPresent()) {
                         editKeyboard(callbackQuery, setLanguageMenu(), """
-                                You have already learn "DE".
+                                Вы уже учите "DE".
 
-                                Set Language""");
+                                Установка языка:""");
                     }
 
                 } else if (callBackData.equals("/mainMenu")) {
-                    editKeyboard(update.getCallbackQuery(), globalMenu(adminStatus), EmojiGive.germanFlag + "\n\nI'm here!!! Did someone call me???\n\nMain menu");
+                    editKeyboard(update.getCallbackQuery(), globalMenu(adminStatus),
+                            EmojiGive.germanFlag + "\n\nЯ тут! Меня кто-то звал???\n\n"
+                                    + EmojiGive.joystick + " Главное меню:");
                 } else if (callBackData.startsWith("/Offer=")) {
 
                 }
@@ -406,12 +442,11 @@ public class TelegramBot extends TelegramLongPollingBot {
                 if (callBackData.equals("/registration")) {
                     usersController.createNewUser(telegramId, userName);
                     if (usersController.registeredOr(telegramId)) {
-                        editKeyboard(update.getCallbackQuery(), globalMenu(false), """
-                                Successfully! You're registered!
-
-                                Main menu""");
-                    } else sendMessage(chatId, "Oooopsie! Sorry, something wrong happened..." +
-                            "\nWrite \"/start\" and try again!!");
+                        editKeyboard(update.getCallbackQuery(), globalMenu(false),
+                                "Успех! Вы зарегистрированы!\n\n" +
+                                        EmojiGive.joystick + " Главное меню:");
+                    } else sendMessage(chatId, "Оооой! Что-то пошло не так..." +
+                            "\nНажмите \"/start\" и попробуйте снова!!!");
                 } else if (callBackData.equals("/aboutRegistration")) {
                     if (!callbackQuery.getMessage().getText().equals("You have to register!\n\nPlease, push *Registration* in this menu.")) {
                         editKeyboard(update.getCallbackQuery(), registration(), "You have to register!\n\nPlease, push *Registration* in this menu.");
@@ -437,13 +472,13 @@ public class TelegramBot extends TelegramLongPollingBot {
     private InlineKeyboardMarkup addWordsMenu() {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //button "main menu
-        InlineKeyboardButton addOneWordButton = new InlineKeyboardButton("Add Word");
+        InlineKeyboardButton addOneWordButton = new InlineKeyboardButton("Добавить слово");
         addOneWordButton.setCallbackData("/addWordAdmin");
         //button "main menu
-        InlineKeyboardButton addListButton = new InlineKeyboardButton("Add Words From List");
+        InlineKeyboardButton addListButton = new InlineKeyboardButton("Добавить слова из списка");
         addListButton.setCallbackData("/addListAdmin");
         //button "main menu
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<< main menu");
+        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
         goToMainMenuButton.setCallbackData("/mainMenu");
         ////position from left to right
         List<InlineKeyboardButton> row1 = new ArrayList<>();
@@ -466,11 +501,11 @@ public class TelegramBot extends TelegramLongPollingBot {
     private InlineKeyboardMarkup adminMenu() {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //button "main menu
-        InlineKeyboardButton languagesButton = new InlineKeyboardButton("Languages");
+        InlineKeyboardButton languagesButton = new InlineKeyboardButton("Языки:");
         languagesButton.setCallbackData("/languagesAdmin");
 
         //button "main menu
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<< main menu");
+        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
         goToMainMenuButton.setCallbackData("/mainMenu");
         ////position from left to right
         List<InlineKeyboardButton> row1 = new ArrayList<>();
@@ -504,19 +539,19 @@ public class TelegramBot extends TelegramLongPollingBot {
             if (isTranslate.equalsIgnoreCase(NO)) {
                 //a user looks for a word and can choose from the word list, also we get a translatable word for the next step
                 button.setCallbackData("/SearchOffer=" + item + "=" + translatableWord);
-                goToTrainingMenuButton = new InlineKeyboardButton("< training menu");
+                goToTrainingMenuButton = new InlineKeyboardButton("<" + EmojiGive.gameDie + " к меню тренировок");
                 goToTrainingMenuButton.setCallbackData("/training");
             } else if (isTranslate.equalsIgnoreCase(YES)) {
                 //this step get to a user a lot of translations for the search word
                 button.setCallbackData("/TranslationsOffer=" + item + "=" + translatableWord);
-                goToTrainingMenuButton = new InlineKeyboardButton("< back");
+                goToTrainingMenuButton = new InlineKeyboardButton("<" + EmojiGive.backArrow + " назад");
                 goToTrainingMenuButton.setCallbackData("/toSearchOffer");
             }
             buttons.add(button);
             rows.add(buttons);
         }
         //button
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<< main menu");
+        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
         goToMainMenuButton.setCallbackData("/mainMenu");
         ////position from left to right
         List<InlineKeyboardButton> row1 = new ArrayList<>();
@@ -550,7 +585,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             rows.add(buttons);
         }
         //button "main menu
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<< main menu");
+        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
         goToMainMenuButton.setCallbackData("/mainMenu");
         ////position from left to right
         List<InlineKeyboardButton> row = new ArrayList<>();
@@ -566,7 +601,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private InlineKeyboardMarkup statisticMenu() {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //button "main menu
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<< main menu");
+        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
         goToMainMenuButton.setCallbackData("/mainMenu");
         ////position from left to right
         List<InlineKeyboardButton> row1 = new ArrayList<>();
@@ -584,35 +619,35 @@ public class TelegramBot extends TelegramLongPollingBot {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //position from up to down
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-        List<UserStatistic> userStatisticList=userStatisticController.getAllStatisticWithNewWords();
-        int count=0;
+        List<UserStatistic> userStatisticList = userStatisticController.getAllStatisticWithNewWords();
+        int count = 0;
         if (!userStatisticList.isEmpty()) {
-            for (UserStatistic item: userStatisticList) {
-                Long userLangIdFromStat= trainingController.getUserLangByUserStatistic(item).getId();
-                Long userLangIdFromIncomingParam=userLanguage.getId();
-                if(userLangIdFromIncomingParam.equals(userLangIdFromStat))
+            for (UserStatistic item : userStatisticList) {
+                Long userLangIdFromStat = trainingController.getUserLangByUserStatistic(item).getId();
+                Long userLangIdFromIncomingParam = userLanguage.getId();
+                if (userLangIdFromIncomingParam.equals(userLangIdFromStat))
                     count++;
             }
         }
-        if(count!=0) {
+        if (count != 0) {
             //button "Daily"
-            InlineKeyboardButton learningNewWordsTrainingButton = new InlineKeyboardButton("Learning New Words");
+            InlineKeyboardButton learningNewWordsTrainingButton = new InlineKeyboardButton(EmojiGive.newButton + " Учить новые слова");
             learningNewWordsTrainingButton.setCallbackData("/Trainings=/StartLearningTraining");
             List<InlineKeyboardButton> row = new ArrayList<>();
             row.add(learningNewWordsTrainingButton);
             rows.add(row);
         }
         //button "Daily"
-        InlineKeyboardButton repeatWordsTrainingButton = new InlineKeyboardButton("Repeat Training");
+        InlineKeyboardButton repeatWordsTrainingButton = new InlineKeyboardButton(EmojiGive.repeatButton + " Ежедневная тренировка");
         repeatWordsTrainingButton.setCallbackData("/Trainings=/StartRepeatTraining");
         //button "Daily"
-        InlineKeyboardButton failsTrainingButton = new InlineKeyboardButton("Fails Training");
+        InlineKeyboardButton failsTrainingButton = new InlineKeyboardButton(EmojiGive.redQuestionMark + " Ошиблись - повторите");
         failsTrainingButton.setCallbackData("/Trainings=/StartFailsTraining");
         //button "Add new"
-        InlineKeyboardButton addNewWordsButton = new InlineKeyboardButton("Add New Words");
+        InlineKeyboardButton addNewWordsButton = new InlineKeyboardButton(EmojiGive.inboxTray + " Добавить новые слова");
         addNewWordsButton.setCallbackData("/addNewWords");
         //button "main menu
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<< main menu");
+        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
         goToMainMenuButton.setCallbackData("/mainMenu");
         ////position from left to right
         List<InlineKeyboardButton> row1 = new ArrayList<>();
@@ -637,19 +672,19 @@ public class TelegramBot extends TelegramLongPollingBot {
     private InlineKeyboardMarkup globalMenu(boolean ifAdmin) {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //button "Training"
-        InlineKeyboardButton trainingButton = new InlineKeyboardButton("Training");
+        InlineKeyboardButton trainingButton = new InlineKeyboardButton(EmojiGive.gameDie + " Тренировки");
         trainingButton.setCallbackData("/training");
         //button "Statistic"
-        InlineKeyboardButton statisticButton = new InlineKeyboardButton("Statistic");
+        InlineKeyboardButton statisticButton = new InlineKeyboardButton(EmojiGive.barChart + " Статитстика");
         statisticButton.setCallbackData("/statistic");
         //button "Settings"
-        InlineKeyboardButton settingsButton = new InlineKeyboardButton("Settings");
+        InlineKeyboardButton settingsButton = new InlineKeyboardButton(EmojiGive.wrench + " Настройки");
         settingsButton.setCallbackData("/settings");
         //button "Info"
-        InlineKeyboardButton infoButton = new InlineKeyboardButton("Info");
+        InlineKeyboardButton infoButton = new InlineKeyboardButton(EmojiGive.clipboard + " Инфо");
         infoButton.setCallbackData("/info");
         //========for admin========
-        InlineKeyboardButton adminMenuButton = new InlineKeyboardButton("Admin Menu");
+        InlineKeyboardButton adminMenuButton = new InlineKeyboardButton(EmojiGive.lockedWithKey + " Admin Menu");
         adminMenuButton.setCallbackData("/adminMenu");
         //position from left to right
         List<InlineKeyboardButton> row1 = new ArrayList<>();
@@ -683,16 +718,16 @@ public class TelegramBot extends TelegramLongPollingBot {
     private InlineKeyboardMarkup settingsMenu() {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //button "change Name"
-        InlineKeyboardButton changeNameButton = new InlineKeyboardButton("Change Name");
+        InlineKeyboardButton changeNameButton = new InlineKeyboardButton("Сменить имя");
         changeNameButton.setCallbackData("/changeName");
         //button "change Surname"
-        InlineKeyboardButton changeSurnameButton = new InlineKeyboardButton("Change Surname");
+        InlineKeyboardButton changeSurnameButton = new InlineKeyboardButton("Сменить фамилию");
         changeSurnameButton.setCallbackData("/changeSurname");
         //button "set new language"
-        InlineKeyboardButton setNewLanguageButton = new InlineKeyboardButton("Set New Language");
+        InlineKeyboardButton setNewLanguageButton = new InlineKeyboardButton("Установить новый язык");
         setNewLanguageButton.setCallbackData("/setNewLanguage");
         //button "settings menu go back"
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<< main menu");
+        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
         goToMainMenuButton.setCallbackData("/mainMenu");
         //position from left to right
         List<InlineKeyboardButton> row1 = new ArrayList<>();
@@ -718,13 +753,13 @@ public class TelegramBot extends TelegramLongPollingBot {
     private InlineKeyboardMarkup infoMenu() {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //button "User Info"
-        InlineKeyboardButton userInfoButton = new InlineKeyboardButton("User Info");
+        InlineKeyboardButton userInfoButton = new InlineKeyboardButton(EmojiGive.alien + " Инфо о пользователе");
         userInfoButton.setCallbackData("/userInfo");
         //button "About This Bot"
-        InlineKeyboardButton aboutBotButton = new InlineKeyboardButton("About This Bot");
+        InlineKeyboardButton aboutBotButton = new InlineKeyboardButton(EmojiGive.robot + " Об этом боте");
         aboutBotButton.setCallbackData("/aboutThisBot");
         //button "About This Bot"
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<< main menu");
+        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
         goToMainMenuButton.setCallbackData("/mainMenu");
         //position from left to right
         List<InlineKeyboardButton> row1 = new ArrayList<>();
@@ -772,13 +807,13 @@ public class TelegramBot extends TelegramLongPollingBot {
     private InlineKeyboardMarkup setLanguageMenu() {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //button
-        InlineKeyboardButton userInfoButton = new InlineKeyboardButton("\"DE\" German");
+        InlineKeyboardButton userInfoButton = new InlineKeyboardButton("\"DE\" Немецкий");
         userInfoButton.setCallbackData("/germanDE");
         //button
-        InlineKeyboardButton goToSettingsMenuButton = new InlineKeyboardButton("< settings menu");
+        InlineKeyboardButton goToSettingsMenuButton = new InlineKeyboardButton("<" + EmojiGive.wrench + " в меню настроек");
         goToSettingsMenuButton.setCallbackData("/settings");
         //button
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<< main menu");
+        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
         goToMainMenuButton.setCallbackData("/mainMenu");
         //position from left to right
         List<InlineKeyboardButton> row1 = new ArrayList<>();
@@ -857,12 +892,12 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private String sendUserInfo(long telegramId) {
         Optional<Users> user = usersController.findUserByTelegramId(telegramId);
-        return user.map(users -> "User: " + users.getUserName()
-                + "\nUser id: " + users.getId()
-                + "\nTelegram id: " + users.getTelegramId()
-                + "\nFirstname: " + users.getName()
-                + "\nLastname: " + users.getSurname()
-                + "\nPhone: " + users.getPhoneNumber()
-                + "\nRegistration date: " + users.getRegistrationDate()).orElse(null);
+        return user.map(users -> "Пользователь: " + users.getUserName()
+                + "\nID пользователя: " + users.getId()
+                + "\nTelegram id пользователя: " + users.getTelegramId()
+                + "\nИмя: " + users.getName()
+                + "\nФамилия: " + users.getSurname()
+                + "\nНомер телефона: " + users.getPhoneNumber()
+                + "\nДата регистрации: " + users.getRegistrationDate()).orElse(null);
     }
 }

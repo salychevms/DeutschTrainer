@@ -154,7 +154,7 @@ public class TrainingController {
             wrongAnswers.remove(randomIndex);
         }
         //button
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("=abort training=");
+        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("=Прервать тренировку=");
         goToMainMenuButton.setCallbackData("/Trainings=/FinishAllTrainings");
         //position from left to right
         List<InlineKeyboardButton> row = new ArrayList<>();
@@ -183,15 +183,11 @@ public class TrainingController {
             Russian ruFromUser = russianController.findById(userAnswerId);
             Optional<Deutsch> german = deRuController
                     .getDeRuById(correctPairId).flatMap(deRu -> Optional.ofNullable(deutschController.findById(deRu.getDeutschId())));
-            System.out.println("answerId: " + userAnswerId + "\ncorrectPairID: " + correctPairId);//////////////////////////////////////////////////////////////////////////
-            System.out.println("ruCorrectWord: " + ruCorrect.get().getWord() + " id: " + ruCorrect.get().getId());/////////////////////////////////////////////////////////
-            System.out.println("ruFromUser: " + ruFromUser.getWord() + " id: " + ruFromUser.getId());//////////////////////////////////////////////////////////////////////
-            System.out.println("germanWord: " + german.get().getDeWord() + " id: " + german.get().getId());///////////////////////////////////////////////////////////////
             if (ruCorrect.isPresent() && german.isPresent()) {
                 if (userAnswerId.equals(ruCorrect.get().getId())) {
                     Optional<UserDictionary> forStatistic = userDictionaryController.getUserDictionaryByPairId(correctPairId);
                     forStatistic.ifPresent(userStatisticController::updateAllIterationsAndNewWordStatus);
-                    answerToUser = "***** GOOD!!! *****\n\n"
+                    answerToUser = "***** ОТЛИЧНО!!! *****\n\n"
                             + german.get().getDeWord() + " --> " + ruCorrect.get().getWord()
                             + "\n\n*******************\n"
                             + EmojiGive.greyCheck;
@@ -199,9 +195,9 @@ public class TrainingController {
                     Optional<UserDictionary> forStatistic = userDictionaryController.getUserDictionaryByPairId(correctPairId);
                     forStatistic.ifPresent(userStatisticController::updateAllIterationsAndNewWordStatus);
                     forStatistic.ifPresent(userStatisticController::updateAllFails);
-                    answerToUser = "***** WRONG!!! *****"
-                            + "\nYou choosed: " + ruFromUser.getWord()
-                            + "\n--- Correct pair ---\n\n"
+                    answerToUser = "***** ОШИБКА!!! *****"
+                            + "\n\nВы выбрали: " + ruFromUser.getWord()
+                            + "\n\n--- Верный ответ ---\n\n"
                             + german.get().getDeWord() + " --> " + ruCorrect.get().getWord()
                             + "\n\n********************\n"
                             + EmojiGive.redCross;
