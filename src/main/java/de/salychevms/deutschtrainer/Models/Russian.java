@@ -1,8 +1,12 @@
 package de.salychevms.deutschtrainer.Models;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Setter
+@Getter
 @Table(name = "russian")
 public class Russian {
     @Id
@@ -15,22 +19,6 @@ public class Russian {
     }
 
     public Russian(String word) {
-        this.ruWord = word;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getWord() {
-        return ruWord;
-    }
-
-    public void setWord(String word) {
         this.ruWord = word;
     }
 

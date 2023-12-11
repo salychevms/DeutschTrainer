@@ -18,11 +18,11 @@ public class RussianController {
         this.russianService = russianService;
     }
 
-    public List<Long> createNewWords(String data) {
+    public List<Russian> createNewWords(String data) {
         String[] parts = data.split(" // ");
         System.out.println("ge: "+parts[0]+"\nru: "+parts[1]);/////////////////////////////////////////////////////////////////////////////////////////////////////
         List<String> translations = List.of(parts[1].split("/"));
-        List<Long> russianList = new ArrayList<>();
+        List<Russian> russianList = new ArrayList<>();
         for (String item : translations) {
             russianList.add(russianService.createNewRussian(item));
         }

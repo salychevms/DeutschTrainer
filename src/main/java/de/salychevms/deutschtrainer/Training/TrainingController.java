@@ -53,8 +53,8 @@ public class TrainingController {
                         if (userPair.isPresent()) {
                             Optional<DeRu> compareWith = deRuController.getDeRuById(userPair.get().getPair().getId());
                             if (compareWith.isPresent()) {
-                                Deutsch german = deutschController.findById(compareWith.get().getDeutschId());
-                                Russian russian = russianController.findById(compareWith.get().getRussianId());
+                                Deutsch german = deutschController.findById(compareWith.get().getDeutsch().getId());
+                                Russian russian = russianController.findById(compareWith.get().getRussian().getId());
                                 trainingPairList.add(createNewPair(statisticItem, userPair.get(), compareWith.get(), german, russian));
                             }
                         }
@@ -87,8 +87,8 @@ public class TrainingController {
                             if (userPair.isPresent()) {
                                 Optional<DeRu> compareWith = deRuController.getDeRuById(userPair.get().getPair().getId());
                                 if (compareWith.isPresent()) {
-                                    Deutsch german = deutschController.findById(compareWith.get().getDeutschId());
-                                    Russian russian = russianController.findById(compareWith.get().getRussianId());
+                                    Deutsch german = deutschController.findById(compareWith.get().getDeutsch().getId());
+                                    Russian russian = russianController.findById(compareWith.get().getRussian().getId());
                                     trainingFailList.add(createNewPair(statisticItem, userPair.get(), compareWith.get(), german, russian));
                                 }
                             }
@@ -121,8 +121,8 @@ public class TrainingController {
                         if (userPair.isPresent()) {
                             Optional<DeRu> compareWith = deRuController.getDeRuById(userPair.get().getPair().getId());
                             if (compareWith.isPresent()) {
-                                Deutsch german = deutschController.findById(compareWith.get().getDeutschId());
-                                Russian russian = russianController.findById(compareWith.get().getRussianId());
+                                Deutsch german = deutschController.findById(compareWith.get().getDeutsch().getId());
+                                Russian russian = russianController.findById(compareWith.get().getRussian().getId());
                                 learningPairList.add(createNewPair(statisticItem, userPair.get(), compareWith.get(), german, russian));
                             }
                         }
@@ -146,7 +146,7 @@ public class TrainingController {
         while (!wrongAnswers.isEmpty()) {
             int randomIndex = random.nextInt(wrongAnswers.size());
             Russian ru = wrongAnswers.get(randomIndex);
-            InlineKeyboardButton testButton = new InlineKeyboardButton(ru.getWord());
+            InlineKeyboardButton testButton = new InlineKeyboardButton(ru.getRuWord());
             testButton.setCallbackData(answer + ru.getId() + "%" + pair.getCompareWith().getId());
             List<InlineKeyboardButton> row = new ArrayList<>();
             row.add(testButton);
@@ -179,16 +179,16 @@ public class TrainingController {
         }
         if (userAnswerId != null && correctPairId != null) {
             Optional<Russian> ruCorrect = deRuController
-                    .getDeRuById(correctPairId).flatMap(deRu -> Optional.ofNullable(russianController.findById(deRu.getRussianId())));
+                    .getDeRuById(correctPairId).flatMap(deRu -> Optional.ofNullable(russianController.findById(deRu.getRussian().getId())));
             Russian ruFromUser = russianController.findById(userAnswerId);
             Optional<Deutsch> german = deRuController
-                    .getDeRuById(correctPairId).flatMap(deRu -> Optional.ofNullable(deutschController.findById(deRu.getDeutschId())));
+                    .getDeRuById(correctPairId).flatMap(deRu -> Optional.ofNullable(deutschController.findById(deRu.getDeutsch().getId())));
             if (ruCorrect.isPresent() && german.isPresent()) {
                 if (userAnswerId.equals(ruCorrect.get().getId())) {
                     Optional<UserDictionary> forStatistic = userDictionaryController.getUserDictionaryByPairId(correctPairId);
                     forStatistic.ifPresent(userStatisticController::updateAllIterationsAndNewWordStatus);
                     answerToUser = "***** ОТЛИЧНО!!! *****\n\n"
-                            + german.get().getDeWord() + " --> " + ruCorrect.get().getWord()
+                            + german.get().getDeWord() + " --> " + ruCorrect.get().getRuWord()
                             + "\n\n*******************\n"
                             + EmojiGive.greyCheck;
                 } else {
@@ -196,9 +196,9 @@ public class TrainingController {
                     forStatistic.ifPresent(userStatisticController::updateAllIterationsAndNewWordStatus);
                     forStatistic.ifPresent(userStatisticController::updateAllFails);
                     answerToUser = "***** ОШИБКА!!! *****"
-                            + "\n\nВы выбрали: " + ruFromUser.getWord()
+                            + "\n\nВы выбрали: " + ruFromUser.getRuWord()
                             + "\n\n--- Верный ответ ---\n\n"
-                            + german.get().getDeWord() + " --> " + ruCorrect.get().getWord()
+                            + german.get().getDeWord() + " --> " + ruCorrect.get().getRuWord()
                             + "\n\n********************\n"
                             + EmojiGive.redCross;
                 }
@@ -218,8 +218,8 @@ public class TrainingController {
         if (userDictionary.isPresent()) {
             deRu = deRuController.getDeRuById(userDictionary.get().getPair().getId());
             if (deRu.isPresent()) {
-                russian = Optional.ofNullable(russianController.findById(deRu.get().getRussianId()));
-                german = Optional.ofNullable(deutschController.findById(deRu.get().getDeutschId()));
+                russian = Optional.ofNullable(russianController.findById(deRu.get().getRussian().getId()));
+                german = Optional.ofNullable(deutschController.findById(deRu.get().getDeutsch().getId()));
             }
         }
         while (wrongAnswers.size() < 4) {

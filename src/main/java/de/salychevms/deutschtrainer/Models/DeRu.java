@@ -1,38 +1,49 @@
 package de.salychevms.deutschtrainer.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
+
+@Entity
 @Getter
 @Setter
-@Entity
 @Table(name = "de_ru")
 public class DeRu {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "de_ru_generator")
     private Long id;
-    @Column(name = "deutsch_id")
-    private Long deutschId;
 
-    @Column(name = "russian_id")
-    private Long russianId;
+    @ManyToOne(fetch = FetchType.LAZY,optional = false)
+    @JoinColumn(name = "deutsch")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
+    private Deutsch deutsch;
+
+    @ManyToOne(fetch = FetchType.LAZY,optional = false)
+    @JoinColumn(name = "russian")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
+    private Russian russian;
 
     public DeRu() {
     }
 
-    public DeRu(Long deutschId, Long russianId) {
-        this.deutschId = deutschId;
-        this.russianId = russianId;
+    public DeRu(Deutsch deutsch, Russian russian) {
+        this.deutsch = deutsch;
+        this.russian = russian;
     }
 
     @Override
     public String toString() {
         return "De-Ru pair{" +
                 "id=" + id + '\'' +
-                ", deutschId=" + deutschId + '\'' +
-                ", russianId=" + russianId + '\'' +
+                ", deutsch=" + deutsch.getId() + '\'' +
+                ", russian=" + russian.getId() + '\'' +
                 '}';
     }
 }

@@ -28,9 +28,9 @@ public class DeRuController {
         this.russianController = russianController;
     }
 
-    public List<Long> createPairs(Long german, List<Long> russian) {
+    public List<Long> createPairs(Deutsch german, List<Russian> russian) {
         List<Long> pairs = new ArrayList<>();
-        for (Long item : russian) {
+        for (Russian item : russian) {
             pairs.add(deRuService.createNewPairs(german, item));
         }
         return pairs;
@@ -43,8 +43,8 @@ public class DeRuController {
         for (Long item : pairsId) {
             Optional<DeRu> deRu = deRuService.findById(item);
             if (deRu.isPresent()) {
-                Long id = deRu.get().getRussianId();
-                String russian = russianController.findById(id).getWord();
+                Long id = deRu.get().getRussian().getId();
+                String russian = russianController.findById(id).getRuWord();
                 pairs.append("\n\t").append(russian);
             }
         }
@@ -76,7 +76,7 @@ public class DeRuController {
         } else if (RU.equals(language)) {
             List<Russian> russian = russianController.findAllRussianWords(userWord);
             for (Russian item : russian) {
-                wordList.add(item.getWord());
+                wordList.add(item.getRuWord());
             }
         } else return null;
         return wordList;
@@ -89,7 +89,7 @@ public class DeRuController {
             if(deutsch.isPresent()){
                 List<DeRu> allPairs=deRuService.findAllByDeutschId(deutsch.get().getId());
                 for(DeRu item:allPairs){
-                    translationList.add(russianController.findById(item.getRussianId()).getWord());
+                    translationList.add(russianController.findById(item.getRussian().getId()).getRuWord());
                 }
             }
         } else if (RU.equalsIgnoreCase(fromLanguage)) {
@@ -97,7 +97,7 @@ public class DeRuController {
             if(russian.isPresent()){
                 List<DeRu> allPairs=deRuService.findAllByRussianId(russian.get().getId());
                 for(DeRu item:allPairs){
-                    translationList.add(deutschController.findById(item.getDeutschId()).getDeWord());
+                    translationList.add(deutschController.findById(item.getRussian().getId()).getDeWord());
                 }
             }
         }

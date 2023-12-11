@@ -23,11 +23,9 @@ public class DeutschService {
     }
 
     @Transactional
-    public Long createNewDeutsch(String word) {
+    public Deutsch createNewDeutsch(String word) {
         Optional<Deutsch> exist = deutschRepository.findByDeWordIgnoreCase(word);
-        if (exist.isEmpty()) {
-            return deutschRepository.save(new Deutsch(word)).getId();
-        } else return exist.get().getId();
+        return exist.orElseGet(() -> deutschRepository.save(new Deutsch(word)));
     }
 
     @Transactional

@@ -1,9 +1,13 @@
 package de.salychevms.deutschtrainer.Models;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 
 @Entity
+@Getter
+@Setter
 @Table(name = "deutsch")
 public class Deutsch {
     @Id
@@ -16,22 +20,6 @@ public class Deutsch {
     }
 
     public Deutsch(String deWord) {
-        this.deWord = deWord;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getDeWord() {
-        return deWord;
-    }
-
-    public void setDeWord(String deWord) {
         this.deWord = deWord;
     }
 

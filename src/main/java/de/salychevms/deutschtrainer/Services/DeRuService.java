@@ -1,6 +1,8 @@
 package de.salychevms.deutschtrainer.Services;
 
 import de.salychevms.deutschtrainer.Models.DeRu;
+import de.salychevms.deutschtrainer.Models.Deutsch;
+import de.salychevms.deutschtrainer.Models.Russian;
 import de.salychevms.deutschtrainer.Repo.DeRuRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,8 +19,8 @@ public class DeRuService {
     }
 
     @Transactional
-    public Long createNewPairs(Long german, Long russian) {
-        Optional<DeRu> deRu = deRuRepository.getByDeutschIdAndRussianId(german, russian);
+    public Long createNewPairs(Deutsch german, Russian russian) {
+        Optional<DeRu> deRu = deRuRepository.getByDeutschIdAndRussianId(german.getId(), russian.getId());
         return deRu.orElseGet(() -> deRuRepository.save(new DeRu(german, russian))).getId();
     }
 

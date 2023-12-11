@@ -30,7 +30,7 @@ public class Language {
         return "Language{" +
                 "id=" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", identifier='" + name + '\'' +
+                ", identifier='" + identifier + '\'' +
                 '}';
     }
 }

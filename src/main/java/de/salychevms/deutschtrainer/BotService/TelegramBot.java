@@ -114,12 +114,12 @@ public class TelegramBot extends TelegramLongPollingBot {
                             } else if (userText.equals("/addWordAdmin")) {
                                 iterator.remove();
                                 //create one german word
-                                Long germanWord = deutschController.createNewWord(messageText);
+                                Deutsch germanWord = deutschController.createNewWord(messageText);
                                 //create a lot of russian word
-                                List<Long> russianTranslate = russianController.createNewWords(messageText);
+                                List<Russian> russianTranslate = russianController.createNewWords(messageText);
                                 //create pairs of words
                                 List<Long> pairs = deRuController.createPairs(germanWord, russianTranslate);
-                                String result = deRuController.getAllWordPairsByPairId(germanWord, pairs);
+                                String result = deRuController.getAllWordPairsByPairId(germanWord.getId(), pairs);
                                 sendKeyboard(adminLanguagesMenu(), chatId, result);
                                 break;
                             } else if (userText.equals("/addNewWords")) {
@@ -220,7 +220,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         sendKeyboard(trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(
                                         telegramId, "DE")),
                                 chatId,
-                                "Вы добавили пару слов:\n" + deutsch.get().getDeWord() + " = " + russian.get().getWord());
+                                "Вы добавили пару слов:\n" + deutsch.get().getDeWord() + " = " + russian.get().getRuWord());
                     }
                 } else if (callBackData.equals("/toSearchOffer")) {
 
@@ -342,12 +342,12 @@ public class TelegramBot extends TelegramLongPollingBot {
                         for (String str : wordList) {
                             if (!str.isEmpty()) {
                                 //create one german word
-                                Long germanWord = deutschController.createNewWord(str);
+                                Deutsch germanWord = deutschController.createNewWord(str);
                                 //create a lot of russian word
-                                List<Long> russianTranslate = russianController.createNewWords(str);
+                                List<Russian> russianTranslate = russianController.createNewWords(str);
                                 //create pairs of words
                                 List<Long> pairs = deRuController.createPairs(germanWord, russianTranslate);
-                                String result = deRuController.getAllWordPairsByPairId(germanWord, pairs);
+                                String result = deRuController.getAllWordPairsByPairId(germanWord.getId(), pairs);
                                 sendMessage(chatId, result);
                             }
                         }

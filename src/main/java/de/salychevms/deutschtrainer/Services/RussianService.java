@@ -23,11 +23,9 @@ public class RussianService {
     }
 
     @Transactional
-    public Long createNewRussian(String word){
+    public Russian createNewRussian(String word){
         Optional<Russian> exist=russianRepository.findByRuWordIgnoreCase(word);
-        if(exist.isEmpty()){
-            return russianRepository.save(new Russian(word)).getId();
-        }else return exist.get().getId();
+        return exist.orElseGet(() -> russianRepository.save(new Russian(word)));
     }
 
     @Transactional

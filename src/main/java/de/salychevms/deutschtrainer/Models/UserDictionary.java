@@ -2,12 +2,16 @@ package de.salychevms.deutschtrainer.Models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.Date;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "user_dictionary")
 public class UserDictionary {
     @Id
@@ -30,38 +34,6 @@ public class UserDictionary {
     public UserDictionary(UserLanguage userLanguage, DeRu pair, Date dateAdded){
         this.userLanguage=userLanguage;
         this.pair=pair;
-        this.dateAdded = dateAdded;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public UserLanguage getUserLanguage() {
-        return userLanguage;
-    }
-
-    public void setUserLanguage(UserLanguage userLanguage) {
-        this.userLanguage = userLanguage;
-    }
-
-    public DeRu getPair() {
-        return pair;
-    }
-
-    public void setPair(DeRu pair) {
-        this.pair = pair;
-    }
-
-    public Date getDateAdded() {
-        return dateAdded;
-    }
-
-    public void setDateAdded(Date dateAdded) {
         this.dateAdded = dateAdded;
     }
 

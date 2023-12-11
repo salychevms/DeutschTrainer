@@ -17,7 +17,7 @@ public class DeutschController {
         this.deutschService = deutschService;
     }
 
-    public Long createNewWord(String data) {
+    public Deutsch createNewWord(String data) {
         String[] parts = data.split(" // ");
         return deutschService.createNewDeutsch(parts[0]);
     }
