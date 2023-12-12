@@ -42,7 +42,7 @@ public class TrainingController {
         Optional<UserLanguage> userLanguage;
         Long userLanguageId;
         if (user.isPresent() && language.isPresent()) {
-            userLanguage = userLanguageController.getByUserIdAndLanguageId(user.get().getId(), language.get().getId());
+            userLanguage = userLanguageController.getByUserIdAndLanguageId(user.get().getTelegramId(), language.get().getId());
             if (userLanguage.isPresent()) {
                 userLanguageId = userLanguage.get().getId();
                 List<UserStatistic> statisticList = userStatisticController.getAllStatisticWithIterationsAllAsc();
@@ -75,7 +75,7 @@ public class TrainingController {
         Optional<UserLanguage> userLanguage;
         Long userLanguageId;
         if (user.isPresent() && language.isPresent()) {
-            userLanguage = userLanguageController.getByUserIdAndLanguageId(user.get().getId(), language.get().getId());
+            userLanguage = userLanguageController.getByUserIdAndLanguageId(user.get().getTelegramId(), language.get().getId());
             if (userLanguage.isPresent()) {
                 userLanguageId = userLanguage.get().getId();
                 List<UserStatistic> statisticList = userStatisticController.getAllStatisticWithFailsAllDesc();
@@ -110,7 +110,7 @@ public class TrainingController {
         Optional<UserLanguage> userLanguage;
         Long userLanguageId;
         if (user.isPresent() && language.isPresent()) {
-            userLanguage = userLanguageController.getByUserIdAndLanguageId(user.get().getId(), language.get().getId());
+            userLanguage = userLanguageController.getByUserIdAndLanguageId(user.get().getTelegramId(), language.get().getId());
             if (userLanguage.isPresent()) {
                 userLanguageId = userLanguage.get().getId();
                 List<UserStatistic> statisticList = userStatisticController.getAllStatisticWithNewWords();
@@ -243,7 +243,7 @@ public class TrainingController {
         Optional<Language> language = languageController.getLanguageByIdentifier(languageIdentifier);
         Optional<UserLanguage> userLanguage;
         if (user.isPresent() && language.isPresent()) {
-            userLanguage = userLanguageController.getByUserIdAndLanguageId(user.get().getId(), language.get().getId());
+            userLanguage = userLanguageController.getByUserIdAndLanguageId(user.get().getTelegramId(), language.get().getId());
             return userLanguage.orElse(null);
         } else return null;
     }

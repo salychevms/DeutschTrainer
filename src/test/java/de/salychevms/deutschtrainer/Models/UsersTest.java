@@ -26,7 +26,6 @@ class UsersTest {
         String testUserName="testUserName";
         Users user=new Users(testTelegramId,testUserName, testDate);
         assertEquals("Users{" +
-                "id=" + user.getId() + '\'' +
                 ", telegramId=" + testTelegramId + '\'' +
                 ", name='" + null + '\'' +
                 ", surname='" + null + '\'' +
@@ -35,13 +34,6 @@ class UsersTest {
                 ", registrationDate=" + testDate +
                 ", admin=" + false +
                 '}', user.toString());
-    }
-
-    @Test
-    void testSetAndGetId() {
-        Users user=new Users();
-        user.setId(1L);
-        assertEquals(1L, user.getId());
     }
 
     @Test

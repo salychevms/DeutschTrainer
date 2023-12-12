@@ -25,7 +25,7 @@ public class UserDictionaryController {
         Optional<Users> user = usersController.findUserByTelegramId(telegramId);
         Optional<Language> language = languageController.getLanguageByIdentifier(languageIdentifier);
         if (language.isPresent() && user.isPresent()) {
-            Optional<UserLanguage> userLanguage = userLanguageController.getByUserIdAndLanguageId(user.get().getId(), language.get().getId());
+            Optional<UserLanguage> userLanguage = userLanguageController.getByUserIdAndLanguageId(user.get().getTelegramId(), language.get().getId());
             if (userLanguage.isPresent()) {
                 return userDictionaryService.saveNewPair(userLanguage.get(), pair);
             }

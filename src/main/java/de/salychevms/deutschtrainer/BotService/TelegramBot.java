@@ -893,7 +893,6 @@ public class TelegramBot extends TelegramLongPollingBot {
     private String sendUserInfo(long telegramId) {
         Optional<Users> user = usersController.findUserByTelegramId(telegramId);
         return user.map(users -> "Пользователь: " + users.getUserName()
-                + "\nID пользователя: " + users.getId()
                 + "\nTelegram id пользователя: " + users.getTelegramId()
                 + "\nИмя: " + users.getName()
                 + "\nФамилия: " + users.getSurname()

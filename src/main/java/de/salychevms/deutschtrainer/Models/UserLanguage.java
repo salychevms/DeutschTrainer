@@ -39,7 +39,7 @@ public class UserLanguage {
     public String toString() {
         return "UserLanguage{" +
                 "id=" + id + '\'' +
-                ", users=" + user.getId() + '\'' +
+                ", users=" + user.getTelegramId() + '\'' +
                 ", language=" + language.getId() + '\'' +
                 '}';
     }

@@ -5,13 +5,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface UsersRepository extends JpaRepository<Users, Long> {
-    Users findByUserName(String userName);
+    Optional<Users> findByUserName(String userName);
 
-    Users findByName(String name);
+    Optional<Users> findByName(String name);
 
-    Users findBySurname(String surname);
+    Optional<Users> findBySurname(String surname);
 
-    Users findByTelegramId(Long telegramId);
+    Optional<Users> findByTelegramId(Long telegramId);
+
 }

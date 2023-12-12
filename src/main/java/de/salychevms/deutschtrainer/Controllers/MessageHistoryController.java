@@ -21,7 +21,7 @@ public class MessageHistoryController {
         this.usersController = usersController;
     }
 
-    public boolean saveData(Long userId, long chatId, String content, boolean isMessage, boolean isCallbackData) {
+    /*public boolean saveData(Long userId, long chatId, String content, boolean isMessage, boolean isCallbackData) {
         if (!(!isMessage && !isCallbackData)) {
             if (isMessage != isCallbackData) {
                 Users user = usersController.findUserById(userId).get();
@@ -31,22 +31,22 @@ public class MessageHistoryController {
                 return true;
             } else return false;
         } else return false;
-    }
+    }*/
 
     public List<MessageHistory> getAllHistory() {
         return messageHistoryRepository.findAll();
     }
 
-    public List<MessageHistory> getAllHistoryByUser(Long userId) {
+   /* public List<MessageHistory> getAllHistoryByUser(Long userId) {
         Optional<Users> user = usersController.findUserById(userId);
         return user.map(messageHistoryRepository::findMessageHistoriesByUser).orElse(null);
-    }
+    }*/
 
     public List<MessageHistory> getAllHistoryByChatId(Long chatId) {
         return messageHistoryRepository.findAllByChatId(chatId);
     }
 
-    private void deleteLastHistory(Long userId) {
+    /*private void deleteLastHistory(Long userId) {
         List<MessageHistory> all = getAllHistoryByUser(userId);
         int totalValues = all.size();
         int valuesToKeep = Math.min(totalValues, totalValues - 100);
@@ -57,5 +57,5 @@ public class MessageHistoryController {
                 messageHistoryRepository.deleteAll(all);
             }
         }
-    }
+    }*/
 }

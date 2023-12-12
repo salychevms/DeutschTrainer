@@ -24,7 +24,7 @@ class UserLanguageTest {
         assertEquals(testLanguage, userLanguage.getLanguage());
         assertEquals("UserLanguage{" +
                 "id=" + userLanguage.getId() + '\'' +
-                ", users=" + testUser.getId() + '\'' +
+                ", users=" + testUser.getTelegramId() + '\'' +
                 ", language=" + testLanguage.getId() + '\'' +
                 '}', userLanguage.toString());
     }

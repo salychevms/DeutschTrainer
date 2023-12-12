@@ -12,8 +12,6 @@ import java.util.Date;
 @Table(name = "users")
 public class Users {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_generator")
-    private Long id;
     @Column(name = "telegram_id", nullable = false, unique = true)
     private Long telegramId;
     @Column(name = "name")
@@ -42,7 +40,6 @@ public class Users {
     @Override
     public String toString() {
         return "Users{" +
-                "id=" + id + '\'' +
                 ", telegramId=" + telegramId + '\'' +
                 ", name='" + name + '\'' +
                 ", surname='" + surname + '\'' +
