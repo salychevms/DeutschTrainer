@@ -70,7 +70,7 @@ public class UsersService {
 
     @Transactional
     public boolean getAdminStatus(Long telegramId) {
-        Optional<Users> user = usersRepository.findById(telegramId);
+        Optional<Users> user = usersRepository.findByTelegramId(telegramId);
         return user.map(Users::isAdmin).orElse(false);
     }
 

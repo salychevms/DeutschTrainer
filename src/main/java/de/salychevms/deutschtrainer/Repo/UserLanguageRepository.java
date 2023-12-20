@@ -3,7 +3,6 @@ package de.salychevms.deutschtrainer.Repo;
 import de.salychevms.deutschtrainer.Models.UserLanguage;
 import de.salychevms.deutschtrainer.Models.Users;
 import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,6 +15,5 @@ public interface UserLanguageRepository extends JpaRepository<UserLanguage, Long
     @EntityGraph(attributePaths = "language")
     List<UserLanguage> findAllByUser_TelegramId(Long telegramId);
 
-    Optional<UserLanguage> findByUserIdAndLanguageId(Long userId, Long languageId);
-
+    Optional<UserLanguage> findByUserAndLanguageId(Users user, Long languageId);
 }

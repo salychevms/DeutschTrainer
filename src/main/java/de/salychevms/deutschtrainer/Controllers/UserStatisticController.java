@@ -2,24 +2,22 @@ package de.salychevms.deutschtrainer.Controllers;
 
 import de.salychevms.deutschtrainer.Models.*;
 import de.salychevms.deutschtrainer.Services.UserStatisticService;
-import de.salychevms.deutschtrainer.Training.TrainingPair;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 public class UserStatisticController {
     private final UserStatisticService userStatisticService;
-    private final DeRuController deRuController;
+    private final DeRuPairsController deRuPairsController;
     private final UserDictionaryController userDictionaryController;
     private final DeutschController deutschController;
     private final RussianController russianController;
 
-    public UserStatisticController(UserStatisticService userStatisticService, DeRuController deRuController, UserDictionaryController userDictionaryController, DeutschController deutschController, RussianController russianController) {
+    public UserStatisticController(UserStatisticService userStatisticService, DeRuPairsController deRuPairsController, UserDictionaryController userDictionaryController, DeutschController deutschController, RussianController russianController) {
         this.userStatisticService = userStatisticService;
-        this.deRuController = deRuController;
+        this.deRuPairsController = deRuPairsController;
         this.userDictionaryController = userDictionaryController;
         this.deutschController = deutschController;
         this.russianController = russianController;

@@ -9,12 +9,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
@@ -51,10 +49,9 @@ class UsersServiceTest {
         verify(usersRepository, times(1)).save(argThat(newUser ->
                 newUser.getTelegramId().equals(testTgId) &&
                         newUser.getUserName().equals(testUserName)));
-
         ArgumentCaptor<Users> userCaptor = ArgumentCaptor.forClass(Users.class);
-        verify(usersRepository, times(1)).save(userCaptor.capture());
 
+        verify(usersRepository, times(1)).save(userCaptor.capture());
         Users capturedUser = userCaptor.getValue();
 
         assertThat(capturedUser.getTelegramId()).isEqualTo(testTgId);
@@ -76,51 +73,150 @@ class UsersServiceTest {
     }
 
     @Test
-    void updateNameByTelegramId() {
+    void testUpdateNameByTelegramId() {
         Long testTgId = 1234567890000L;
+        String testUserName = "testUserName";
+        String newTestName = "newTestName";
+        Date testDate = new Date();
+        Users user = new Users(testTgId, testUserName, testDate);
+
+        when(usersRepository.findByTelegramId(testTgId)).thenReturn(Optional.of(user));
+        usersService.updateNameByTelegramID(testTgId, newTestName);
+
+        verify(usersRepository, times(1)).findByTelegramId(testTgId);
+        ArgumentCaptor<Users> userCaptor = ArgumentCaptor.forClass(Users.class);
+
+        verify(usersRepository, times(1)).save(userCaptor.capture());
+        Users capturedUser = userCaptor.getValue();
+
+        assertThat(capturedUser.getTelegramId()).isEqualTo(testTgId);
+        assertThat(capturedUser.getName()).isEqualTo(newTestName);
+    }
+
+    @Test
+    void testUpdateSurnameByTelegramId() {
+        Long testTgId = 54321567890000L;
+        String testUserName = "testUserName";
+        String newTestSurnameName = "newTestSurnameName";
+        Date testDate = new Date();
+        Users user = new Users(testTgId, testUserName, testDate);
+
+        when(usersRepository.findByTelegramId(testTgId)).thenReturn(Optional.of(user));
+        usersService.updateSurnameByTelegramId(testTgId, newTestSurnameName);
+
+        verify(usersRepository, times(1)).findByTelegramId(testTgId);
+        ArgumentCaptor<Users> userCaptor = ArgumentCaptor.forClass(Users.class);
+
+        verify(usersRepository, times(1)).save(userCaptor.capture());
+        Users capturedUser = userCaptor.getValue();
+
+        assertThat(capturedUser.getTelegramId()).isEqualTo(testTgId);
+        assertThat(capturedUser.getSurname()).isEqualTo(newTestSurnameName);
+    }
+
+    @Test
+    void testUpdatePhoneNumberByTelegramId() {
+        Long testTgId = 223355567890000L;
+        String testUserName = "testUserName";
+        String newPhoneNumber = "+491571234567";
+        Date testDate = new Date();
+        Users user = new Users(testTgId, testUserName, testDate);
+
+        when(usersRepository.findByTelegramId(testTgId)).thenReturn(Optional.of(user));
+        usersService.updatePhoneNumberByTelegramId(testTgId, newPhoneNumber);
+
+        verify(usersRepository, times(1)).findByTelegramId(testTgId);
+        ArgumentCaptor<Users> userCaptor=ArgumentCaptor.forClass(Users.class);
+
+        verify(usersRepository, times(1)).save(userCaptor.capture());
+        Users capturedUser=userCaptor.getValue();
+
+        assertThat(capturedUser.getTelegramId()).isEqualTo(testTgId);
+        assertThat(capturedUser.getPhoneNumber()).isEqualTo(newPhoneNumber);
+    }
+
+    @Test
+    void testGetAdminStatus() {
+        Long testTgId = 223355567890000L;
         String testUserName = "testUserName";
         Date testDate = new Date();
         Users user = new Users(testTgId, testUserName, testDate);
 
-        assertNull(user.getName());
+        user.setAdmin(false);
 
-        ArgumentCaptor<Users> userCaptor = ArgumentCaptor.forClass(Users.class);
-        doAnswer(invocation -> {
-            Users savedUser = invocation.getArgument(0);
-            savedUser.setName("newTestName");
-            return null;
-        }).when(usersRepository).save(userCaptor.capture());
+        when(usersRepository.findByTelegramId(testTgId)).thenReturn(Optional.of(user));
+        boolean isAdminFalse=usersService.getAdminStatus(testTgId);
+        assertFalse(isAdminFalse);
 
-        String newTestName = "newTestName";
-        usersService.updateNameByTelegramID(testTgId, newTestName);
+        user.setAdmin(true);
 
-        verify(usersRepository, times(1)).save(any(Users.class));
-        Users capturedUser = userCaptor.getValue();
-
-        assertThat    (capturedU ser.getName()).isEqualTo(newTestName);
-    }
-
-    @Test
-    void updateSurnameByTelegramId() {
-    }
-
-    @Test
-    void updatePhoneNumberByTelegramId() {
-    }
-
-    @Test
-    void getAdminStatus() {
+        when(usersRepository.findByTelegramId(testTgId)).thenReturn(Optional.of(user));
+        boolean isAdminTrue=usersService.getAdminStatus(testTgId);
+        assertTrue(isAdminTrue);
     }
 
     @Test
     void updateAdminStatusOn() {
+        Long testTgId = 2201030405060L;
+        String testUserName = "testUserName";
+        Date testDate = new Date();
+        Users user = new Users(testTgId, testUserName, testDate);
+
+        when(usersRepository.findByTelegramId(testTgId)).thenReturn(Optional.of(user));
+        usersService.updateAdminStatusOn(testTgId);
+
+        verify(usersRepository, times(1)).findByTelegramId(testTgId);
+        ArgumentCaptor<Users> userCaptor=ArgumentCaptor.forClass(Users.class);
+
+        verify(usersRepository, times(1)).save(userCaptor.capture());
+        Users capturedUser=userCaptor.getValue();
+
+        assertThat(capturedUser.getTelegramId()).isEqualTo(testTgId);
+        assertTrue(capturedUser.isAdmin());
     }
 
     @Test
     void deleteUserByTelegramId() {
+        Long testTgId = 3304050607080L;
+        String testUserName = "testUserName";
+        Date testDate = new Date();
+        Users user = new Users(testTgId, testUserName, testDate);
+
+        when(usersRepository.findByTelegramId(testTgId)).thenReturn(Optional.of(user));
+        usersService.deleteUserByTelegramId(testTgId);
+
+        verify(usersRepository, times(1)).deleteById(testTgId);
+
+        when(usersRepository.findByTelegramId(testTgId)).thenReturn(Optional.empty());
+
+        assertFalse(usersRepository.findByTelegramId(testTgId).isPresent());
     }
 
     @Test
     void deleteAllUsers() {
+        Long firstTestTgId = 3123032101230123L;
+        String firstTestUserName = "firstTestUserName";
+        Date firstTestDate = new Date();
+        Users firstUser = new Users(firstTestTgId, firstTestUserName, firstTestDate);
+
+        Long secondTestTgId = 3570357035707530753L;
+        String secondTestUserName = "secondTestUserName";
+        Date secondTestDate = new Date();
+        Users secondUser = new Users(secondTestTgId, secondTestUserName, secondTestDate);
+
+        List<Users> testUserList=new ArrayList<>();
+        testUserList.add(firstUser);
+        testUserList.add(secondUser);
+
+        when(usersRepository.findAll()).thenReturn(testUserList);
+        usersService.deleteAllUsers();
+
+        verify(usersRepository, times(1)).deleteAll();
+
+        when(usersRepository.findAll()).thenReturn(Collections.emptyList());
+
+        assertTrue(usersRepository.findAll().isEmpty());
+        assertEquals(Optional.empty(), usersService.findUserByTelegramId(firstTestTgId));
+        assertEquals(Optional.empty(), usersService.findUserByTelegramId(secondTestTgId));
     }
 }

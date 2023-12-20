@@ -18,13 +18,12 @@ public class UserDictionaryService {
     }
 
     @Transactional
-    public UserDictionary saveNewPair(UserLanguage userLanguage, DeRu pair){
+    public UserDictionary saveNewPair(UserLanguage userLanguage, DeRuPairs pair){
         UserDictionary userDictionary=new UserDictionary();
         userDictionary.setUserLanguage(userLanguage);
         userDictionary.setPair(pair);
         userDictionary.setDateAdded(new Date());
-        userDictionaryRepository.save(userDictionary);
-        return userDictionary;
+        return userDictionaryRepository.save(userDictionary);
     }
 
     @Transactional

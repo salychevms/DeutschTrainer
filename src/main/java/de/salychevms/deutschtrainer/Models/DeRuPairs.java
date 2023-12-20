@@ -12,7 +12,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Getter
 @Setter
 @Table(name = "de_ru")
-public class DeRu {
+public class DeRuPairs {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "de_ru_generator")
@@ -30,10 +30,10 @@ public class DeRu {
     @JsonIgnore
     private Russian russian;
 
-    public DeRu() {
+    public DeRuPairs() {
     }
 
-    public DeRu(Deutsch deutsch, Russian russian) {
+    public DeRuPairs(Deutsch deutsch, Russian russian) {
         this.deutsch = deutsch;
         this.russian = russian;
     }

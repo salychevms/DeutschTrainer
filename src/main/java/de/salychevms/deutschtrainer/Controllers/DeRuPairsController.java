@@ -1,9 +1,9 @@
 package de.salychevms.deutschtrainer.Controllers;
 
-import de.salychevms.deutschtrainer.Models.DeRu;
+import de.salychevms.deutschtrainer.Models.DeRuPairs;
 import de.salychevms.deutschtrainer.Models.Deutsch;
 import de.salychevms.deutschtrainer.Models.Russian;
-import de.salychevms.deutschtrainer.Services.DeRuService;
+import de.salychevms.deutschtrainer.Services.DeRuPairsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,16 +14,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @RestController
-public class DeRuController {
-    private final DeRuService deRuService;
+public class DeRuPairsController {
+    private final DeRuPairsService deRuPairsService;
     private final DeutschController deutschController;
     private final RussianController russianController;
     final String DE = "DE";
     final String RU = "RU";
 
     @Autowired
-    public DeRuController(DeRuService deRuService, DeutschController deutschController, RussianController russianController) {
-        this.deRuService = deRuService;
+    public DeRuPairsController(DeRuPairsService deRuPairsService, DeutschController deutschController, RussianController russianController) {
+        this.deRuPairsService = deRuPairsService;
         this.deutschController = deutschController;
         this.russianController = russianController;
     }
@@ -31,7 +31,7 @@ public class DeRuController {
     public List<Long> createPairs(Deutsch german, List<Russian> russian) {
         List<Long> pairs = new ArrayList<>();
         for (Russian item : russian) {
-            pairs.add(deRuService.createNewPairs(german, item));
+            pairs.add(deRuPairsService.createNewPairs(german, item));
         }
         return pairs;
     }
@@ -41,7 +41,7 @@ public class DeRuController {
                 + deutschController.findById(germanId).getDeWord()
                 + "\ntranslation of the word into russian:");
         for (Long item : pairsId) {
-            Optional<DeRu> deRu = deRuService.findById(item);
+            Optional<DeRuPairs> deRu = deRuPairsService.findById(item);
             if (deRu.isPresent()) {
                 Long id = deRu.get().getRussian().getId();
                 String russian = russianController.findById(id).getRuWord();
@@ -87,26 +87,26 @@ public class DeRuController {
         if(DE.equalsIgnoreCase(fromLanguage)){
             Optional<Deutsch> deutsch=deutschController.findByWord(chosenWord);
             if(deutsch.isPresent()){
-                List<DeRu> allPairs=deRuService.findAllByDeutschId(deutsch.get().getId());
-                for(DeRu item:allPairs){
+                List<DeRuPairs> allPairs= deRuPairsService.findAllByDeutschId(deutsch.get().getId());
+                for(DeRuPairs item:allPairs){
                     translationList.add(russianController.findById(item.getRussian().getId()).getRuWord());
                 }
             }
         } else if (RU.equalsIgnoreCase(fromLanguage)) {
             Optional<Russian> russian=russianController.findByWord(chosenWord);
             if(russian.isPresent()){
-                List<DeRu> allPairs=deRuService.findAllByRussianId(russian.get().getId());
-                for(DeRu item:allPairs){
+                List<DeRuPairs> allPairs= deRuPairsService.findAllByRussianId(russian.get().getId());
+                for(DeRuPairs item:allPairs){
                     translationList.add(deutschController.findById(item.getRussian().getId()).getDeWord());
                 }
             }
         }
         return translationList;
     }
-    public Optional<DeRu> getPairByGermanIdAndRussianId(Long germanId, Long russianId){
-        return deRuService.findByGermanIdAndRussianId(germanId,russianId);
+    public Optional<DeRuPairs> getPairByGermanIdAndRussianId(Long germanId, Long russianId){
+        return deRuPairsService.findByGermanIdAndRussianId(germanId,russianId);
     }
-    public Optional<DeRu> getDeRuById(Long id){
-        return deRuService.findPairById(id);
+    public Optional<DeRuPairs> getDeRuById(Long id){
+        return deRuPairsService.findPairById(id);
     }
 }

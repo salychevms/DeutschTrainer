@@ -21,7 +21,7 @@ public class UserDictionaryController {
         this.userDictionaryService = userDictionaryService;
     }
 
-    public UserDictionary saveNewPair(Long telegramId, String languageIdentifier, DeRu pair) {
+    public UserDictionary saveNewPair(Long telegramId, String languageIdentifier, DeRuPairs pair) {
         Optional<Users> user = usersController.findUserByTelegramId(telegramId);
         Optional<Language> language = languageController.getLanguageByIdentifier(languageIdentifier);
         if (language.isPresent() && user.isPresent()) {

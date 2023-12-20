@@ -11,7 +11,7 @@ class UserDictionaryTest {
     @Test
     void testConstructorWithParameters() {
         UserLanguage testUserLanguage = new UserLanguage();
-        DeRu testPair = new DeRu();
+        DeRuPairs testPair = new DeRuPairs();
         Date testDate = new Date();
         UserDictionary userDictionary = new UserDictionary(testUserLanguage, testPair, testDate);
         assertEquals(testUserLanguage, userDictionary.getUserLanguage());
@@ -22,7 +22,7 @@ class UserDictionaryTest {
     @Test
     void testToString() {
         UserLanguage testUserLanguage = new UserLanguage();
-        DeRu testPair = new DeRu();
+        DeRuPairs testPair = new DeRuPairs();
         Date testDate = new Date();
         UserDictionary userDictionary = new UserDictionary(testUserLanguage, testPair, testDate);
         assertEquals("UserDictionary{" +
@@ -50,7 +50,7 @@ class UserDictionaryTest {
 
     @Test
     void testSetAndGetPair() {
-        DeRu testPair = new DeRu();
+        DeRuPairs testPair = new DeRuPairs();
         UserDictionary userDictionary = new UserDictionary();
         userDictionary.setPair(testPair);
         assertEquals(testPair, userDictionary.getPair());

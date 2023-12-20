@@ -12,7 +12,7 @@ import java.util.*;
 @RestController
 public class TrainingController {
     private final UserStatisticController userStatisticController;
-    private final DeRuController deRuController;
+    private final DeRuPairsController deRuPairsController;
     private final UserDictionaryController userDictionaryController;
     private final DeutschController deutschController;
     private final RussianController russianController;
@@ -20,9 +20,9 @@ public class TrainingController {
     private final UsersController usersController;
     private final LanguageController languageController;
 
-    public TrainingController(UserStatisticController userStatisticController, DeRuController deRuController, UserDictionaryController userDictionaryController, DeutschController deutschController, RussianController russianController, UserLanguageController userLanguageController, UsersController usersController, LanguageController languageController) {
+    public TrainingController(UserStatisticController userStatisticController, DeRuPairsController deRuPairsController, UserDictionaryController userDictionaryController, DeutschController deutschController, RussianController russianController, UserLanguageController userLanguageController, UsersController usersController, LanguageController languageController) {
         this.userStatisticController = userStatisticController;
-        this.deRuController = deRuController;
+        this.deRuPairsController = deRuPairsController;
         this.userDictionaryController = userDictionaryController;
         this.deutschController = deutschController;
         this.russianController = russianController;
@@ -31,7 +31,7 @@ public class TrainingController {
         this.languageController = languageController;
     }
 
-    private TrainingPair createNewPair(UserStatistic statisticInfo, UserDictionary userPair, DeRu compareWith, Deutsch german, Russian russian) {
+    private TrainingPair createNewPair(UserStatistic statisticInfo, UserDictionary userPair, DeRuPairs compareWith, Deutsch german, Russian russian) {
         return new TrainingPair(userPair, compareWith, statisticInfo, german, russian);
     }
 
@@ -51,7 +51,7 @@ public class TrainingController {
                     if (statisticLanguageId.equals(userLanguageId)) {
                         Optional<UserDictionary> userPair = userDictionaryController.getById(statisticItem.getWord().getId());
                         if (userPair.isPresent()) {
-                            Optional<DeRu> compareWith = deRuController.getDeRuById(userPair.get().getPair().getId());
+                            Optional<DeRuPairs> compareWith = deRuPairsController.getDeRuById(userPair.get().getPair().getId());
                             if (compareWith.isPresent()) {
                                 Deutsch german = deutschController.findById(compareWith.get().getDeutsch().getId());
                                 Russian russian = russianController.findById(compareWith.get().getRussian().getId());
@@ -85,7 +85,7 @@ public class TrainingController {
                         if (statisticLanguageId.equals(userLanguageId)) {
                             Optional<UserDictionary> userPair = userDictionaryController.getById(statisticItem.getWord().getId());
                             if (userPair.isPresent()) {
-                                Optional<DeRu> compareWith = deRuController.getDeRuById(userPair.get().getPair().getId());
+                                Optional<DeRuPairs> compareWith = deRuPairsController.getDeRuById(userPair.get().getPair().getId());
                                 if (compareWith.isPresent()) {
                                     Deutsch german = deutschController.findById(compareWith.get().getDeutsch().getId());
                                     Russian russian = russianController.findById(compareWith.get().getRussian().getId());
@@ -119,7 +119,7 @@ public class TrainingController {
                     if (statisticLanguageId.equals(userLanguageId)) {
                         Optional<UserDictionary> userPair = userDictionaryController.getById(statisticItem.getWord().getId());
                         if (userPair.isPresent()) {
-                            Optional<DeRu> compareWith = deRuController.getDeRuById(userPair.get().getPair().getId());
+                            Optional<DeRuPairs> compareWith = deRuPairsController.getDeRuById(userPair.get().getPair().getId());
                             if (compareWith.isPresent()) {
                                 Deutsch german = deutschController.findById(compareWith.get().getDeutsch().getId());
                                 Russian russian = russianController.findById(compareWith.get().getRussian().getId());
@@ -178,10 +178,10 @@ public class TrainingController {
             correctPairId = Long.parseLong(parts[1]);
         }
         if (userAnswerId != null && correctPairId != null) {
-            Optional<Russian> ruCorrect = deRuController
+            Optional<Russian> ruCorrect = deRuPairsController
                     .getDeRuById(correctPairId).flatMap(deRu -> Optional.ofNullable(russianController.findById(deRu.getRussian().getId())));
             Russian ruFromUser = russianController.findById(userAnswerId);
-            Optional<Deutsch> german = deRuController
+            Optional<Deutsch> german = deRuPairsController
                     .getDeRuById(correctPairId).flatMap(deRu -> Optional.ofNullable(deutschController.findById(deRu.getDeutsch().getId())));
             if (ruCorrect.isPresent() && german.isPresent()) {
                 if (userAnswerId.equals(ruCorrect.get().getId())) {
@@ -212,11 +212,11 @@ public class TrainingController {
         wrongAnswers.add(pair.getRussian());
         //max 3 wrong words
         Optional<UserDictionary> userDictionary = userDictionaryController.getById(pair.getUserPair().getId());
-        Optional<DeRu> deRu;
+        Optional<DeRuPairs> deRu;
         Optional<Russian> russian = Optional.empty();
         Optional<Deutsch> german = Optional.empty();
         if (userDictionary.isPresent()) {
-            deRu = deRuController.getDeRuById(userDictionary.get().getPair().getId());
+            deRu = deRuPairsController.getDeRuById(userDictionary.get().getPair().getId());
             if (deRu.isPresent()) {
                 russian = Optional.ofNullable(russianController.findById(deRu.get().getRussian().getId()));
                 german = Optional.ofNullable(deutschController.findById(deRu.get().getDeutsch().getId()));
@@ -226,7 +226,7 @@ public class TrainingController {
             Optional<Russian> randomRu = russianController.get1RandomRussian();
             if (randomRu.isPresent() && russian.isPresent() && german.isPresent()) {
                 if (!randomRu.get().getId().equals(russian.get().getId())) {
-                    Optional<DeRu> check = deRuController.getPairByGermanIdAndRussianId(german.get().getId(), randomRu.get().getId());
+                    Optional<DeRuPairs> check = deRuPairsController.getPairByGermanIdAndRussianId(german.get().getId(), randomRu.get().getId());
                     if (check.isEmpty()) {
                         if (!wrongAnswers.contains(randomRu.get())) {
                             wrongAnswers.add(randomRu.get());

@@ -1,6 +1,5 @@
 package de.salychevms.deutschtrainer.Services;
 
-import de.salychevms.deutschtrainer.Models.Language;
 import de.salychevms.deutschtrainer.Models.UserLanguage;
 import de.salychevms.deutschtrainer.Models.Users;
 import de.salychevms.deutschtrainer.Repo.UserLanguageRepository;
@@ -38,8 +37,8 @@ public class UserLanguageService {
     }
 
     @Transactional
-    public Optional<UserLanguage> getByUserIdAndLanguageId(Long userId, Long languageId){
-        return userLanguageRepository.findByUserIdAndLanguageId(userId, languageId);
+    public Optional<UserLanguage> getByUserIdAndLanguageId(Users user, Long languageId){
+        return userLanguageRepository.findByUserAndLanguageId(user, languageId);
     }
 
     @Transactional

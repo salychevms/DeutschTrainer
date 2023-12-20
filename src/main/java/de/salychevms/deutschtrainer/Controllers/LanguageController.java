@@ -1,8 +1,7 @@
 package de.salychevms.deutschtrainer.Controllers;
 
 import de.salychevms.deutschtrainer.Models.Language;
-import de.salychevms.deutschtrainer.Repo.LanguageRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import de.salychevms.deutschtrainer.Services.LanguageService;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -10,34 +9,32 @@ import java.util.Optional;
 
 @RestController
 public class LanguageController {
-    final LanguageRepository languageRepository;
+    private final LanguageService languageService;
 
-    @Autowired
-    public LanguageController(LanguageRepository languageRepository) {
-        this.languageRepository = languageRepository;
+    public LanguageController(LanguageService languageService) {
+        this.languageService = languageService;
     }
 
-    public boolean createLanguage(String name, String identifier) {
-        if (languageRepository.findLanguageByIdentifierIgnoreCase(identifier).isEmpty()
-                && languageRepository.findByName(name).isEmpty()) {
+    public void createLanguage(String name, String identifier) {
+        if (languageService.findLanguageByIdentifierIgnoreCase(identifier).isEmpty()
+                && languageService.findByName(name).isEmpty()) {
             Language language = new Language();
             language.setIdentifier(identifier);
             language.setName(name);
-            languageRepository.save(language);
-            return true;
-        } else return false;
+            languageService.createLanguage(language);
+        }
     }
 
     public Optional<Language> getById(Long languageId) {
-        return languageRepository.findById(languageId);
+        return languageService.findById(languageId);
     }
 
     public Optional<Language> getLanguageByIdentifier(String identifier) {
-        return languageRepository.findLanguageByIdentifierIgnoreCase(identifier);
+        return languageService.findLanguageByIdentifierIgnoreCase(identifier);
     }
 
     public List<Language> getAll() {
-        return languageRepository.findAll();
+        return languageService.findAll();
     }
 
 }

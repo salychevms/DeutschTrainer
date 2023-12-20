@@ -26,11 +26,15 @@ public class UserLanguageController {
 
     public void createUserLanguage(Long telegramId, Long languageId) {
         Optional<Users> user = (usersController.findUserByTelegramId(telegramId));
-        Optional<Language> language = languageController.getById(languageId);
-        UserLanguage userLanguage = new UserLanguage();
-        userLanguage.setUser(user.get());
-        userLanguage.setLanguage(language.get());
-        userLanguageService.createUserLanguage(userLanguage);
+        if (user.isPresent()) {
+            Optional<Language> language = languageController.getById(languageId);
+            if (language.isPresent()) {
+                UserLanguage userLanguage = new UserLanguage();
+                userLanguage.setUser(user.get());
+                userLanguage.setLanguage(language.get());
+                userLanguageService.createUserLanguage(userLanguage);
+            }
+        }
     }
 
     public List<String> getAllLanguagesByTelegramId(Long telegramId) {
@@ -42,11 +46,16 @@ public class UserLanguageController {
         return identifiers;
     }
 
-    public Optional<UserLanguage> getByUserIdAndLanguageId(Long userId, Long languageId){
-        return userLanguageService.getByUserIdAndLanguageId(userId, languageId);
+    public Optional<UserLanguage> getByUserIdAndLanguageId(Long telegramId, Long languageId) {
+        Optional<Users> user = usersController.findUserByTelegramId(telegramId);
+        if (user.isPresent()) {
+            return userLanguageService.getByUserIdAndLanguageId(user.get(), languageId);
+        }else {
+            return Optional.empty();
+        }
     }
 
-    public Optional<UserLanguage> getById(Long id){
+    public Optional<UserLanguage> getById(Long id) {
         return userLanguageService.getById(id);
     }
 }

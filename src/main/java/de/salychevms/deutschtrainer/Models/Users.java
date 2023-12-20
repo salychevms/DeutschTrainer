@@ -39,14 +39,13 @@ public class Users {
 
     @Override
     public String toString() {
-        return "Users{" +
-                ", telegramId=" + telegramId + '\'' +
-                ", name='" + name + '\'' +
-                ", surname='" + surname + '\'' +
-                ", userName='" + userName + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", registrationDate=" + registrationDate +
-                ", admin=" + admin +
-                '}';
+        return "Users: " +
+                "telegramId=\t" + telegramId + '\n' +
+                ", name=\t" + name + '\n' +
+                ", surname=\t" + surname + '\n' +
+                ", userName=\t" + userName + '\n' +
+                ", phoneNumber=\t" + phoneNumber + '\n' +
+                ", registrationDate=\t" + registrationDate +'\n' +
+                ", admin=\t" + admin;
     }
 }

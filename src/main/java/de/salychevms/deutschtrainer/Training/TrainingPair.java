@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class TrainingPair {
-    private DeRu compareWith;
+    private DeRuPairs compareWith;
     private UserDictionary userPair;
     private UserStatistic userStatistic;
     private Deutsch german;
@@ -16,7 +16,7 @@ public class TrainingPair {
     public TrainingPair() {
     }
 
-    public TrainingPair(UserDictionary userPair, DeRu compareWith, UserStatistic userStatistic, Deutsch german, Russian russian) {
+    public TrainingPair(UserDictionary userPair, DeRuPairs compareWith, UserStatistic userStatistic, Deutsch german, Russian russian) {
         this.compareWith = compareWith;
         this.userPair = userPair;
         this.userStatistic = userStatistic;

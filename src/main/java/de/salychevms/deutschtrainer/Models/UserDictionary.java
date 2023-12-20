@@ -26,12 +26,12 @@ public class UserDictionary {
     @JoinColumn(name = "pair")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
-    private DeRu pair;
+    private DeRuPairs pair;
     @Column(name = "date_added")
     private Date dateAdded;
 
     public UserDictionary(){}
-    public UserDictionary(UserLanguage userLanguage, DeRu pair, Date dateAdded){
+    public UserDictionary(UserLanguage userLanguage, DeRuPairs pair, Date dateAdded){
         this.userLanguage=userLanguage;
         this.pair=pair;
         this.dateAdded = dateAdded;
