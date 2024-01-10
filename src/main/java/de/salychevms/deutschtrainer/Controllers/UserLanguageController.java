@@ -5,13 +5,13 @@ import de.salychevms.deutschtrainer.Models.UserLanguage;
 import de.salychevms.deutschtrainer.Models.Users;
 import de.salychevms.deutschtrainer.Services.UserLanguageService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@RestController
+@Component
 public class UserLanguageController {
     final UserLanguageService userLanguageService;
     final UsersController usersController;
@@ -37,7 +37,7 @@ public class UserLanguageController {
         }
     }
 
-    public List<String> getAllLanguagesByTelegramId(Long telegramId) {
+    public List<String> getAllLanguageIdentifiersByTelegramId(Long telegramId) {
         List<String> languages = userLanguageService.getAllLanguagesByTelegramId(telegramId);
         List<String> identifiers = new ArrayList<>(languages);
         if (identifiers.isEmpty()) {
@@ -50,7 +50,7 @@ public class UserLanguageController {
         Optional<Users> user = usersController.findUserByTelegramId(telegramId);
         if (user.isPresent()) {
             return userLanguageService.getByUserIdAndLanguageId(user.get(), languageId);
-        }else {
+        } else {
             return Optional.empty();
         }
     }

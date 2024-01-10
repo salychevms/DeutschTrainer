@@ -30,7 +30,7 @@ public class DeRuPairsService {
     }
 
     @Transactional
-    public Optional<DeRuPairs> findByGermanIdAndRussianId(Long germanId, Long russianId){
+    public Optional<DeRuPairs> findByGermanIdAndRussianId(Long germanId, Long russianId) {
         return deRuPairsRepository.getByDeutschIdAndRussianId(germanId, russianId);
     }
 
@@ -38,10 +38,12 @@ public class DeRuPairsService {
     public List<DeRuPairs> findAllByDeutschId(Long germanId) {
         return deRuPairsRepository.getAllByDeutschId(germanId);
     }
+
     @Transactional
     public List<DeRuPairs> findAllByRussianId(Long russianId) {
         return deRuPairsRepository.getAllByRussianId(russianId);
     }
+
     @Transactional
     public Optional<DeRuPairs> findPairById(Long id) {
         return deRuPairsRepository.findById(id);

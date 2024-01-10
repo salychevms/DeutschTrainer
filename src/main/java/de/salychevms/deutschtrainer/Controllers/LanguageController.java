@@ -2,12 +2,13 @@ package de.salychevms.deutschtrainer.Controllers;
 
 import de.salychevms.deutschtrainer.Models.Language;
 import de.salychevms.deutschtrainer.Services.LanguageService;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
 
-@RestController
+@Component
 public class LanguageController {
     private final LanguageService languageService;
 

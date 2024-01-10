@@ -17,9 +17,9 @@ public class RussianService {
     }
 
     @Transactional
-    public Russian findById(Long id){
+    public Optional<Russian> findById(Long id){
         Optional<Russian> russian=russianRepository.findById(id);
-        return russian.orElse(null);
+        return russian;
     }
 
     @Transactional

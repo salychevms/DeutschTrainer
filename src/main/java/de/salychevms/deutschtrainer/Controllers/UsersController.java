@@ -3,12 +3,11 @@ package de.salychevms.deutschtrainer.Controllers;
 import de.salychevms.deutschtrainer.Models.Users;
 import de.salychevms.deutschtrainer.Services.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
 
-@RestController
+@Component
 public class UsersController {
     final UsersService usersService;
 
@@ -38,7 +37,7 @@ public class UsersController {
     }
 
     public void updatePhoneNumberByTelegramId(Long telegramId, String number) {
-        usersService.updatePhoneNumberByTelegramId(telegramId,number);
+        usersService.updatePhoneNumberByTelegramId(telegramId, number);
     }
 
     public boolean getAdminStatus(Long telegramId) {

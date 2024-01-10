@@ -2,12 +2,12 @@ package de.salychevms.deutschtrainer.Controllers;
 
 import de.salychevms.deutschtrainer.Models.*;
 import de.salychevms.deutschtrainer.Services.UserDictionaryService;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 
-@RestController
+@Component
 public class UserDictionaryController {
     private final UsersController usersController;
     private final LanguageController languageController;

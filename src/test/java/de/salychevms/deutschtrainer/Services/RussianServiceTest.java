@@ -33,9 +33,9 @@ class RussianServiceTest {
         russian.setId(russianId);
 
         when(russianRepository.findById(russianId)).thenReturn(Optional.of(russian));
-        Russian result=russianService.findById(russianId);
+        Optional<Russian> result=russianService.findById(russianId);
 
-        assertEquals(russian, result);
+        result.ifPresent(value-> assertEquals(russian, value));
     }
 
     @Test

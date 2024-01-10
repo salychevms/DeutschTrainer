@@ -5,6 +5,7 @@ import de.salychevms.deutschtrainer.Models.Deutsch;
 import de.salychevms.deutschtrainer.Models.Russian;
 import de.salychevms.deutschtrainer.Services.DeRuPairsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@RestController
+@Component
 public class DeRuPairsController {
     private final DeRuPairsService deRuPairsService;
     private final DeutschController deutschController;
@@ -21,7 +22,6 @@ public class DeRuPairsController {
     final String DE = "DE";
     final String RU = "RU";
 
-    @Autowired
     public DeRuPairsController(DeRuPairsService deRuPairsService, DeutschController deutschController, RussianController russianController) {
         this.deRuPairsService = deRuPairsService;
         this.deutschController = deutschController;
@@ -37,9 +37,9 @@ public class DeRuPairsController {
     }
 
     public String getAllWordPairsByPairId(Long germanId, List<Long> pairsId) {
-        StringBuilder pairs = new StringBuilder("You added: "
+        StringBuilder pairs = new StringBuilder("Вы добавили перевод слова: "
                 + deutschController.findById(germanId).getDeWord()
-                + "\ntranslation of the word into russian:");
+                + "\nНа русском это будет:");
         for (Long item : pairsId) {
             Optional<DeRuPairs> deRu = deRuPairsService.findById(item);
             if (deRu.isPresent()) {
@@ -66,15 +66,15 @@ public class DeRuPairsController {
     }
 
 
-    public List<String> getWordsWhichUserLooksFor(String userWord, String language) {
+    public List<String> getWordsWhichUserLooksFor(String userWord, String languageIdentifier) {
         List<String> wordList = new ArrayList<>();
-        if (DE.equals(language)) {
-            List<Deutsch> german = deutschController.findAllDeutschWords(userWord);
+        if (DE.equals(languageIdentifier)) {
+            List<Deutsch> german = deutschController.findAllDeutschWordsWhichContain(userWord);
             for (Deutsch item : german) {
                 wordList.add(item.getDeWord());
             }
-        } else if (RU.equals(language)) {
-            List<Russian> russian = russianController.findAllRussianWords(userWord);
+        } else if (RU.equals(languageIdentifier)) {
+            List<Russian> russian = russianController.findAllRussianWordsWhichContain(userWord);
             for (Russian item : russian) {
                 wordList.add(item.getRuWord());
             }
@@ -97,7 +97,7 @@ public class DeRuPairsController {
             if(russian.isPresent()){
                 List<DeRuPairs> allPairs= deRuPairsService.findAllByRussianId(russian.get().getId());
                 for(DeRuPairs item:allPairs){
-                    translationList.add(deutschController.findById(item.getRussian().getId()).getDeWord());
+                    translationList.add(deutschController.findById(item.getDeutsch().getId()).getDeWord());
                 }
             }
         }

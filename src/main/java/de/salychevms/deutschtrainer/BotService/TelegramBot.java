@@ -32,6 +32,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final UserStatisticController userStatisticController;
     private final UserDictionaryController userDictionaryController;
     private final TrainingController trainingController;
+    private final MenuMaker mm;
 
     private List<String> queue = new ArrayList<>();
     private List<TrainingPair> learningList = new ArrayList<>();
@@ -42,7 +43,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                        UserLanguageController userLanguageController, DeutschController deutschController,
                        RussianController russianController, DeRuPairsController deRuPairsController,
                        UserStatisticController userStatisticController, UserDictionaryController userDictionaryController,
-                       TrainingController trainingController) {
+                       TrainingController trainingController, MenuMaker mm) {
         this.config = config;
         this.usersController = usersController;
         this.languageController = languageController;
@@ -53,6 +54,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         this.userStatisticController = userStatisticController;
         this.userDictionaryController = userDictionaryController;
         this.trainingController = trainingController;
+        this.mm = mm;
     }
 
     @Override
@@ -77,7 +79,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 //if user sent /start
                 if (messageText.equals("/start")) {
                     //give start menu
-                    sendKeyboard(registration(), chatId, "Вы активировали бота-тренера." + "\nВы должны зарегистрироваться.");
+                    sendKeyboard(mm.registration(), chatId, "Вы активировали бота-тренера." + "\nВы должны зарегистрироваться.");
                     //if something unusual happened
                 } else {
                     sendMessage(chatId, "Упс! Так не пойдет!\nВведите снова команду \"/start\" пожалуйста!");
@@ -87,7 +89,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 boolean adminStatus = usersController.findUserByTelegramId(telegramId).get().isAdmin();
                 if (messageText.equals("/start")) {
                     //give global menu
-                    sendKeyboard(globalMenu(adminStatus), chatId,
+                    sendKeyboard(mm.globalMenu(adminStatus), chatId,
                             EmojiGive.germanFlag + "\n\nЯ тут! Меня кто-то звал???\n\n"
                                     + EmojiGive.joystick + " Главное меню:");
                     //global menu
@@ -100,14 +102,14 @@ public class TelegramBot extends TelegramLongPollingBot {
                             if (userText.equals("/changeName")) {
                                 usersController.updateNameByTelegramID(telegramId, messageText);
                                 iterator.remove();
-                                sendKeyboard(settingsMenu(), chatId, "Ваше имя изменено! \""
+                                sendKeyboard(mm.settingsMenu(), chatId, "Ваше имя изменено! \""
                                         + messageText + "\""
                                         + "\n\n" + EmojiGive.wrench + " Настройки:");
                                 break;
                             } else if (userText.equals("/changeSurname")) {
                                 usersController.updateSurnameByTelegramId(telegramId, messageText);
                                 iterator.remove();
-                                sendKeyboard(settingsMenu(), chatId, "Ваша фамилия изменена! \""
+                                sendKeyboard(mm.settingsMenu(), chatId, "Ваша фамилия изменена! \""
                                         + messageText + "\""
                                         + "\n\n" + EmojiGive.wrench + " Настройки:");
                                 break;
@@ -120,7 +122,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                                 //create pairs of words
                                 List<Long> pairs = deRuPairsController.createPairs(germanWord, russianTranslate);
                                 String result = deRuPairsController.getAllWordPairsByPairId(germanWord.getId(), pairs);
-                                sendKeyboard(adminLanguagesMenu(), chatId, result);
+                                sendKeyboard(mm.adminLanguagesMenu(), chatId, result);
                                 break;
                             } else if (userText.equals("/addNewWords")) {
                                 iterator.remove();
@@ -128,12 +130,12 @@ public class TelegramBot extends TelegramLongPollingBot {
                                     if (deRuPairsController.isItGerman(messageText)) {
                                         List<String> searchList = deRuPairsController.getWordsWhichUserLooksFor(messageText, "DE");
                                         if (!searchList.isEmpty()) {
-                                            sendKeyboard(getSearchWordMenu(searchList, messageText, "no"), chatId,
+                                            sendKeyboard(mm.getSearchWordMenu(searchList, messageText, "no"), chatId,
                                                     "Вы ввели слово: " + messageText + "\nВыберите одно из преложенных слов " +
                                                             "\nи получите доступные варианты перевода.");
                                         } else {
                                             UserLanguage userLanguage = trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE");
-                                            sendKeyboard(trainingMenu(userLanguage), chatId,
+                                            sendKeyboard(mm.trainingMenu(userLanguage), chatId,
                                                     "Вы ввели слово: " + messageText +
                                                             "\nК сожалению ни чего подходящегок этому не нашлось! Попробуйте что-то другое.\n\n" +
                                                             EmojiGive.gameDie + " Тренировки:");
@@ -142,12 +144,12 @@ public class TelegramBot extends TelegramLongPollingBot {
                                     } else if (deRuPairsController.isItRussian(messageText)) {
                                         List<String> searchList = deRuPairsController.getWordsWhichUserLooksFor(messageText, "RU");
                                         if (!searchList.isEmpty()) {
-                                            sendKeyboard(getSearchWordMenu(searchList, messageText, "no"), chatId,
+                                            sendKeyboard(mm.getSearchWordMenu(searchList, messageText, "no"), chatId,
                                                     "You entered a word: " + messageText + "\nВыберите одно из преложенных слов " +
                                                             "\nи получите доступные варианты перевода.");
                                         } else {
                                             UserLanguage userLanguage = trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE");
-                                            sendKeyboard(trainingMenu(userLanguage), chatId,
+                                            sendKeyboard(mm.trainingMenu(userLanguage), chatId,
                                                     "Вы ввели слово: " + messageText +
                                                             "\nК сожалению ни чего подходящего к этому не нашлось! Попробуйте что-то другое.\n\n" +
                                                             EmojiGive.gameDie + " Тренировки:");
@@ -156,7 +158,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                                     }
                                 } else {
                                     UserLanguage userLanguage = trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE");
-                                    sendKeyboard(trainingMenu(userLanguage), chatId,
+                                    sendKeyboard(mm.trainingMenu(userLanguage), chatId,
                                             "Либо вы ни чего не ввели, либо что-то пошло не так...\nИзвините, найдем - починим!\n\n" +
                                                     EmojiGive.gameDie + " Тренировки:");
                                     break;
@@ -174,11 +176,11 @@ public class TelegramBot extends TelegramLongPollingBot {
             String userName = callbackQuery.getMessage().getChat().getUserName();
             //if user exists
             if (usersController.registeredOr(telegramId)) {
-                boolean adminStatus = usersController.findUserByTelegramId(telegramId).get().isAdmin();
+                boolean adminStatus = usersController.getAdminStatus(telegramId);
                 UserLanguage userLanguage = trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE");
                 //reg keyboard
                 if (callBackData.equals("/training")) {
-                    editKeyboard(update.getCallbackQuery(), trainingMenu(userLanguage), EmojiGive.gameDie + " Тренировки:");
+                    editKeyboard(update.getCallbackQuery(), mm.trainingMenu(userLanguage), EmojiGive.gameDie + " Тренировки:");
                 } else if (callBackData.equals("/addNewWords")) {
                     editMessage(callbackQuery, """
                             Вы можете ввести слово (к примеру существительное с/без артикля)
@@ -195,11 +197,11 @@ public class TelegramBot extends TelegramLongPollingBot {
                     List<String> translationList;
                     if (deRuPairsController.isItGerman(selectedWord[1])) {
                         translationList = deRuPairsController.getTranslations(selectedWord[1], "DE");
-                        sendKeyboard(getSearchWordMenu(translationList, selectedWord[1], "yes"), chatId,
+                        sendKeyboard(mm.getSearchWordMenu(translationList, selectedWord[1], "yes"), chatId,
                                 "\nВы можете выбрать одно слово и получить все доступные переводы:\n" + selectedWord[2]);
                     } else if (deRuPairsController.isItRussian(selectedWord[1])) {
                         translationList = deRuPairsController.getTranslations(selectedWord[1], "RU");
-                        sendKeyboard(getSearchWordMenu(translationList, selectedWord[1], "yes"), chatId,
+                        sendKeyboard(mm.getSearchWordMenu(translationList, selectedWord[1], "yes"), chatId,
                                 "\nВы можете выбрать одно слово и получить все доступные переводы:\n" + selectedWord[2]);
                     }
                 } else if (callBackData.startsWith("/TranslationsOffer=")) {
@@ -217,7 +219,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         Optional<DeRuPairs> pair = deRuPairsController.getPairByGermanIdAndRussianId(deutsch.get().getId(), russian.get().getId());
                         pair.ifPresent(deRu -> userStatisticController.saveNewPairInStatistic(userDictionaryController.saveNewPair(
                                 telegramId, "DE", deRu)));
-                        sendKeyboard(trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(
+                        sendKeyboard(mm.trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(
                                         telegramId, "DE")),
                                 chatId,
                                 "Вы добавили пару слов:\n" + deutsch.get().getDeWord() + " = " + russian.get().getRuWord());
@@ -251,7 +253,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         if (learningList.isEmpty()) {
                             editKeyboard(callbackQuery, null, result + "\n\nОтлично! Вы завершили обучение!");
                             sendMessage(chatId, EmojiGive.oK);
-                            sendKeyboard(trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE")),
+                            sendKeyboard(mm.trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE")),
                                     chatId, EmojiGive.gameDie + " Тренировки:");
                         } else {
                             TrainingPair pair = learningList.get(0);
@@ -265,7 +267,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         if (repeatList.isEmpty()) {
                             editKeyboard(callbackQuery, null, result + "\n\nОтлично! Вы завершили тренировку!");
                             sendMessage(chatId, EmojiGive.oK);
-                            sendKeyboard(trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE")),
+                            sendKeyboard(mm.trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE")),
                                     chatId, EmojiGive.gameDie + " Тренировки:");
                         } else {
                             TrainingPair pair = repeatList.get(0);
@@ -279,7 +281,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         if (failList.isEmpty()) {
                             editKeyboard(callbackQuery, null, result + "\n\nОтлично! Вы повторили слова с ошибками!");
                             sendMessage(chatId, EmojiGive.oK);
-                            sendKeyboard(trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE")),
+                            sendKeyboard(mm.trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE")),
                                     chatId, EmojiGive.gameDie + " Тренировки:");
                         } else {
                             TrainingPair pair = failList.get(0);
@@ -292,26 +294,26 @@ public class TelegramBot extends TelegramLongPollingBot {
                         editKeyboard(callbackQuery, null, "Вы прервали занятие! Жаль!" +
                                 "\nНадеюсь Вы вернетесь к обучению как можно скорее!");
                         sendMessage(chatId, EmojiGive.thinkingFace);
-                        sendKeyboard(trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE")),
+                        sendKeyboard(mm.trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE")),
                                 chatId, EmojiGive.gameDie + " Тренировки:");
                         learningList.clear();
                         repeatList.clear();
                         failList.clear();
                     }
                 } else if (callBackData.equals("/statistic")) {
-                    editKeyboard(update.getCallbackQuery(), statisticMenu(), EmojiGive.barChart + " Статистика:");
+                    editKeyboard(update.getCallbackQuery(), mm.statisticMenu(), EmojiGive.barChart + " Статистика:");
                 } else if (callBackData.equals("/settings")) {
-                    editKeyboard(update.getCallbackQuery(), settingsMenu(), EmojiGive.wrench + " Настройки:");
+                    editKeyboard(update.getCallbackQuery(), mm.settingsMenu(), EmojiGive.wrench + " Настройки:");
                 } else if (callBackData.equals("/info")) {
-                    editKeyboard(update.getCallbackQuery(), infoMenu(), EmojiGive.clipboard + " Инфо:");
+                    editKeyboard(update.getCallbackQuery(), mm.infoMenu(), EmojiGive.clipboard + " Инфо:");
                 } else if (callBackData.equals("/adminMenu")) {
-                    editKeyboard(update.getCallbackQuery(), adminMenu(), EmojiGive.lockedWithKey + " Admin Menu:");
+                    editKeyboard(update.getCallbackQuery(), mm.adminMenu(), EmojiGive.lockedWithKey + " Admin Menu:");
                 } else if (callBackData.equals("/languagesAdmin")) {
-                    editKeyboard(update.getCallbackQuery(), adminLanguagesMenu(), "Языковое меню: ");
+                    editKeyboard(update.getCallbackQuery(), mm.adminLanguagesMenu(), "Языковое меню: ");
                 } else if (callBackData.equals("/russianSettings")) {
-                    editKeyboard(update.getCallbackQuery(), addWordsMenu(), "Добавить слова:\nRU - русский");
+                    editKeyboard(update.getCallbackQuery(), mm.addWordsMenu(), "Добавить слова:\nRU - русский");
                 } else if (callBackData.equals("/germanSettings")) {
-                    editKeyboard(update.getCallbackQuery(), addWordsMenu(), "Добавить слова:\nDE - немецекий");
+                    editKeyboard(update.getCallbackQuery(), mm.addWordsMenu(), "Добавить слова:\nDE - немецекий");
                 } else if (callBackData.equals("/addWordAdmin")) {
                     editMessage(callbackQuery, """
                             A Very Important Description:
@@ -354,17 +356,17 @@ public class TelegramBot extends TelegramLongPollingBot {
                     }
                     if (create) {
                         sendMessage(chatId, "Успешно!");
-                        sendKeyboard(globalMenu(adminStatus), chatId, EmojiGive.germanFlag + "\n\nЯ тут! Меня кто-то звал???\n\n"
+                        sendKeyboard(mm.globalMenu(adminStatus), chatId, EmojiGive.germanFlag + "\n\nЯ тут! Меня кто-то звал???\n\n"
                                 + EmojiGive.joystick + " Главное меню:");
                     } else {
                         sendMessage(chatId, "Нет новых слов или Ваш список пуст!");
-                        sendKeyboard(globalMenu(adminStatus), chatId, EmojiGive.germanFlag + "\n\nЯ тут! Меня кто-то звал???\n\n"
+                        sendKeyboard(mm.globalMenu(adminStatus), chatId, EmojiGive.germanFlag + "\n\nЯ тут! Меня кто-то звал???\n\n"
                                 + EmojiGive.joystick + " Главное меню:");
                     }
                 } else if (callBackData.equals("/userInfo")) {
-                    editKeyboard(update.getCallbackQuery(), globalMenu(adminStatus), sendUserInfo(telegramId) + "\n\n" + EmojiGive.joystick + " Главное меню:");
+                    editKeyboard(update.getCallbackQuery(), mm.globalMenu(adminStatus), sendUserInfo(telegramId) + "\n\n" + EmojiGive.joystick + " Главное меню:");
                 } else if (callBackData.equals("/aboutThisBot")) {
-                    editKeyboard(update.getCallbackQuery(), globalMenu(adminStatus),
+                    editKeyboard(update.getCallbackQuery(), mm.globalMenu(adminStatus),
                             "Я надеюсь что этот бот поможет людям учить немецкие слова." +
                                     "Бот бесплатный. Это моя практика как программиста. Да и слова мне самому учить надо!=)" +
                                     "Так что как говорится \"двух зайцев одним выстрелом\"!" +
@@ -383,11 +385,11 @@ public class TelegramBot extends TelegramLongPollingBot {
                     //if I pressed button "set new language"
                 } else if (callBackData.equals("/setNewLanguage")) {
                     //I get all identifiers by my id
-                    List<String> identifiers = userLanguageController.getAllLanguagesByTelegramId(telegramId);
+                    List<String> identifiers = userLanguageController.getAllLanguageIdentifiersByTelegramId(telegramId);
                     //I set all identifiers in one string
                     String identifierString = String.join(" / ", identifiers);
                     //I send this string to my editMessage
-                    editKeyboard(callbackQuery, setLanguageMenu(), "Вы уже учите:\n"
+                    editKeyboard(callbackQuery, mm.setLanguageMenu(), "Вы уже учите:\n"
                             + identifierString
                             + "\n\nУстановка языка: ");
 
@@ -399,13 +401,13 @@ public class TelegramBot extends TelegramLongPollingBot {
                     if (language.isEmpty()) {
                         languageController.createLanguage("russian", "RU");
                         languageController.createLanguage("german", "DE");
-                        editKeyboard(callbackQuery, setLanguageMenu(), """
+                        editKeyboard(callbackQuery, mm.setLanguageMenu(), """
                                 Язык: немецкий "DE" был создан.
 
                                 Установка языка: """);
                     }
                     //when this language is exists I get all my languages by my id
-                    List<String> identifiers = userLanguageController.getAllLanguagesByTelegramId(telegramId);
+                    List<String> identifiers = userLanguageController.getAllLanguageIdentifiersByTelegramId(telegramId);
                     boolean found = false;
                     //and check this language in my language list
                     for (String str : identifiers) {
@@ -418,20 +420,20 @@ public class TelegramBot extends TelegramLongPollingBot {
                     if (!found && language.isPresent()) {
                         //I save this language in my language list
                         userLanguageController.createUserLanguage(telegramId, language.get().getId());
-                        editKeyboard(callbackQuery, setLanguageMenu(), """
+                        editKeyboard(callbackQuery, mm.setLanguageMenu(), """
                                 Язык: немецкий "DE" был добавлен.
 
                                 Установка языка:""");
                         //if it is existed I sent to my editMessage information I already learn
                     } else if (found && language.isPresent()) {
-                        editKeyboard(callbackQuery, setLanguageMenu(), """
+                        editKeyboard(callbackQuery, mm.setLanguageMenu(), """
                                 Вы уже учите "DE".
 
                                 Установка языка:""");
                     }
 
                 } else if (callBackData.equals("/mainMenu")) {
-                    editKeyboard(update.getCallbackQuery(), globalMenu(adminStatus),
+                    editKeyboard(update.getCallbackQuery(), mm.globalMenu(adminStatus),
                             EmojiGive.germanFlag + "\n\nЯ тут! Меня кто-то звал???\n\n"
                                     + EmojiGive.joystick + " Главное меню:");
                 } else if (callBackData.startsWith("/Offer=")) {
@@ -442,14 +444,14 @@ public class TelegramBot extends TelegramLongPollingBot {
                 if (callBackData.equals("/registration")) {
                     usersController.createNewUser(telegramId, userName);
                     if (usersController.registeredOr(telegramId)) {
-                        editKeyboard(update.getCallbackQuery(), globalMenu(false),
+                        editKeyboard(update.getCallbackQuery(), mm.globalMenu(false),
                                 "Успех! Вы зарегистрированы!\n\n" +
                                         EmojiGive.joystick + " Главное меню:");
                     } else sendMessage(chatId, "Оооой! Что-то пошло не так..." +
                             "\nНажмите \"/start\" и попробуйте снова!!!");
                 } else if (callBackData.equals("/aboutRegistration")) {
                     if (!callbackQuery.getMessage().getText().equals("You have to register!\n\nPlease, push *Registration* in this menu.")) {
-                        editKeyboard(update.getCallbackQuery(), registration(), "You have to register!\n\nPlease, push *Registration* in this menu.");
+                        editKeyboard(update.getCallbackQuery(), mm.registration(), "You have to register!\n\nPlease, push *Registration* in this menu.");
                     } else
                         editMessage(update.getCallbackQuery(), "You're haven't registered!\nPress /start and get a sign up, please!");
                 }
@@ -467,371 +469,6 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
         stripe.append("=");
         return stripe + "\n\n" + word + "\n\n" + stripe;
-    }
-
-    private InlineKeyboardMarkup addWordsMenu() {
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        //button "main menu
-        InlineKeyboardButton addOneWordButton = new InlineKeyboardButton("Добавить слово");
-        addOneWordButton.setCallbackData("/addWordAdmin");
-        //button "main menu
-        InlineKeyboardButton addListButton = new InlineKeyboardButton("Добавить слова из списка");
-        addListButton.setCallbackData("/addListAdmin");
-        //button "main menu
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
-        goToMainMenuButton.setCallbackData("/mainMenu");
-        ////position from left to right
-        List<InlineKeyboardButton> row1 = new ArrayList<>();
-        List<InlineKeyboardButton> row2 = new ArrayList<>();
-        List<InlineKeyboardButton> row3 = new ArrayList<>();
-        //
-        row1.add(addOneWordButton);
-        row2.add(addListButton);
-        row3.add(goToMainMenuButton);
-        //position from up to down
-        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-        rows.add(row1);
-        rows.add(row2);
-        rows.add(row3);
-        //save buttons in the markup variable
-        keyboardMarkup.setKeyboard(rows);
-        return keyboardMarkup;
-    }
-
-    private InlineKeyboardMarkup adminMenu() {
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        //button "main menu
-        InlineKeyboardButton languagesButton = new InlineKeyboardButton("Языки:");
-        languagesButton.setCallbackData("/languagesAdmin");
-
-        //button "main menu
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
-        goToMainMenuButton.setCallbackData("/mainMenu");
-        ////position from left to right
-        List<InlineKeyboardButton> row1 = new ArrayList<>();
-        List<InlineKeyboardButton> row2 = new ArrayList<>();
-        //
-        row1.add(languagesButton);
-        row2.add(goToMainMenuButton);
-        //position from up to down
-        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-        rows.add(row1);
-        rows.add(row2);
-        //save buttons in the markup variable
-        keyboardMarkup.setKeyboard(rows);
-        return keyboardMarkup;
-    }
-
-    private InlineKeyboardMarkup getSearchWordMenu(List<String> wordCollection, String translatableWord, String isTranslate) {
-        final String YES = "yes";
-        final String NO = "no";
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-        //button
-        InlineKeyboardButton goToTrainingMenuButton = new InlineKeyboardButton();
-        for (String item : wordCollection) {
-            InlineKeyboardButton button = new InlineKeyboardButton();
-            List<InlineKeyboardButton> buttons = new ArrayList<>();
-            button.setText(item);
-            /* CallbackData constructor:
-            for search words: "/SearchOffer="+item  ==>>  /SearchOffer=rennen
-            for translate words: "/TranslationsOffer="+item  ==>>  /TranslationsOffer=rennen */
-            if (isTranslate.equalsIgnoreCase(NO)) {
-                //a user looks for a word and can choose from the word list, also we get a translatable word for the next step
-                button.setCallbackData("/SearchOffer=" + item + "=" + translatableWord);
-                goToTrainingMenuButton = new InlineKeyboardButton("<" + EmojiGive.gameDie + " к меню тренировок");
-                goToTrainingMenuButton.setCallbackData("/training");
-            } else if (isTranslate.equalsIgnoreCase(YES)) {
-                //this step get to a user a lot of translations for the search word
-                button.setCallbackData("/TranslationsOffer=" + item + "=" + translatableWord);
-                goToTrainingMenuButton = new InlineKeyboardButton("<" + EmojiGive.backArrow + " назад");
-                goToTrainingMenuButton.setCallbackData("/toSearchOffer");
-            }
-            buttons.add(button);
-            rows.add(buttons);
-        }
-        //button
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
-        goToMainMenuButton.setCallbackData("/mainMenu");
-        ////position from left to right
-        List<InlineKeyboardButton> row1 = new ArrayList<>();
-        List<InlineKeyboardButton> row2 = new ArrayList<>();
-        //
-        row1.add(goToTrainingMenuButton);
-        row2.add(goToMainMenuButton);
-        rows.add(row1);
-        rows.add(row2);
-        //save buttons in the markup variable
-        keyboardMarkup.setKeyboard(rows);
-        return keyboardMarkup;
-
-    }
-
-    private InlineKeyboardMarkup adminLanguagesMenu() {
-        List<Language> languages = languageController.getAll();
-        List<String> languageNames = new ArrayList<>();
-        for (Language item : languages) {
-            languageNames.add(item.getName());
-        }
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-        for (String item : languageNames) {
-            InlineKeyboardButton button = new InlineKeyboardButton();
-            List<InlineKeyboardButton> buttons = new ArrayList<>();
-            button.setText(item);
-            /* CallbackData constructor:  "/"+item+"Settings"  ==>>  /russianSettings*/
-            button.setCallbackData("/" + item + "Settings");
-            buttons.add(button);
-            rows.add(buttons);
-        }
-        //button "main menu
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
-        goToMainMenuButton.setCallbackData("/mainMenu");
-        ////position from left to right
-        List<InlineKeyboardButton> row = new ArrayList<>();
-        //
-        row.add(goToMainMenuButton);
-        //position from up to down
-        rows.add(row);
-        //save buttons in the markup variable
-        keyboardMarkup.setKeyboard(rows);
-        return keyboardMarkup;
-    }
-
-    private InlineKeyboardMarkup statisticMenu() {
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        //button "main menu
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
-        goToMainMenuButton.setCallbackData("/mainMenu");
-        ////position from left to right
-        List<InlineKeyboardButton> row1 = new ArrayList<>();
-        //
-        row1.add(goToMainMenuButton);
-        //position from up to down
-        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-        rows.add(row1);
-        //save buttons in the markup variable
-        keyboardMarkup.setKeyboard(rows);
-        return keyboardMarkup;
-    }
-
-    private InlineKeyboardMarkup trainingMenu(UserLanguage userLanguage) {
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        //position from up to down
-        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-        List<UserStatistic> userStatisticList = userStatisticController.getAllStatisticWithNewWords();
-        int count = 0;
-        if (!userStatisticList.isEmpty()) {
-            for (UserStatistic item : userStatisticList) {
-                Long userLangIdFromStat = trainingController.getUserLangByUserStatistic(item).getId();
-                Long userLangIdFromIncomingParam = userLanguage.getId();
-                if (userLangIdFromIncomingParam.equals(userLangIdFromStat))
-                    count++;
-            }
-        }
-        if (count != 0) {
-            //button "Daily"
-            InlineKeyboardButton learningNewWordsTrainingButton = new InlineKeyboardButton(EmojiGive.newButton + " Учить новые слова");
-            learningNewWordsTrainingButton.setCallbackData("/Trainings=/StartLearningTraining");
-            List<InlineKeyboardButton> row = new ArrayList<>();
-            row.add(learningNewWordsTrainingButton);
-            rows.add(row);
-        }
-        //button "Daily"
-        InlineKeyboardButton repeatWordsTrainingButton = new InlineKeyboardButton(EmojiGive.repeatButton + " Ежедневная тренировка");
-        repeatWordsTrainingButton.setCallbackData("/Trainings=/StartRepeatTraining");
-        //button "Daily"
-        InlineKeyboardButton failsTrainingButton = new InlineKeyboardButton(EmojiGive.redQuestionMark + " Ошиблись - повторите");
-        failsTrainingButton.setCallbackData("/Trainings=/StartFailsTraining");
-        //button "Add new"
-        InlineKeyboardButton addNewWordsButton = new InlineKeyboardButton(EmojiGive.inboxTray + " Добавить новые слова");
-        addNewWordsButton.setCallbackData("/addNewWords");
-        //button "main menu
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
-        goToMainMenuButton.setCallbackData("/mainMenu");
-        ////position from left to right
-        List<InlineKeyboardButton> row1 = new ArrayList<>();
-        List<InlineKeyboardButton> row2 = new ArrayList<>();
-        List<InlineKeyboardButton> row3 = new ArrayList<>();
-        List<InlineKeyboardButton> row4 = new ArrayList<>();
-        //
-        row1.add(repeatWordsTrainingButton);
-        row2.add(failsTrainingButton);
-        row3.add(addNewWordsButton);
-        row4.add(goToMainMenuButton);
-        //position from up to down
-        rows.add(row1);
-        rows.add(row2);
-        rows.add(row3);
-        rows.add(row4);
-        //save buttons in the markup variable
-        keyboardMarkup.setKeyboard(rows);
-        return keyboardMarkup;
-    }
-
-    private InlineKeyboardMarkup globalMenu(boolean ifAdmin) {
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        //button "Training"
-        InlineKeyboardButton trainingButton = new InlineKeyboardButton(EmojiGive.gameDie + " Тренировки");
-        trainingButton.setCallbackData("/training");
-        //button "Statistic"
-        InlineKeyboardButton statisticButton = new InlineKeyboardButton(EmojiGive.barChart + " Статитстика");
-        statisticButton.setCallbackData("/statistic");
-        //button "Settings"
-        InlineKeyboardButton settingsButton = new InlineKeyboardButton(EmojiGive.wrench + " Настройки");
-        settingsButton.setCallbackData("/settings");
-        //button "Info"
-        InlineKeyboardButton infoButton = new InlineKeyboardButton(EmojiGive.clipboard + " Инфо");
-        infoButton.setCallbackData("/info");
-        //========for admin========
-        InlineKeyboardButton adminMenuButton = new InlineKeyboardButton(EmojiGive.lockedWithKey + " Admin Menu");
-        adminMenuButton.setCallbackData("/adminMenu");
-        //position from left to right
-        List<InlineKeyboardButton> row1 = new ArrayList<>();
-        List<InlineKeyboardButton> row2 = new ArrayList<>();
-        List<InlineKeyboardButton> row3 = new ArrayList<>();
-        List<InlineKeyboardButton> row4 = new ArrayList<>();
-        //========for admin========
-        List<InlineKeyboardButton> adminRow = new ArrayList<>();
-        //
-        row1.add(trainingButton);
-        row2.add(statisticButton);
-        row3.add(settingsButton);
-        row4.add(infoButton);
-        //========for admin========
-        adminRow.add(adminMenuButton);
-        //position from up to down
-        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-        rows.add(row1);
-        rows.add(row2);
-        rows.add(row3);
-        rows.add(row4);
-        //========for admin========
-        if (ifAdmin) {
-            rows.add(adminRow);
-        }
-        //save buttons in the markup variable
-        keyboardMarkup.setKeyboard(rows);
-        return keyboardMarkup;
-    }
-
-    private InlineKeyboardMarkup settingsMenu() {
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        //button "change Name"
-        InlineKeyboardButton changeNameButton = new InlineKeyboardButton("Сменить имя");
-        changeNameButton.setCallbackData("/changeName");
-        //button "change Surname"
-        InlineKeyboardButton changeSurnameButton = new InlineKeyboardButton("Сменить фамилию");
-        changeSurnameButton.setCallbackData("/changeSurname");
-        //button "set new language"
-        InlineKeyboardButton setNewLanguageButton = new InlineKeyboardButton("Установить новый язык");
-        setNewLanguageButton.setCallbackData("/setNewLanguage");
-        //button "settings menu go back"
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
-        goToMainMenuButton.setCallbackData("/mainMenu");
-        //position from left to right
-        List<InlineKeyboardButton> row1 = new ArrayList<>();
-        List<InlineKeyboardButton> row2 = new ArrayList<>();
-        List<InlineKeyboardButton> row3 = new ArrayList<>();
-        List<InlineKeyboardButton> row4 = new ArrayList<>();
-        //
-        row1.add(changeNameButton);
-        row2.add(changeSurnameButton);
-        row3.add(setNewLanguageButton);
-        row4.add(goToMainMenuButton);
-        //position from up to down
-        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-        rows.add(row1);
-        rows.add(row2);
-        rows.add(row3);
-        rows.add(row4);
-        //save buttons in the markup variable
-        keyboardMarkup.setKeyboard(rows);
-        return keyboardMarkup;
-    }
-
-    private InlineKeyboardMarkup infoMenu() {
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        //button "User Info"
-        InlineKeyboardButton userInfoButton = new InlineKeyboardButton(EmojiGive.alien + " Инфо о пользователе");
-        userInfoButton.setCallbackData("/userInfo");
-        //button "About This Bot"
-        InlineKeyboardButton aboutBotButton = new InlineKeyboardButton(EmojiGive.robot + " Об этом боте");
-        aboutBotButton.setCallbackData("/aboutThisBot");
-        //button "About This Bot"
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
-        goToMainMenuButton.setCallbackData("/mainMenu");
-        //position from left to right
-        List<InlineKeyboardButton> row1 = new ArrayList<>();
-        List<InlineKeyboardButton> row2 = new ArrayList<>();
-        List<InlineKeyboardButton> row3 = new ArrayList<>();
-
-        //
-        row1.add(userInfoButton);
-        row2.add(aboutBotButton);
-        row3.add(goToMainMenuButton);
-        //position from up to down
-        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-        rows.add(row1);
-        rows.add(row2);
-        rows.add(row3);
-
-        //save buttons in the markup variable
-        keyboardMarkup.setKeyboard(rows);
-        return keyboardMarkup;
-    }
-
-    private InlineKeyboardMarkup registration() {
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        //button "Registration"
-        InlineKeyboardButton button = new InlineKeyboardButton("Registration");
-        button.setCallbackData("/registration");
-        //button "About registration"
-        InlineKeyboardButton button1 = new InlineKeyboardButton("About Registration");
-        button1.setCallbackData("/aboutRegistration");
-        //positions
-        List<InlineKeyboardButton> row = new ArrayList<>();
-        List<InlineKeyboardButton> row1 = new ArrayList<>();
-        //
-        row.add(button);
-        row1.add(button1);
-
-        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-        rows.add(row);
-        rows.add(row1);
-
-        keyboardMarkup.setKeyboard(rows);
-        return keyboardMarkup;
-    }
-
-    private InlineKeyboardMarkup setLanguageMenu() {
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        //button
-        InlineKeyboardButton userInfoButton = new InlineKeyboardButton("\"DE\" Немецкий");
-        userInfoButton.setCallbackData("/germanDE");
-        //button
-        InlineKeyboardButton goToSettingsMenuButton = new InlineKeyboardButton("<" + EmojiGive.wrench + " в меню настроек");
-        goToSettingsMenuButton.setCallbackData("/settings");
-        //button
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
-        goToMainMenuButton.setCallbackData("/mainMenu");
-        //position from left to right
-        List<InlineKeyboardButton> row1 = new ArrayList<>();
-        List<InlineKeyboardButton> row2 = new ArrayList<>();
-        List<InlineKeyboardButton> row3 = new ArrayList<>();
-        //
-        row1.add(userInfoButton);
-        row2.add(goToSettingsMenuButton);
-        row3.add(goToMainMenuButton);
-        //position from up to down
-        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-        rows.add(row1);
-        rows.add(row2);
-        rows.add(row3);
-
-        //save buttons in the markup variable
-        keyboardMarkup.setKeyboard(rows);
-        return keyboardMarkup;
     }
 
     private void sendKeyboard(InlineKeyboardMarkup keyboardMarkup, long chatId, String msg) {

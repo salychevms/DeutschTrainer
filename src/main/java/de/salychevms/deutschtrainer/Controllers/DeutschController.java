@@ -3,12 +3,13 @@ package de.salychevms.deutschtrainer.Controllers;
 import de.salychevms.deutschtrainer.Models.Deutsch;
 import de.salychevms.deutschtrainer.Services.DeutschService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
 
-@RestController
+@Component
 public class DeutschController {
     private final DeutschService deutschService;
 
@@ -26,7 +27,7 @@ public class DeutschController {
         return deutschService.findById(id);
     }
 
-    public List<Deutsch> findAllDeutschWords(String german){
+    public List<Deutsch> findAllDeutschWordsWhichContain(String german){
         return deutschService.findWordsContaining(german);
     }
 

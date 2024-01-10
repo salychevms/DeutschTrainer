@@ -35,7 +35,7 @@ public class UsersService {
 
     @Transactional
     public Optional<Users> findUserByTelegramId(Long telegramId) {
-        return (usersRepository.findByTelegramId(telegramId));
+        return usersRepository.findByTelegramId(telegramId);
     }
 
     @Transactional

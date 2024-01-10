@@ -3,13 +3,13 @@ package de.salychevms.deutschtrainer.Training;
 import de.salychevms.deutschtrainer.Controllers.*;
 import de.salychevms.deutschtrainer.Emojies.EmojiGive;
 import de.salychevms.deutschtrainer.Models.*;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.*;
 
-@RestController
+@Component
 public class TrainingController {
     private final UserStatisticController userStatisticController;
     private final DeRuPairsController deRuPairsController;
@@ -177,7 +177,7 @@ public class TrainingController {
             userAnswerId = Long.parseLong(parts[0]);
             correctPairId = Long.parseLong(parts[1]);
         }
-        if (userAnswerId != null && correctPairId != null) {
+        if (userAnswerId != null) {
             Optional<Russian> ruCorrect = deRuPairsController
                     .getDeRuById(correctPairId).flatMap(deRu -> Optional.ofNullable(russianController.findById(deRu.getRussian().getId())));
             Russian ruFromUser = russianController.findById(userAnswerId);
