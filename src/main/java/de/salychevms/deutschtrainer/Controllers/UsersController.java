@@ -2,6 +2,7 @@ package de.salychevms.deutschtrainer.Controllers;
 
 import de.salychevms.deutschtrainer.Models.Users;
 import de.salychevms.deutschtrainer.Services.UsersService;
+import org.apache.commons.codec.language.bm.Lang;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +10,7 @@ import java.util.Optional;
 
 @Component
 public class UsersController {
-    final UsersService usersService;
+    private final UsersService usersService;
 
     @Autowired
     public UsersController(UsersService usersService) {

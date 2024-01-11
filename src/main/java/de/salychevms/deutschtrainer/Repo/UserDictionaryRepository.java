@@ -1,6 +1,7 @@
 package de.salychevms.deutschtrainer.Repo;
 
 import de.salychevms.deutschtrainer.Models.UserDictionary;
+import de.salychevms.deutschtrainer.Models.UserLanguage;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +16,6 @@ public interface UserDictionaryRepository extends JpaRepository<UserDictionary, 
     Optional<UserDictionary> getUserDictionaryByPairId(Long id);
 
     Optional<UserDictionary> findById(Long id);
+
+    Optional<UserDictionary> getByUserLanguage(UserLanguage language);
 }

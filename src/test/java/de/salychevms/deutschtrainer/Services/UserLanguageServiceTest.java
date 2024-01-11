@@ -1,6 +1,7 @@
 package de.salychevms.deutschtrainer.Services;
 
 import de.salychevms.deutschtrainer.Models.Language;
+import de.salychevms.deutschtrainer.Models.UserDictionary;
 import de.salychevms.deutschtrainer.Models.UserLanguage;
 import de.salychevms.deutschtrainer.Models.Users;
 import de.salychevms.deutschtrainer.Repo.UserLanguageRepository;

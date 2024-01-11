@@ -4,20 +4,31 @@ import de.salychevms.deutschtrainer.Models.*;
 import de.salychevms.deutschtrainer.Services.UserStatisticService;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Component
 public class UserStatisticController {
     private final UserStatisticService userStatisticService;
+    private final UserDictionaryController userDictionaryController;
 
-    public UserStatisticController(UserStatisticService userStatisticService) {
+    public UserStatisticController(UserStatisticService userStatisticService, UserDictionaryController userDictionaryController) {
         this.userStatisticService = userStatisticService;
 
+        this.userDictionaryController = userDictionaryController;
     }
 
-    public List<UserStatistic> getAllStatisticWithNewWords() {
-        return userStatisticService.getUserStatisticNewWordIsTrue();
+    public List<UserStatistic> getAllStatisticWithNewWords(UserLanguage userLanguage) {
+        List<UserStatistic> userStatistics = new ArrayList<>();
+        List<UserStatistic> statistics = userStatisticService.getUserStatisticNewWordIsTrue();
+        for (UserStatistic value : statistics) {
+            Optional<UserDictionary> word = userDictionaryController.getById(value.getWord().getId());
+            if (word.isPresent() && userLanguage.getId().equals(word.get().getUserLanguage().getId())) {
+                userStatistics.add(value);
+            }
+        }
+        return userStatistics;
     }
 
     public List<UserStatistic> getAllStatisticWithFailsAllDesc() {

@@ -40,4 +40,9 @@ public class UserDictionaryService {
     public List<UserDictionary> getAll() {
         return userDictionaryRepository.findAll();
     }
+
+    @Transactional
+    public Optional<UserDictionary> getByUserLanguage(UserLanguage userLanguage){
+        return userDictionaryRepository.getByUserLanguage(userLanguage);
+    }
 }

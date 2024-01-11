@@ -113,17 +113,19 @@ public class TrainingController {
             userLanguage = userLanguageController.getByUserIdAndLanguageId(user.get().getTelegramId(), language.get().getId());
             if (userLanguage.isPresent()) {
                 userLanguageId = userLanguage.get().getId();
-                List<UserStatistic> statisticList = userStatisticController.getAllStatisticWithNewWords();
-                for (UserStatistic statisticItem : statisticList) {
-                    Long statisticLanguageId = getUserLangByUserStatistic(statisticItem).getId();
-                    if (statisticLanguageId.equals(userLanguageId)) {
-                        Optional<UserDictionary> userPair = userDictionaryController.getById(statisticItem.getWord().getId());
-                        if (userPair.isPresent()) {
-                            Optional<DeRuPairs> compareWith = deRuPairsController.getDeRuById(userPair.get().getPair().getId());
-                            if (compareWith.isPresent()) {
-                                Deutsch german = deutschController.findById(compareWith.get().getDeutsch().getId());
-                                Russian russian = russianController.findById(compareWith.get().getRussian().getId());
-                                learningPairList.add(createNewPair(statisticItem, userPair.get(), compareWith.get(), german, russian));
+                List<UserStatistic> statisticList = userStatisticController.getAllStatisticWithNewWords(userLanguage.get());
+                if (!statisticList.isEmpty()) {
+                    for (UserStatistic statisticItem : statisticList) {
+                        Long statisticLanguageId = getUserLangByUserStatistic(statisticItem).getId();
+                        if (statisticLanguageId.equals(userLanguageId)) {
+                            Optional<UserDictionary> userPair = userDictionaryController.getById(statisticItem.getWord().getId());
+                            if (userPair.isPresent()) {
+                                Optional<DeRuPairs> compareWith = deRuPairsController.getDeRuById(userPair.get().getPair().getId());
+                                if (compareWith.isPresent()) {
+                                    Deutsch german = deutschController.findById(compareWith.get().getDeutsch().getId());
+                                    Russian russian = russianController.findById(compareWith.get().getRussian().getId());
+                                    learningPairList.add(createNewPair(statisticItem, userPair.get(), compareWith.get(), german, russian));
+                                }
                             }
                         }
                     }

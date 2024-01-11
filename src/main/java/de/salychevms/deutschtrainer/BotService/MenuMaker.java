@@ -1,9 +1,7 @@
 package de.salychevms.deutschtrainer.BotService;
 
-import de.salychevms.deutschtrainer.Controllers.LanguageController;
 import de.salychevms.deutschtrainer.Controllers.UserStatisticController;
 import de.salychevms.deutschtrainer.Emojies.EmojiGive;
-import de.salychevms.deutschtrainer.Models.Language;
 import de.salychevms.deutschtrainer.Models.UserLanguage;
 import de.salychevms.deutschtrainer.Models.UserStatistic;
 import de.salychevms.deutschtrainer.Training.TrainingController;
@@ -14,28 +12,25 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 
 import java.util.ArrayList;
 import java.util.List;
+
 @Component
 public class MenuMaker {
-    private final LanguageController languageController;
     private final UserStatisticController userStatisticController;
     private final TrainingController trainingController;
 
-    public MenuMaker(LanguageController languageController, UserStatisticController userStatisticController, TrainingController trainingController) {
-        this.languageController = languageController;
+    public MenuMaker(UserStatisticController userStatisticController, TrainingController trainingController) {
         this.userStatisticController = userStatisticController;
         this.trainingController = trainingController;
     }
 
-
-    InlineKeyboardMarkup addWordsMenu() {
+    InlineKeyboardMarkup adminMenu() {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        //button "main menu
-        InlineKeyboardButton addOneWordButton = new InlineKeyboardButton("Добавить слово");
-        addOneWordButton.setCallbackData("/addWordAdmin");
-        //button "main menu
-        InlineKeyboardButton addListButton = new InlineKeyboardButton("Добавить слова из списка");
-        addListButton.setCallbackData("/addListAdmin");
-        //button "main menu
+        //buttons
+        InlineKeyboardButton addWordsButton = new InlineKeyboardButton("Добавить новое слово в общий словарь");
+        addWordsButton.setCallbackData("/adminMenu/addWordsAdmin");
+        InlineKeyboardButton addListButton = new InlineKeyboardButton("Добавить список слов в общий словарь");
+        addListButton.setCallbackData("/adminMenu/addListAdmin");
+        //button
         InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
         goToMainMenuButton.setCallbackData("/mainMenu");
         ////position from left to right
@@ -43,7 +38,7 @@ public class MenuMaker {
         List<InlineKeyboardButton> row2 = new ArrayList<>();
         List<InlineKeyboardButton> row3 = new ArrayList<>();
         //
-        row1.add(addOneWordButton);
+        row1.add(addWordsButton);
         row2.add(addListButton);
         row3.add(goToMainMenuButton);
         //position from up to down
@@ -51,30 +46,6 @@ public class MenuMaker {
         rows.add(row1);
         rows.add(row2);
         rows.add(row3);
-        //save buttons in the markup variable
-        keyboardMarkup.setKeyboard(rows);
-        return keyboardMarkup;
-    }
-
-    InlineKeyboardMarkup adminMenu() {
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        //button "main menu
-        InlineKeyboardButton languagesButton = new InlineKeyboardButton("Языки:");
-        languagesButton.setCallbackData("/languagesAdmin");
-
-        //button "main menu
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
-        goToMainMenuButton.setCallbackData("/mainMenu");
-        ////position from left to right
-        List<InlineKeyboardButton> row1 = new ArrayList<>();
-        List<InlineKeyboardButton> row2 = new ArrayList<>();
-        //
-        row1.add(languagesButton);
-        row2.add(goToMainMenuButton);
-        //position from up to down
-        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-        rows.add(row1);
-        rows.add(row2);
         //save buttons in the markup variable
         keyboardMarkup.setKeyboard(rows);
         return keyboardMarkup;
@@ -125,37 +96,6 @@ public class MenuMaker {
 
     }
 
-    InlineKeyboardMarkup adminLanguagesMenu() {
-        List<Language> languages = languageController.getAll();
-        List<String> languageNames = new ArrayList<>();
-        for (Language item : languages) {
-            languageNames.add(item.getName());
-        }
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-        for (String item : languageNames) {
-            InlineKeyboardButton button = new InlineKeyboardButton();
-            List<InlineKeyboardButton> buttons = new ArrayList<>();
-            button.setText(item);
-            /* CallbackData constructor:  "/"+item+"Settings"  ==>>  /russianSettings*/
-            button.setCallbackData("/" + item + "Settings");
-            buttons.add(button);
-            rows.add(buttons);
-        }
-        //button "main menu
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
-        goToMainMenuButton.setCallbackData("/mainMenu");
-        ////position from left to right
-        List<InlineKeyboardButton> row = new ArrayList<>();
-        //
-        row.add(goToMainMenuButton);
-        //position from up to down
-        rows.add(row);
-        //save buttons in the markup variable
-        keyboardMarkup.setKeyboard(rows);
-        return keyboardMarkup;
-    }
-
     InlineKeyboardMarkup statisticMenu() {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //button "main menu
@@ -177,7 +117,8 @@ public class MenuMaker {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //position from up to down
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-        List<UserStatistic> userStatisticList = userStatisticController.getAllStatisticWithNewWords();
+        List<UserStatistic> userStatisticList = userStatisticController.getAllStatisticWithNewWords(userLanguage);
+        System.out.println(userStatisticList);/////////////////////////////////////////////////////////////////////////////////////
         int count = 0;
         if (!userStatisticList.isEmpty()) {
             for (UserStatistic item : userStatisticList) {
@@ -190,20 +131,20 @@ public class MenuMaker {
         if (count != 0) {
             //button "Daily"
             InlineKeyboardButton learningNewWordsTrainingButton = new InlineKeyboardButton(EmojiGive.newButton + " Учить новые слова");
-            learningNewWordsTrainingButton.setCallbackData("/Trainings=/StartLearningTraining");
+            learningNewWordsTrainingButton.setCallbackData("/training=/StartLearningTraining");
             List<InlineKeyboardButton> row = new ArrayList<>();
             row.add(learningNewWordsTrainingButton);
             rows.add(row);
         }
         //button "Daily"
         InlineKeyboardButton repeatWordsTrainingButton = new InlineKeyboardButton(EmojiGive.repeatButton + " Ежедневная тренировка");
-        repeatWordsTrainingButton.setCallbackData("/Trainings=/StartRepeatTraining");
+        repeatWordsTrainingButton.setCallbackData("/training=/StartRepeatTraining");
         //button "Daily"
         InlineKeyboardButton failsTrainingButton = new InlineKeyboardButton(EmojiGive.redQuestionMark + " Ошиблись - повторите");
-        failsTrainingButton.setCallbackData("/Trainings=/StartFailsTraining");
+        failsTrainingButton.setCallbackData("/training=/StartFailsTraining");
         //button "Add new"
         InlineKeyboardButton addNewWordsButton = new InlineKeyboardButton(EmojiGive.inboxTray + " Добавить новые слова");
-        addNewWordsButton.setCallbackData("/addNewWords");
+        addNewWordsButton.setCallbackData("/training/addNewWords");
         //button "main menu
         InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
         goToMainMenuButton.setCallbackData("/mainMenu");
@@ -227,7 +168,7 @@ public class MenuMaker {
         return keyboardMarkup;
     }
 
-    InlineKeyboardMarkup globalMenu(boolean ifAdmin) {
+    InlineKeyboardMarkup mainMenu(boolean ifAdmin) {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //button "Training"
         InlineKeyboardButton trainingButton = new InlineKeyboardButton(EmojiGive.gameDie + " Тренировки");
@@ -277,31 +218,31 @@ public class MenuMaker {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //button "change Name"
         InlineKeyboardButton changeNameButton = new InlineKeyboardButton("Сменить имя");
-        changeNameButton.setCallbackData("/changeName");
+        changeNameButton.setCallbackData("/settings/changeName");
         //button "change Surname"
         InlineKeyboardButton changeSurnameButton = new InlineKeyboardButton("Сменить фамилию");
-        changeSurnameButton.setCallbackData("/changeSurname");
+        changeSurnameButton.setCallbackData("/settings/changeSurname");
         //button "set new language"
-        InlineKeyboardButton setNewLanguageButton = new InlineKeyboardButton("Установить новый язык");
-        setNewLanguageButton.setCallbackData("/setNewLanguage");
+        /*InlineKeyboardButton setNewLanguageButton = new InlineKeyboardButton("Установить новый язык");
+        setNewLanguageButton.setCallbackData("/setNewLanguage");*/
         //button "settings menu go back"
         InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
         goToMainMenuButton.setCallbackData("/mainMenu");
         //position from left to right
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         List<InlineKeyboardButton> row2 = new ArrayList<>();
-        List<InlineKeyboardButton> row3 = new ArrayList<>();
+        //List<InlineKeyboardButton> row3 = new ArrayList<>();
         List<InlineKeyboardButton> row4 = new ArrayList<>();
         //
         row1.add(changeNameButton);
         row2.add(changeSurnameButton);
-        row3.add(setNewLanguageButton);
+        //row3.add(setNewLanguageButton);
         row4.add(goToMainMenuButton);
         //position from up to down
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         rows.add(row1);
         rows.add(row2);
-        rows.add(row3);
+        //rows.add(row3);
         rows.add(row4);
         //save buttons in the markup variable
         keyboardMarkup.setKeyboard(rows);
@@ -312,10 +253,10 @@ public class MenuMaker {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //button "User Info"
         InlineKeyboardButton userInfoButton = new InlineKeyboardButton(EmojiGive.alien + " Инфо о пользователе");
-        userInfoButton.setCallbackData("/userInfo");
+        userInfoButton.setCallbackData("/info/userInfo");
         //button "About This Bot"
         InlineKeyboardButton aboutBotButton = new InlineKeyboardButton(EmojiGive.robot + " Об этом боте");
-        aboutBotButton.setCallbackData("/aboutThisBot");
+        aboutBotButton.setCallbackData("/info/aboutThisBot");
         //button "About This Bot"
         InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
         goToMainMenuButton.setCallbackData("/mainMenu");
@@ -358,36 +299,6 @@ public class MenuMaker {
         rows.add(row);
         rows.add(row1);
 
-        keyboardMarkup.setKeyboard(rows);
-        return keyboardMarkup;
-    }
-
-    InlineKeyboardMarkup setLanguageMenu() {
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        //button
-        InlineKeyboardButton userInfoButton = new InlineKeyboardButton("\"DE\" Немецкий");
-        userInfoButton.setCallbackData("/germanDE");
-        //button
-        InlineKeyboardButton goToSettingsMenuButton = new InlineKeyboardButton("<" + EmojiGive.wrench + " в меню настроек");
-        goToSettingsMenuButton.setCallbackData("/settings");
-        //button
-        InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
-        goToMainMenuButton.setCallbackData("/mainMenu");
-        //position from left to right
-        List<InlineKeyboardButton> row1 = new ArrayList<>();
-        List<InlineKeyboardButton> row2 = new ArrayList<>();
-        List<InlineKeyboardButton> row3 = new ArrayList<>();
-        //
-        row1.add(userInfoButton);
-        row2.add(goToSettingsMenuButton);
-        row3.add(goToMainMenuButton);
-        //position from up to down
-        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-        rows.add(row1);
-        rows.add(row2);
-        rows.add(row3);
-
-        //save buttons in the markup variable
         keyboardMarkup.setKeyboard(rows);
         return keyboardMarkup;
     }

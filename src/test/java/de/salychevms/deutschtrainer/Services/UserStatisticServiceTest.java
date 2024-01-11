@@ -86,14 +86,10 @@ class UserStatisticServiceTest {
     }
 
     @Test
-    void getUserStatisticNewWordIsTrue() {
+    void getUserStatisticNewWordIsTrueForUser() {
         UserStatistic statistic = new UserStatistic();
         UserStatistic newStatistic = new UserStatistic();
         UserStatistic someOneStatistic = new UserStatistic();
-
-        statistic.setNewWord(true);
-        newStatistic.setNewWord(true);
-        someOneStatistic.setNewWord(true);
 
         List<UserStatistic> statistics = new ArrayList<>();
         statistics.add(statistic);
@@ -103,8 +99,8 @@ class UserStatisticServiceTest {
         when(userStatisticRepository.findAllByNewWordIsTrue()).thenReturn(statistics);
         List<UserStatistic> result = userStatisticService.getUserStatisticNewWordIsTrue();
 
-        assertFalse(result.isEmpty());
-        assertEquals(statistics, result);
+        assertNotNull(result);
+        assertEquals(statistics,result);
     }
 
     @Test

@@ -98,4 +98,15 @@ class UserDictionaryServiceTest {
         assertFalse(result.isEmpty());
         assertEquals(userDictionaries, result);
     }
+
+    @Test
+    void testGetUserDictionaryByUserLanguage(){
+        UserLanguage userLanguage=new UserLanguage();
+        UserDictionary userDictionary=new UserDictionary(userLanguage, new DeRuPairs(),new Date());
+
+        when(userDictionaryRepository.getByUserLanguage(userLanguage)).thenReturn(Optional.of(userDictionary));
+        Optional<UserDictionary> result=userDictionaryService.getByUserLanguage(userLanguage);
+
+        result.ifPresent(value->assertEquals(userDictionary, value));
+    }
 }

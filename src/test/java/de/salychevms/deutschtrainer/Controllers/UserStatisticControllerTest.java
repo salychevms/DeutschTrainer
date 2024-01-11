@@ -20,20 +20,32 @@ import static org.mockito.Mockito.*;
 class UserStatisticControllerTest {
     @Mock
     private UserStatisticService userStatisticService;
+    @Mock
+    private UserDictionaryController userDictionaryController;
     @InjectMocks
     private UserStatisticController userStatisticController;
 
     @Test
     void testGetAllStatisticWithNewWords() {
+        UserLanguage userLanguage = new UserLanguage();
+        userLanguage.setId(123L);
+        UserDictionary userDictionary1 = new UserDictionary(userLanguage, new DeRuPairs(), new Date());
+        UserDictionary userDictionary2 = new UserDictionary(userLanguage, new DeRuPairs(), new Date());
+        userDictionary1.setId(45L);
+        userDictionary2.setId(67L);
+        UserStatistic us1 = new UserStatistic(userDictionary1);
+        UserStatistic us2 = new UserStatistic(userDictionary2);
         List<UserStatistic> userStatistics = new ArrayList<>();
-        userStatistics.add(new UserStatistic());
-        userStatistics.add(new UserStatistic(new UserDictionary()));
-        userStatistics.add(new UserStatistic(new UserDictionary(new UserLanguage(), new DeRuPairs(), new Date())));
+        userStatistics.add(us1);
+        userStatistics.add(us2);
 
         when(userStatisticService.getUserStatisticNewWordIsTrue()).thenReturn(userStatistics);
-        List<UserStatistic> result = userStatisticController.getAllStatisticWithNewWords();
+        when(userDictionaryController.getById(us1.getWord().getId())).thenReturn(Optional.of(userDictionary1));
+        when(userDictionaryController.getById(us2.getWord().getId())).thenReturn(Optional.of(userDictionary2));
 
-        assertNotNull(result);
+        List<UserStatistic> result = userStatisticController.getAllStatisticWithNewWords(userLanguage);
+
+        assertEquals(2, result.size());
         assertEquals(userStatistics, result);
     }
 
@@ -61,7 +73,7 @@ class UserStatisticControllerTest {
         when(userStatisticService.getUserStatisticSortByIterationAllAsc()).thenReturn(userStatistics);
         List<UserStatistic> result = userStatisticController.getAllStatisticWithIterationsAllAsc();
 
-        assertNotNull(result);
+        assertEquals(3, result.size());
         assertEquals(userStatistics, result);
     }
 
@@ -97,7 +109,7 @@ class UserStatisticControllerTest {
 
     @Test
     void testSaveNewPairInStatistic() {
-        UserDictionary userDictionary=new UserDictionary(new UserLanguage(), new DeRuPairs(), new Date());
+        UserDictionary userDictionary = new UserDictionary(new UserLanguage(), new DeRuPairs(), new Date());
 
         userStatisticController.saveNewPairInStatistic(userDictionary);
         verify(userStatisticService, times(1)).saveNewWordInStatistic(userDictionary);
@@ -105,7 +117,7 @@ class UserStatisticControllerTest {
 
     @Test
     void testUpdateAllIterationsAndNewWordStatus() {
-        UserDictionary userDictionary=new UserDictionary(new UserLanguage(), new DeRuPairs(), new Date());
+        UserDictionary userDictionary = new UserDictionary(new UserLanguage(), new DeRuPairs(), new Date());
 
         userStatisticController.updateAllIterationsAndNewWordStatus(userDictionary);
         verify(userStatisticService, times(1)).updateLastTraining(userDictionary);
@@ -118,7 +130,7 @@ class UserStatisticControllerTest {
 
     @Test
     void testUpdateAllFails() {
-        UserDictionary userDictionary=new UserDictionary(new UserLanguage(), new DeRuPairs(), new Date());
+        UserDictionary userDictionary = new UserDictionary(new UserLanguage(), new DeRuPairs(), new Date());
 
         userStatisticController.updateAllFails(userDictionary);
         verify(userStatisticService, times(1)).updateMonthFails(userDictionary);
