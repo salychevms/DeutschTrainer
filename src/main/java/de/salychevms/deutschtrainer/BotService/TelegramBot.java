@@ -104,7 +104,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                                 sendKeyboard(mm.settingsMenu(), chatId, "Ваше имя изменено! \""
                                         + messageText + "\""
                                         + "\n\n" + EmojiGive.wrench + " Настройки:");
-                                break;
                             } else if (userText.equals("/settings/changeSurname")) {
                                 usersController.updateSurnameByTelegramId(telegramId, messageText);
                                 iterator.remove();
@@ -128,29 +127,31 @@ public class TelegramBot extends TelegramLongPollingBot {
                                         List<String> searchList = deRuPairsController.getWordsWhichUserLooksFor(messageText, "DE");
                                         if (!searchList.isEmpty()) {
                                             sendKeyboard(mm.getSearchWordMenu(searchList, messageText, "no"), chatId,
-                                                    "Вы ввели слово: " + messageText + "\nВыберите одно из преложенных слов " +
-                                                            "\nи получите доступные варианты перевода.");
+                                                    "Вы ввели слово: " + messageText + "\nВыберите одно из преложенных слов (первые 20 совпадений)" +
+                                                            "\nи получите доступные варианты перевода."+
+                                                            "\n\nВажно!!! Выводятся только первые 20 совпадений по запросу пользователя. " +
+                                                            "Возможно нужное слово вы найдете, если напишете новый более подробный запрос.");
                                         } else {
                                             UserLanguage userLanguage = trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE");
                                             sendKeyboard(mm.trainingMenu(userLanguage), chatId,
                                                     "Вы ввели слово: " + messageText +
                                                             "\nК сожалению ни чего подходящегок этому не нашлось! Попробуйте что-то другое.\n\n" +
                                                             EmojiGive.gameDie + " Тренировки:");
-                                            break;
                                         }
                                     } else if (deRuPairsController.isItRussian(messageText)) {
                                         List<String> searchList = deRuPairsController.getWordsWhichUserLooksFor(messageText, "RU");
                                         if (!searchList.isEmpty()) {
                                             sendKeyboard(mm.getSearchWordMenu(searchList, messageText, "no"), chatId,
-                                                    "You entered a word: " + messageText + "\nВыберите одно из преложенных слов " +
-                                                            "\nи получите доступные варианты перевода.");
+                                                    "Вы ввели слово: " + messageText + "\nВыберите одно из преложенных слов (первые 20 совпадений)" +
+                                                            "\nи получите доступные варианты перевода."+
+                                                            "\n\nВажно!!! Выводятся только первые 20 совпадений по запросу пользователя. " +
+                                                            "Возможно нужное слово вы найдете, если напишете новый более подробный запрос.");
                                         } else {
                                             UserLanguage userLanguage = trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE");
                                             sendKeyboard(mm.trainingMenu(userLanguage), chatId,
                                                     "Вы ввели слово: " + messageText +
                                                             "\nК сожалению ни чего подходящего к этому не нашлось! Попробуйте что-то другое.\n\n" +
                                                             EmojiGive.gameDie + " Тренировки:");
-                                            break;
                                         }
                                     }
                                 } else {
@@ -158,7 +159,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                                     sendKeyboard(mm.trainingMenu(userLanguage), chatId,
                                             "Либо вы ни чего не ввели, либо что-то пошло не так...\nИзвините, найдем - починим!\n\n" +
                                                     EmojiGive.gameDie + " Тренировки:");
-                                    break;
                                 }
                             }
                         }
@@ -359,12 +359,14 @@ public class TelegramBot extends TelegramLongPollingBot {
                     editKeyboard(update.getCallbackQuery(), mm.mainMenu(adminStatus), sendUserInfo(telegramId) + "\n\n" + EmojiGive.joystick + " Главное меню:");
                 } else if (callBackData.equals("/info/aboutThisBot")) {
                     editKeyboard(update.getCallbackQuery(), mm.mainMenu(adminStatus),
-                            "Я надеюсь что этот бот поможет людям учить немецкие слова." +
-                                    "Бот бесплатный. Это моя практика как программиста. Да и слова мне самому учить надо!=)" +
-                                    "Так что как говорится \"двух зайцев одним выстрелом\"!" +
-                                    "Любые вопросы, пожелания, проблемы пишем сюда:" +
+                            "Я надеюсь что этот бот поможет людям учить немецкие слова. " +
+                                    "Бот бесплатный. Это моя практика как программиста. Да и слова мне самому учить надо!=) " +
+                                    "Словарь как таковой пока я набиваю в ручную, если не сильно лень, " +
+                                    "так что буду признателен за помощь в составлении списка слов, которые нужны вам для изучения. "+
+                                    "Любые вопросы, пожелания, проблемы, а также списки слов, которые вам нужны - всё шлём и пишем сюда: " +
                                     "mishanya_k-city@mail.ru." +
-                                    "Удачи в учебе и хорошего настроения! =)\n\n" +
+                                    "\nСпасибо, что уделили время этому проекту! Надеюсь он вам поможет!" +
+                                    "\nУдачи в учебе и хорошего настроения! =)\n\n" +
                                     EmojiGive.joystick + " Главное меню:");
                 } else if (callBackData.equals("/settings/changeName")) {
                     editMessage(callbackQuery, "Сменить имя:");

@@ -51,30 +51,60 @@ class UserStatisticControllerTest {
 
     @Test
     void testGetAllStatisticWithFailsAllDesc() {
+        UserLanguage userLanguage = new UserLanguage();
+        userLanguage.setId(321L);
+        UserDictionary ud1 = new UserDictionary(userLanguage, new DeRuPairs(), new Date());
+        UserDictionary ud2 = new UserDictionary(userLanguage, new DeRuPairs(), new Date());
+        UserDictionary ud3 = new UserDictionary(userLanguage, new DeRuPairs(), new Date());
+        ud1.setId(987L);
+        ud2.setId(98L);
+        ud3.setId(9L);
+        UserStatistic us1=new UserStatistic(ud1);
+        UserStatistic us2=new UserStatistic(ud2);
+        UserStatistic us3=new UserStatistic(ud3);
         List<UserStatistic> userStatistics = new ArrayList<>();
-        userStatistics.add(new UserStatistic());
-        userStatistics.add(new UserStatistic(new UserDictionary()));
-        userStatistics.add(new UserStatistic(new UserDictionary(new UserLanguage(), new DeRuPairs(), new Date())));
+        userStatistics.add(us1);
+        userStatistics.add(us2);
+        userStatistics.add(us3);
 
         when(userStatisticService.getUserStatisticSortByFailsAllDesc()).thenReturn(userStatistics);
-        List<UserStatistic> result = userStatisticController.getAllStatisticWithFailsAllDesc();
+        when(userDictionaryController.getById(us1.getWord().getId())).thenReturn(Optional.of(ud1));
+        when(userDictionaryController.getById(us2.getWord().getId())).thenReturn(Optional.of(ud2));
+        when(userDictionaryController.getById(us3.getWord().getId())).thenReturn(Optional.of(ud3));
+        List<UserStatistic> result = userStatisticController.getAllStatisticWithFailsAllDesc(userLanguage);
 
-        assertNotNull(result);
+        assertEquals(3, result.size());
         assertEquals(userStatistics, result);
     }
 
     @Test
     void testGetAllStatisticWithIterationsAllAsc() {
+        UserLanguage userLanguage = new UserLanguage();
+        userLanguage.setId(686L);
+        UserDictionary ud1 = new UserDictionary(userLanguage, new DeRuPairs(), new Date());
+        UserDictionary ud2 = new UserDictionary(new UserLanguage(), new DeRuPairs(), new Date());
+        UserDictionary ud3 = new UserDictionary(userLanguage, new DeRuPairs(), new Date());
+        ud1.setId(777L);
+        ud2.setId(69L);
+        ud3.setId(1L);
+        UserStatistic us1=new UserStatistic(ud1);
+        UserStatistic us2=new UserStatistic(ud2);
+        UserStatistic us3=new UserStatistic(ud3);
         List<UserStatistic> userStatistics = new ArrayList<>();
-        userStatistics.add(new UserStatistic());
-        userStatistics.add(new UserStatistic(new UserDictionary()));
-        userStatistics.add(new UserStatistic(new UserDictionary(new UserLanguage(), new DeRuPairs(), new Date())));
+        userStatistics.add(us1);
+        userStatistics.add(us2);
+        userStatistics.add(us3);
 
-        when(userStatisticService.getUserStatisticSortByIterationAllAsc()).thenReturn(userStatistics);
-        List<UserStatistic> result = userStatisticController.getAllStatisticWithIterationsAllAsc();
+        when(userStatisticService.getUserStatisticSortByFailsAllDesc()).thenReturn(userStatistics);
+        when(userDictionaryController.getById(us1.getWord().getId())).thenReturn(Optional.of(ud1));
+        when(userDictionaryController.getById(us2.getWord().getId())).thenReturn(Optional.of(ud2));
+        when(userDictionaryController.getById(us3.getWord().getId())).thenReturn(Optional.of(ud3));
+        List<UserStatistic> result = userStatisticController.getAllStatisticWithFailsAllDesc(userLanguage);
 
-        assertEquals(3, result.size());
-        assertEquals(userStatistics, result);
+        assertEquals(2, result.size());
+        assertNotEquals(userStatistics, result);
+        assertEquals(us1, result.get(0));
+        assertEquals(us3, result.get(1));
     }
 
     @Test

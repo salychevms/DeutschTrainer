@@ -45,7 +45,7 @@ public class TrainingController {
             userLanguage = userLanguageController.getByUserIdAndLanguageId(user.get().getTelegramId(), language.get().getId());
             if (userLanguage.isPresent()) {
                 userLanguageId = userLanguage.get().getId();
-                List<UserStatistic> statisticList = userStatisticController.getAllStatisticWithIterationsAllAsc();
+                List<UserStatistic> statisticList = userStatisticController.getAllStatisticWithIterationsAllAsc(userLanguage.get());
                 for (UserStatistic statisticItem : statisticList) {
                     Long statisticLanguageId = getUserLangByUserStatistic(statisticItem).getId();
                     if (statisticLanguageId.equals(userLanguageId)) {
@@ -78,9 +78,9 @@ public class TrainingController {
             userLanguage = userLanguageController.getByUserIdAndLanguageId(user.get().getTelegramId(), language.get().getId());
             if (userLanguage.isPresent()) {
                 userLanguageId = userLanguage.get().getId();
-                List<UserStatistic> statisticList = userStatisticController.getAllStatisticWithFailsAllDesc();
+                List<UserStatistic> statisticList = userStatisticController.getAllStatisticWithFailsAllDesc(userLanguage.get());
                 for (UserStatistic statisticItem : statisticList) {
-                    if (statisticItem.getFailsAll() != null) {
+                    if (statisticItem.getFailsPerDay() != null || statisticItem.getFailsPerWeek() != null || statisticItem.getFailsPerMonth() != null) {
                         Long statisticLanguageId = getUserLangByUserStatistic(statisticItem).getId();
                         if (statisticLanguageId.equals(userLanguageId)) {
                             Optional<UserDictionary> userPair = userDictionaryController.getById(statisticItem.getWord().getId());

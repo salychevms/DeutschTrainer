@@ -31,12 +31,28 @@ public class UserStatisticController {
         return userStatistics;
     }
 
-    public List<UserStatistic> getAllStatisticWithFailsAllDesc() {
-        return userStatisticService.getUserStatisticSortByFailsAllDesc();
+    public List<UserStatistic> getAllStatisticWithFailsAllDesc(UserLanguage userLanguage) {
+        List<UserStatistic> userStatistics=new ArrayList<>();
+        List<UserStatistic> statistics=userStatisticService.getUserStatisticSortByFailsAllDesc();
+        for(UserStatistic value:statistics){
+            Optional<UserDictionary> word=userDictionaryController.getById(value.getWord().getId());
+            if(word.isPresent() && userLanguage.getId().equals(word.get().getUserLanguage().getId())){
+                userStatistics.add(value);
+            }
+        }
+        return userStatistics;
     }
 
-    public List<UserStatistic> getAllStatisticWithIterationsAllAsc() {
-        return userStatisticService.getUserStatisticSortByIterationAllAsc();
+    public List<UserStatistic> getAllStatisticWithIterationsAllAsc(UserLanguage userLanguage) {
+        List<UserStatistic> userStatistics=new ArrayList<>();
+        List<UserStatistic> statistics=userStatisticService.getUserStatisticSortByIterationAllAsc();
+        for(UserStatistic value:statistics){
+            Optional<UserDictionary> word=userDictionaryController.getById(value.getWord().getId());
+            if(word.isPresent() && userLanguage.getId().equals(word.get().getUserLanguage().getId())){
+                userStatistics.add(value);
+            }
+        }
+        return userStatistics;
     }
 
     public Optional<UserStatistic> getUserStatisticByUserDictionary(UserDictionary userDictionary, UserLanguage userLanguage) {

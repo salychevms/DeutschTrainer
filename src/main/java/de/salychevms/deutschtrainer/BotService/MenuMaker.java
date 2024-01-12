@@ -54,6 +54,12 @@ public class MenuMaker {
     InlineKeyboardMarkup getSearchWordMenu(List<String> wordCollection, String translatableWord, String isTranslate) {
         final String YES = "yes";
         final String NO = "no";
+
+        //first 20 words
+        if (wordCollection.size() >= 20) {
+            wordCollection = wordCollection.subList(0, 19);
+        }
+
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         //button
@@ -117,31 +123,40 @@ public class MenuMaker {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //position from up to down
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-        List<UserStatistic> userStatisticList = userStatisticController.getAllStatisticWithNewWords(userLanguage);
-        System.out.println(userStatisticList);/////////////////////////////////////////////////////////////////////////////////////
-        int count = 0;
-        if (!userStatisticList.isEmpty()) {
-            for (UserStatistic item : userStatisticList) {
-                Long userLangIdFromStat = trainingController.getUserLangByUserStatistic(item).getId();
-                Long userLangIdFromIncomingParam = userLanguage.getId();
-                if (userLangIdFromIncomingParam.equals(userLangIdFromStat))
-                    count++;
-            }
-        }
-        if (count != 0) {
-            //button "Daily"
+        //new words training button
+        List<UserStatistic> userStatisticListOrderByNewWord = userStatisticController.getAllStatisticWithNewWords(userLanguage);
+        if (!userStatisticListOrderByNewWord.isEmpty()) {
             InlineKeyboardButton learningNewWordsTrainingButton = new InlineKeyboardButton(EmojiGive.newButton + " Учить новые слова");
             learningNewWordsTrainingButton.setCallbackData("/training=/StartLearningTraining");
             List<InlineKeyboardButton> row = new ArrayList<>();
             row.add(learningNewWordsTrainingButton);
             rows.add(row);
         }
-        //button "Daily"
-        InlineKeyboardButton repeatWordsTrainingButton = new InlineKeyboardButton(EmojiGive.repeatButton + " Ежедневная тренировка");
-        repeatWordsTrainingButton.setCallbackData("/training=/StartRepeatTraining");
-        //button "Daily"
-        InlineKeyboardButton failsTrainingButton = new InlineKeyboardButton(EmojiGive.redQuestionMark + " Ошиблись - повторите");
-        failsTrainingButton.setCallbackData("/training=/StartFailsTraining");
+        //fails training button
+        List<UserStatistic> userStatisticListOrderByFails = userStatisticController.getAllStatisticWithFailsAllDesc(userLanguage);
+        List<UserStatistic> freshFailsStatistic = new ArrayList<>();
+        for (UserStatistic value : userStatisticListOrderByFails) {
+            if (value.getFailsPerDay() != null || value.getFailsPerWeek() != null || value.getFailsPerMonth() != null) {
+                freshFailsStatistic.add(value);
+            }
+        }
+        if (!freshFailsStatistic.isEmpty()) {
+            InlineKeyboardButton failsTrainingButton = new InlineKeyboardButton(EmojiGive.redQuestionMark + " Ошиблись - повторите");
+            failsTrainingButton.setCallbackData("/training=/StartFailsTraining");
+            List<InlineKeyboardButton> row = new ArrayList<>();
+            row.add(failsTrainingButton);
+            rows.add(row);
+        }
+
+        List<UserStatistic> ifWordsExist=userStatisticController.getAllStatisticWithIterationsAllAsc(userLanguage);
+        if(!ifWordsExist.isEmpty()) {
+            InlineKeyboardButton repeatWordsTrainingButton = new InlineKeyboardButton(EmojiGive.repeatButton + " Ежедневная тренировка");
+            repeatWordsTrainingButton.setCallbackData("/training=/StartRepeatTraining");
+            List<InlineKeyboardButton> row=new ArrayList<>();
+            row.add(repeatWordsTrainingButton);
+            rows.add(row);
+        }
+
         //button "Add new"
         InlineKeyboardButton addNewWordsButton = new InlineKeyboardButton(EmojiGive.inboxTray + " Добавить новые слова");
         addNewWordsButton.setCallbackData("/training/addNewWords");
@@ -151,18 +166,12 @@ public class MenuMaker {
         ////position from left to right
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         List<InlineKeyboardButton> row2 = new ArrayList<>();
-        List<InlineKeyboardButton> row3 = new ArrayList<>();
-        List<InlineKeyboardButton> row4 = new ArrayList<>();
         //
-        row1.add(repeatWordsTrainingButton);
-        row2.add(failsTrainingButton);
-        row3.add(addNewWordsButton);
-        row4.add(goToMainMenuButton);
+        row1.add(addNewWordsButton);
+        row2.add(goToMainMenuButton);
         //position from up to down
         rows.add(row1);
         rows.add(row2);
-        rows.add(row3);
-        rows.add(row4);
         //save buttons in the markup variable
         keyboardMarkup.setKeyboard(rows);
         return keyboardMarkup;
