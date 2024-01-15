@@ -4,7 +4,6 @@ import de.salychevms.deutschtrainer.Controllers.UserStatisticController;
 import de.salychevms.deutschtrainer.Emojies.EmojiGive;
 import de.salychevms.deutschtrainer.Models.UserLanguage;
 import de.salychevms.deutschtrainer.Models.UserStatistic;
-import de.salychevms.deutschtrainer.Training.TrainingController;
 import org.springframework.stereotype.Component;
 
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -16,11 +15,9 @@ import java.util.List;
 @Component
 public class MenuMaker {
     private final UserStatisticController userStatisticController;
-    private final TrainingController trainingController;
 
-    public MenuMaker(UserStatisticController userStatisticController, TrainingController trainingController) {
+    public MenuMaker(UserStatisticController userStatisticController) {
         this.userStatisticController = userStatisticController;
-        this.trainingController = trainingController;
     }
 
     InlineKeyboardMarkup adminMenu() {
@@ -68,6 +65,14 @@ public class MenuMaker {
             InlineKeyboardButton button = new InlineKeyboardButton();
             List<InlineKeyboardButton> buttons = new ArrayList<>();
             button.setText(item);
+            String substr1=" <<еще варианты>>";
+            String substr2=" <<уже добавлено>>";
+            if(item.contains(substr1)){
+                item=item.replaceAll(substr1,"");
+            }
+            if(item.contains(substr2)){
+                item=item.replaceAll(substr2, "");
+            }
             /* CallbackData constructor:
             for search words: "/SearchOffer="+item  ==>>  /SearchOffer=rennen
             for translate words: "/TranslationsOffer="+item  ==>>  /TranslationsOffer=rennen */
@@ -77,7 +82,7 @@ public class MenuMaker {
                 goToTrainingMenuButton = new InlineKeyboardButton("<" + EmojiGive.gameDie + " к меню тренировок");
                 goToTrainingMenuButton.setCallbackData("/training");
             } else if (isTranslate.equalsIgnoreCase(YES)) {
-                //this step get to a user a lot of translations for the search word
+                //this step get to a user a lot of translations for the search word;
                 button.setCallbackData("/TranslationsOffer=" + item + "=" + translatableWord);
                 goToTrainingMenuButton = new InlineKeyboardButton("<" + EmojiGive.backArrow + " назад");
                 goToTrainingMenuButton.setCallbackData("/toSearchOffer");
@@ -99,7 +104,6 @@ public class MenuMaker {
         //save buttons in the markup variable
         keyboardMarkup.setKeyboard(rows);
         return keyboardMarkup;
-
     }
 
     InlineKeyboardMarkup statisticMenu() {

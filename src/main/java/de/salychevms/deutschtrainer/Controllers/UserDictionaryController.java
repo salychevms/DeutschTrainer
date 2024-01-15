@@ -4,7 +4,7 @@ import de.salychevms.deutschtrainer.Models.*;
 import de.salychevms.deutschtrainer.Services.UserDictionaryService;
 import org.springframework.stereotype.Component;
 
-import javax.print.attribute.standard.MediaSize;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,13 +46,13 @@ public class UserDictionaryController {
         return userDictionaryService.getAll();
     }
 
-    public Optional<UserDictionary> getByUserLanguage(Long telegramId) {
+    public List<UserDictionary> getAllByTelegramId(Long telegramId) {
         Optional<Language> language = languageController.getLanguageByIdentifier("DE");
         if (language.isPresent()) {
             Optional<UserLanguage> userLanguage = userLanguageController.getByUserIdAndLanguageId(telegramId, language.get().getId());
             if (userLanguage.isPresent()) {
-                return userDictionaryService.getByUserLanguage(userLanguage.get());
-            }else return Optional.empty();
-        }else return Optional.empty();
+                return userDictionaryService.getAllByUserLanguage(userLanguage.get());
+            }else return Collections.emptyList();
+        }else return Collections.emptyList();
     }
 }

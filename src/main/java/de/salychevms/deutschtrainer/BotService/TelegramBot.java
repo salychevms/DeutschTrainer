@@ -32,11 +32,10 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final UserDictionaryController userDictionaryController;
     private final TrainingController trainingController;
     private final MenuMaker mm;
-
-    private List<String> queue = new ArrayList<>();
     private List<TrainingPair> learningList = new ArrayList<>();
     private List<TrainingPair> failList = new ArrayList<>();
     private List<TrainingPair> repeatList = new ArrayList<>();
+    private List<String> queue = new ArrayList<>();
 
     public TelegramBot(BotConfig config, UsersController usersController, LanguageController languageController,
                        UserLanguageController userLanguageController, DeutschController deutschController,
@@ -124,11 +123,11 @@ public class TelegramBot extends TelegramLongPollingBot {
                                 iterator.remove();
                                 if (!messageText.isEmpty()) {
                                     if (deRuPairsController.isItGerman(messageText)) {
-                                        List<String> searchList = deRuPairsController.getWordsWhichUserLooksFor(messageText, "DE");
+                                        List<String> searchList = deRuPairsController.getWordsWhichUserLooksFor(telegramId, messageText, "DE");
                                         if (!searchList.isEmpty()) {
                                             sendKeyboard(mm.getSearchWordMenu(searchList, messageText, "no"), chatId,
-                                                    "Вы ввели слово: " + messageText + "\nВыберите одно из преложенных слов (первые 20 совпадений)" +
-                                                            "\nи получите доступные варианты перевода."+
+                                                    "Вы ввели слово: " + messageText + "\nВыберите одно из предложенных слов (первые 20 совпадений)" +
+                                                            "\nи получите доступные варианты перевода." +
                                                             "\n\nВажно!!! Выводятся только первые 20 совпадений по запросу пользователя. " +
                                                             "Возможно нужное слово вы найдете, если напишете новый более подробный запрос.");
                                         } else {
@@ -139,11 +138,11 @@ public class TelegramBot extends TelegramLongPollingBot {
                                                             EmojiGive.gameDie + " Тренировки:");
                                         }
                                     } else if (deRuPairsController.isItRussian(messageText)) {
-                                        List<String> searchList = deRuPairsController.getWordsWhichUserLooksFor(messageText, "RU");
+                                        List<String> searchList = deRuPairsController.getWordsWhichUserLooksFor(telegramId, messageText, "RU");
                                         if (!searchList.isEmpty()) {
                                             sendKeyboard(mm.getSearchWordMenu(searchList, messageText, "no"), chatId,
                                                     "Вы ввели слово: " + messageText + "\nВыберите одно из преложенных слов (первые 20 совпадений)" +
-                                                            "\nи получите доступные варианты перевода."+
+                                                            "\nи получите доступные варианты перевода." +
                                                             "\n\nВажно!!! Выводятся только первые 20 совпадений по запросу пользователя. " +
                                                             "Возможно нужное слово вы найдете, если напишете новый более подробный запрос.");
                                         } else {
@@ -193,11 +192,11 @@ public class TelegramBot extends TelegramLongPollingBot {
                     String[] selectedWord = callBackData.split("=");
                     List<String> translationList;
                     if (deRuPairsController.isItGerman(selectedWord[1])) {
-                        translationList = deRuPairsController.getTranslations(selectedWord[1], "DE");
+                        translationList = deRuPairsController.getTranslations(telegramId, selectedWord[1], "DE");
                         sendKeyboard(mm.getSearchWordMenu(translationList, selectedWord[1], "yes"), chatId,
                                 "\nВы можете выбрать одно слово и получить все доступные переводы:\n" + selectedWord[2]);
                     } else if (deRuPairsController.isItRussian(selectedWord[1])) {
-                        translationList = deRuPairsController.getTranslations(selectedWord[1], "RU");
+                        translationList = deRuPairsController.getTranslations(telegramId, selectedWord[1], "RU");
                         sendKeyboard(mm.getSearchWordMenu(translationList, selectedWord[1], "yes"), chatId,
                                 "\nВы можете выбрать одно слово и получить все доступные переводы:\n" + selectedWord[2]);
                     }
@@ -214,12 +213,31 @@ public class TelegramBot extends TelegramLongPollingBot {
                     }
                     if (deutsch.isPresent() && russian.isPresent()) {
                         Optional<DeRuPairs> pair = deRuPairsController.getPairByGermanIdAndRussianId(deutsch.get().getId(), russian.get().getId());
-                        pair.ifPresent(deRu -> userStatisticController.saveNewPairInStatistic(userDictionaryController.saveNewPair(
-                                telegramId, "DE", deRu)));
-                        sendKeyboard(mm.trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(
-                                        telegramId, "DE")),
-                                chatId,
-                                "Вы добавили пару слов:\n" + deutsch.get().getDeWord() + " = " + russian.get().getRuWord());
+                        if (pair.isPresent()) {
+                            List<UserDictionary> dictionaries = userDictionaryController.getAllByTelegramId(telegramId);
+                            boolean bool = false;
+                            for (UserDictionary dict : dictionaries) {
+                                if (dict.getPair().getId().equals(pair.get().getId())) {
+                                    bool = true;
+                                }
+                            }
+                            if (!bool) {
+                                userStatisticController.saveNewPairInStatistic(userDictionaryController.saveNewPair(telegramId, "DE", pair.get()));
+                                sendKeyboard(mm.trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(
+                                                telegramId, "DE")), chatId,
+                                        "Вы добавили пару слов:\n" +
+                                                deutsch.get().getDeWord() +
+                                                " = " + russian.get().getRuWord() +
+                                                "\n\n" + EmojiGive.gameDie + " Тренировки:");
+                            } else {
+                                sendKeyboard(mm.trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(
+                                                telegramId, "DE")), chatId,
+                                        "Вы у вас уже есть эта пара слов:\n" +
+                                                deutsch.get().getDeWord() +
+                                                " = " + russian.get().getRuWord() +
+                                                "\n\n" + EmojiGive.gameDie + " Тренировки:");
+                            }
+                        }
                     }
                 } else if (callBackData.equals("/toSearchOffer")) {
 
@@ -298,14 +316,15 @@ public class TelegramBot extends TelegramLongPollingBot {
                         failList.clear();
                     }
                 } else if (callBackData.equals("/statistic")) {
-                    editKeyboard(update.getCallbackQuery(), mm.statisticMenu(), EmojiGive.barChart + " Статистика:");
+                    String basicStatistic = userStatisticController.getBasicStatistic(telegramId);
+                    editKeyboard(update.getCallbackQuery(), mm.statisticMenu(), EmojiGive.barChart + " Статистика: \n\n" + basicStatistic);
                 } else if (callBackData.equals("/settings")) {
                     editKeyboard(update.getCallbackQuery(), mm.settingsMenu(), EmojiGive.wrench + " Настройки:");
                 } else if (callBackData.equals("/info")) {
                     editKeyboard(update.getCallbackQuery(), mm.infoMenu(), EmojiGive.clipboard + " Инфо:");
                 } else if (callBackData.equals("/adminMenu")) {
                     editKeyboard(update.getCallbackQuery(), mm.adminMenu(), EmojiGive.lockedWithKey + " Admin Menu:");
-                }else if (callBackData.equals("/adminMenu/addWordsAdmin")) {
+                } else if (callBackData.equals("/adminMenu/addWordsAdmin")) {
                     editMessage(callbackQuery, """
                             A Very Important Description:
                             New record should looks like **der Hund // собака**.
@@ -362,7 +381,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                             "Я надеюсь что этот бот поможет людям учить немецкие слова. " +
                                     "Бот бесплатный. Это моя практика как программиста. Да и слова мне самому учить надо!=) " +
                                     "Словарь как таковой пока я набиваю в ручную, если не сильно лень, " +
-                                    "так что буду признателен за помощь в составлении списка слов, которые нужны вам для изучения. "+
+                                    "так что буду признателен за помощь в составлении списка слов, которые нужны вам для изучения. " +
                                     "Любые вопросы, пожелания, проблемы, а также списки слов, которые вам нужны - всё шлём и пишем сюда: " +
                                     "mishanya_k-city@mail.ru." +
                                     "\nСпасибо, что уделили время этому проекту! Надеюсь он вам поможет!" +

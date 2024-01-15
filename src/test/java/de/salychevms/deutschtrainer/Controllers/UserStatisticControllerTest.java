@@ -116,7 +116,7 @@ class UserStatisticControllerTest {
         userDictionary.setId(userDictionaryId);
         UserStatistic userStatistic = new UserStatistic(userDictionary);
 
-        when(userStatisticService.getUserStatisticByWord(userDictionary)).thenReturn(Optional.of(userStatistic));
+        when(userStatisticService.getUserStatisticByUserDictionary(userDictionary)).thenReturn(Optional.of(userStatistic));
         Optional<UserStatistic> result = userStatisticController.getUserStatisticByUserDictionary(userDictionary, userLanguage);
 
         result.ifPresent(value -> assertEquals(userStatistic, value));
@@ -131,7 +131,7 @@ class UserStatisticControllerTest {
         userDictionary.setId(userDictionaryId);
         UserStatistic userStatistic = new UserStatistic(userDictionary);
 
-        when(userStatisticService.getUserStatisticByWord(userDictionary)).thenReturn(Optional.empty());
+        when(userStatisticService.getUserStatisticByUserDictionary(userDictionary)).thenReturn(Optional.empty());
         Optional<UserStatistic> result = userStatisticController.getUserStatisticByUserDictionary(userDictionary, new UserLanguage());
 
         assertEquals(Optional.empty(), result);

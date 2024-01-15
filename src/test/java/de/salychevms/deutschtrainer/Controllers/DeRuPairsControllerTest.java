@@ -1,21 +1,14 @@
 package de.salychevms.deutschtrainer.Controllers;
 
-import de.salychevms.deutschtrainer.Models.DeRuPairs;
-import de.salychevms.deutschtrainer.Models.Deutsch;
-import de.salychevms.deutschtrainer.Models.Russian;
+import de.salychevms.deutschtrainer.Models.*;
 import de.salychevms.deutschtrainer.Services.DeRuPairsService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.sound.midi.Soundbank;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -28,6 +21,8 @@ class DeRuPairsControllerTest {
     private RussianController russianController;
     @Mock
     private DeutschController deutschController;
+    @Mock
+    private UserDictionaryController userDictionaryController;
     @InjectMocks
     private DeRuPairsController deRuPairsController;
 
@@ -131,33 +126,58 @@ class DeRuPairsControllerTest {
 
     @Test
     void TestGetRUWordsWhichUserLooksFor() {
+        Long telegramId=123L;
         String identifier="RU";
         String looksFor="дом";
         String dom="дом";
         String domashniy="домашний";
         String upravdom="управдом";
 
+        Deutsch de=new Deutsch("was???");
+        de.setId(999L);
+        Russian ru1=new Russian(dom);
+        Russian ru2=new Russian(domashniy);
+        Russian ru3=new Russian(upravdom);
+        ru1.setId(555L);
+        ru2.setId(666L);
+        ru3.setId(777L);
+        DeRuPairs pair1=new DeRuPairs(de, ru1);
+        DeRuPairs pair2=new DeRuPairs(de, ru3);
+        Long p1Id=789L;
+        Long p2Id=890L;
+        pair1.setId(p1Id);
+        pair2.setId(p2Id);
+        List<UserDictionary> dictionaryList=new ArrayList<>();
+        UserDictionary ud1=new UserDictionary(new UserLanguage(),pair1,new Date());
+        UserDictionary ud2=new UserDictionary(new UserLanguage(), pair2, new Date());
+        dictionaryList.add(ud1);
+        dictionaryList.add(ud2);
         List<Russian> found=new ArrayList<>();
         List<String> foundedWords=new ArrayList<>();
-        found.add(new Russian(dom));
-        found.add(new Russian(domashniy));
-        found.add(new Russian(upravdom));
-        foundedWords.add(dom);
+        found.add(ru1);
+        found.add(ru2);
+        found.add(ru3);
+        foundedWords.add(dom+ "\n(см. еще варианты)");
         foundedWords.add(domashniy);
-        foundedWords.add(upravdom);
+        foundedWords.add(upravdom+ "\n(см. еще варианты)");
 
+        when(userDictionaryController.getAllByTelegramId(telegramId)).thenReturn(dictionaryList);
+        when(deRuPairsService.findPairById(p1Id)).thenReturn(Optional.of(pair1));
+        when(deRuPairsService.findPairById(p2Id)).thenReturn(Optional.of(pair2));
         when(russianController.findAllRussianWordsWhichContain(looksFor)).thenReturn(found);
-        List<String> result=deRuPairsController.getWordsWhichUserLooksFor(looksFor, identifier);
+        List<String> result=deRuPairsController.getWordsWhichUserLooksFor(telegramId, looksFor, identifier);
 
-        assertNotNull(result);
+        assertEquals(3, result.size());
         assertEquals(foundedWords, result);
-        assertTrue(result.contains(dom));
+        assertTrue(result.contains(dom+ "\n(см. еще варианты)"));
         assertTrue(result.contains(domashniy));
-        assertTrue(result.contains(upravdom));
+        assertTrue(result.contains(upravdom+ "\n(см. еще варианты)"));
     }
 
     @Test
     void TestGetDEWordsWhichUserLooksFor() {
+        Long telegramId=123L;
+
         String identifier="DE";
         String looksFor="unter";
         String verb="unternehmen";
@@ -174,7 +194,7 @@ class DeRuPairsControllerTest {
         foundedWords.add(unterstutzung);
 
         when(deutschController.findAllDeutschWordsWhichContain(looksFor)).thenReturn(found);
-        List<String> result=deRuPairsController.getWordsWhichUserLooksFor(looksFor, identifier);
+        List<String> result=deRuPairsController.getWordsWhichUserLooksFor(telegramId, looksFor, identifier);
 
         assertNotNull(result);
         assertEquals(foundedWords, result);
@@ -185,6 +205,7 @@ class DeRuPairsControllerTest {
 
     @Test
     void testGetDETranslations() {
+        Long telegramId=123L;
         String chosenWord="дом";
         String identifier="RU";
         String haus="das Haus";
@@ -210,7 +231,7 @@ class DeRuPairsControllerTest {
         when(deRuPairsService.findAllByRussianId(chosenRu.getId())).thenReturn(pairs);
         when(deutschController.findById(555L)).thenReturn(de1);
         when(deutschController.findById(666L)).thenReturn(de2);
-        List<String> result=deRuPairsController.getTranslations(chosenWord, identifier);
+        List<String> result=deRuPairsController.getTranslations(telegramId, chosenWord, identifier);
 
         assertNotNull(result);
         assertEquals(translationList, result);
@@ -220,6 +241,7 @@ class DeRuPairsControllerTest {
 
     @Test
     void testGetRUTranslations() {
+        Long telegramId=234L;
         String chosenWord="das Haus";
         String identifier="DE";
         String dom="дом";
@@ -245,7 +267,7 @@ class DeRuPairsControllerTest {
         when(deRuPairsService.findAllByDeutschId(chosenDe.getId())).thenReturn(pairs);
         when(russianController.findById(888L)).thenReturn(ru1);
         when(russianController.findById(999L)).thenReturn(ru2);
-        List<String> result=deRuPairsController.getTranslations(chosenWord, identifier);
+        List<String> result=deRuPairsController.getTranslations(telegramId, chosenWord, identifier);
 
         assertNotNull(result);
         assertEquals(translationList, result);

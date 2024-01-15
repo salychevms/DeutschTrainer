@@ -46,7 +46,7 @@ class UserStatisticServiceTest {
         UserStatistic userStatistic = new UserStatistic(wordPair);
 
         when(userStatisticRepository.findByWord(wordPair)).thenReturn(Optional.of(userStatistic));
-        Optional<UserStatistic> result = userStatisticService.getUserStatisticByWord(wordPair);
+        Optional<UserStatistic> result = userStatisticService.getUserStatisticByUserDictionary(wordPair);
 
         result.ifPresent(value -> assertEquals(userStatistic, value));
     }

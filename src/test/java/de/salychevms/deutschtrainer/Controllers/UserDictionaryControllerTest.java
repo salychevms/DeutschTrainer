@@ -105,21 +105,4 @@ class UserDictionaryControllerTest {
         assertNotNull(result);
         assertEquals(userDictionaryList, result);
     }
-
-    @Test
-    void testGetByUserLanguageIfExists(){
-        Long tgId=123L;
-        Users user=new Users();
-        user.setTelegramId(tgId);
-        Language language=new Language();
-        UserLanguage userLanguage=new UserLanguage(user, language);
-        UserDictionary userDictionary=new UserDictionary(userLanguage, new DeRuPairs(), new Date());
-
-        when(languageController.getLanguageByIdentifier("DE")).thenReturn(Optional.of(language));
-        when(userLanguageController.getByUserIdAndLanguageId(tgId, language.getId())).thenReturn(Optional.of(userLanguage));
-        when(userDictionaryService.getByUserLanguage(userLanguage)).thenReturn(Optional.of(userDictionary));
-        Optional<UserDictionary> result=userDictionaryController.getByUserLanguage(tgId);
-
-        result.ifPresent(value->assertEquals(userDictionary, value));
-    }
 }

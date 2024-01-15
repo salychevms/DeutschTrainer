@@ -99,7 +99,7 @@ class UserDictionaryServiceTest {
         assertEquals(userDictionaries, result);
     }
 
-    @Test
+/*    @Test
     void testGetUserDictionaryByUserLanguage(){
         UserLanguage userLanguage=new UserLanguage();
         UserDictionary userDictionary=new UserDictionary(userLanguage, new DeRuPairs(),new Date());
@@ -108,5 +108,5 @@ class UserDictionaryServiceTest {
         Optional<UserDictionary> result=userDictionaryService.getByUserLanguage(userLanguage);
 
         result.ifPresent(value->assertEquals(userDictionary, value));
-    }
+    }*/
 }

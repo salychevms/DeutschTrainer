@@ -17,5 +17,5 @@ public interface UserDictionaryRepository extends JpaRepository<UserDictionary, 
 
     Optional<UserDictionary> findById(Long id);
 
-    Optional<UserDictionary> getByUserLanguage(UserLanguage language);
+    List<UserDictionary> getAllByUserLanguage(UserLanguage language);
 }

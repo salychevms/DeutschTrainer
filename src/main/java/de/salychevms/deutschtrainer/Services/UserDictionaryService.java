@@ -42,7 +42,7 @@ public class UserDictionaryService {
     }
 
     @Transactional
-    public Optional<UserDictionary> getByUserLanguage(UserLanguage userLanguage){
-        return userDictionaryRepository.getByUserLanguage(userLanguage);
+    public List<UserDictionary> getAllByUserLanguage(UserLanguage userLanguage){
+        return userDictionaryRepository.getAllByUserLanguage(userLanguage);
     }
 }
