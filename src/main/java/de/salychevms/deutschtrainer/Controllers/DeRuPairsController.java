@@ -7,7 +7,6 @@ import de.salychevms.deutschtrainer.Models.UserDictionary;
 import de.salychevms.deutschtrainer.Services.DeRuPairsService;
 import org.springframework.stereotype.Component;
 
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -99,7 +98,6 @@ public class DeRuPairsController {
                 wordList.add(str.toString());
             }
         } else return null;
-        System.out.println(wordList);//////////////////////////////////////////////
         return wordList;
     }
 
@@ -136,7 +134,7 @@ public class DeRuPairsController {
                             willSaved.append(" <<уже добавлено>>");
                         }
                     }
-                    translationList.add(deutschController.findById(item.getDeutsch().getId()).getDeWord());
+                    translationList.add(willSaved.toString());
                 }
             }
         }

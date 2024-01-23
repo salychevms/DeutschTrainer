@@ -30,22 +30,22 @@ class UserDictionaryServiceTest {
 
     @Test
     void saveNewPair() {
-        Long userLanguageId=884578548L;
-        Long deRuId=66663624664L;
-        Long userDictionaryId=2233344555L;
-        UserLanguage userLanguage=new UserLanguage();
-        DeRuPairs deRuPairs =new DeRuPairs();
+        Long userLanguageId = 884578548L;
+        Long deRuId = 66663624664L;
+        Long userDictionaryId = 2233344555L;
+        UserLanguage userLanguage = new UserLanguage();
+        DeRuPairs deRuPairs = new DeRuPairs();
         userLanguage.setId(userLanguageId);
         deRuPairs.setId(deRuId);
-        UserDictionary userDictionary=new UserDictionary(userLanguage, deRuPairs, new Date());
+        UserDictionary userDictionary = new UserDictionary(userLanguage, deRuPairs, new Date());
         userDictionary.setId(userDictionaryId);
 
         when(userDictionaryRepository.save(any(UserDictionary.class))).thenReturn(userDictionary);
-        UserDictionary result=userDictionaryService.saveNewPair(userLanguage, deRuPairs);
-        ArgumentCaptor<UserDictionary> userDictionaryCaptor=ArgumentCaptor.forClass(UserDictionary.class);
+        UserDictionary result = userDictionaryService.saveNewPair(userLanguage, deRuPairs);
+        ArgumentCaptor<UserDictionary> userDictionaryCaptor = ArgumentCaptor.forClass(UserDictionary.class);
 
         verify(userDictionaryRepository, times(1)).save(userDictionaryCaptor.capture());
-        UserDictionary capturedUserDictionary=userDictionaryCaptor.getValue();
+        UserDictionary capturedUserDictionary = userDictionaryCaptor.getValue();
         capturedUserDictionary.setId(userDictionaryId);
 
         assertEquals(result.getId(), capturedUserDictionary.getId());
@@ -55,58 +55,68 @@ class UserDictionaryServiceTest {
 
     @Test
     void findById() {
-        UserLanguage userLanguage=new UserLanguage();
-        DeRuPairs deRuPairs =new DeRuPairs();
-        UserDictionary userDictionary=new UserDictionary(userLanguage, deRuPairs, new Date());
-        Long userDictionaryId=666555447778899L;
+        UserLanguage userLanguage = new UserLanguage();
+        DeRuPairs deRuPairs = new DeRuPairs();
+        UserDictionary userDictionary = new UserDictionary(userLanguage, deRuPairs, new Date());
+        Long userDictionaryId = 666555447778899L;
         userDictionary.setId(userDictionaryId);
 
         when(userDictionaryRepository.findById(userDictionaryId)).thenReturn(Optional.of(userDictionary));
-        Optional<UserDictionary> result=userDictionaryService.findById(userDictionaryId);
+        Optional<UserDictionary> result = userDictionaryService.findById(userDictionaryId);
 
-        result.ifPresent(value->assertEquals(userDictionary, value));
+        result.ifPresent(value -> assertEquals(userDictionary, value));
     }
 
     @Test
     void getUserDictionaryByPairId() {
-        UserLanguage userLanguage=new UserLanguage();
-        DeRuPairs pair=new DeRuPairs();
-        Long pairId=8273568273568723L;
+        UserLanguage userLanguage = new UserLanguage();
+        DeRuPairs pair = new DeRuPairs();
+        Long pairId = 8273568273568723L;
         pair.setId(pairId);
-        UserDictionary userDictionary=new UserDictionary(userLanguage, pair, new Date());
+        UserDictionary userDictionary = new UserDictionary(userLanguage, pair, new Date());
 
         when(userDictionaryRepository.getUserDictionaryByPairId(pairId)).thenReturn(Optional.of(userDictionary));
-        Optional<UserDictionary> result=userDictionaryService.getUserDictionaryByPairId(pairId);
+        Optional<UserDictionary> result = userDictionaryService.getUserDictionaryByPairId(pairId);
 
-        result.ifPresent(value->assertEquals(userDictionary, value));
+        result.ifPresent(value -> assertEquals(userDictionary, value));
     }
 
     @Test
     void getAll() {
-        UserDictionary firstUserDictionary=new UserDictionary();
-        UserDictionary secondUserDictionary=new UserDictionary();
-        UserDictionary thirdUserDictionary=new UserDictionary();
-        List<UserDictionary> userDictionaries=new ArrayList<>();
+        UserDictionary firstUserDictionary = new UserDictionary();
+        UserDictionary secondUserDictionary = new UserDictionary();
+        UserDictionary thirdUserDictionary = new UserDictionary();
+        List<UserDictionary> userDictionaries = new ArrayList<>();
 
         userDictionaries.add(firstUserDictionary);
         userDictionaries.add(secondUserDictionary);
         userDictionaries.add(thirdUserDictionary);
 
         when(userDictionaryRepository.findAll()).thenReturn(userDictionaries);
-        List<UserDictionary> result=userDictionaryService.getAll();
+        List<UserDictionary> result = userDictionaryService.getAll();
 
-        assertFalse(result.isEmpty());
+        assertEquals(3, result.size());
         assertEquals(userDictionaries, result);
     }
 
-/*    @Test
-    void testGetUserDictionaryByUserLanguage(){
-        UserLanguage userLanguage=new UserLanguage();
-        UserDictionary userDictionary=new UserDictionary(userLanguage, new DeRuPairs(),new Date());
+    @Test
+    void testGetAllByUserLanguage() {
+        UserLanguage userLanguage = new UserLanguage();
+        userLanguage.setId(123L);
+        UserDictionary firstUserDictionary = new UserDictionary(userLanguage, new DeRuPairs(), new Date());
+        UserDictionary secondUserDictionary = new UserDictionary(userLanguage, new DeRuPairs(), new Date());
+        UserDictionary thirdUserDictionary = new UserDictionary(userLanguage, new DeRuPairs(), new Date());
 
-        when(userDictionaryRepository.getByUserLanguage(userLanguage)).thenReturn(Optional.of(userDictionary));
-        Optional<UserDictionary> result=userDictionaryService.getByUserLanguage(userLanguage);
+        List<UserDictionary> userDictionaries = new ArrayList<>();
 
-        result.ifPresent(value->assertEquals(userDictionary, value));
-    }*/
+        userDictionaries.add(firstUserDictionary);
+        userDictionaries.add(secondUserDictionary);
+        userDictionaries.add(thirdUserDictionary);
+
+        when(userDictionaryRepository.getAllByUserLanguage(userLanguage)).thenReturn(userDictionaries);
+        List<UserDictionary> result = userDictionaryService.getAllByUserLanguage(userLanguage);
+
+        assertEquals(3, result.size());
+        assertEquals(userDictionaries, result);
+    }
 }

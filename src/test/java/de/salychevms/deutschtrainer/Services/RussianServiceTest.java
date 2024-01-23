@@ -1,6 +1,5 @@
 package de.salychevms.deutschtrainer.Services;
 
-import de.salychevms.deutschtrainer.Models.Deutsch;
 import de.salychevms.deutschtrainer.Models.Russian;
 import de.salychevms.deutschtrainer.Repo.RussianRepository;
 import org.junit.jupiter.api.Test;
@@ -55,7 +54,6 @@ class RussianServiceTest {
     void findWordsContainingIfExists() {
         Russian oneRussian = new Russian("oneRussian");
         Russian someOneRussian = new Russian("someOneRussian");
-        Russian nextRussian = new Russian("nextRussian");
 
         List<Russian> russianList = new ArrayList<>();
         russianList.add(oneRussian);

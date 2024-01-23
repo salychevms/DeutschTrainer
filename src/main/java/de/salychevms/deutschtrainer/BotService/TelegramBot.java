@@ -6,6 +6,7 @@ import de.salychevms.deutschtrainer.Emojies.EmojiGive;
 import de.salychevms.deutschtrainer.Models.*;
 import de.salychevms.deutschtrainer.Training.TrainingController;
 import de.salychevms.deutschtrainer.Training.TrainingPair;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -76,7 +77,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             if (!usersController.registeredOr(telegramId)) {
                 //if user sent /start
                 if (messageText.equals("/start")) {
-                    //give start menu
+                    //give a start menu
                     sendKeyboard(mm.registration(), chatId, "Вы активировали бота-тренера." + "\nВы должны зарегистрироваться.");
                     //if something unusual happened
                 } else {
@@ -113,7 +114,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                                 iterator.remove();
                                 //create one german word
                                 Deutsch germanWord = deutschController.createNewWord(messageText);
-                                //create a lot of russian word
+                                //create a lot of russian words
                                 List<Russian> russianTranslate = russianController.createNewWords(messageText);
                                 //create pairs of words
                                 List<Long> pairs = deRuPairsController.createPairs(germanWord, russianTranslate);
@@ -241,8 +242,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                             }
                         }
                     }
-                } else if (callBackData.equals("/toSearchOffer")) {
-
                 } else if (callBackData.startsWith("/training")) {
                     if (callBackData.equals("/training=/StartLearningTraining")) {
                         learningList = trainingController.createLearningList(telegramId);
@@ -338,7 +337,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                             A word from big letter: **Haus/Hund/Ampel.**""");
                     sendMessage(chatId, "Введите пару слов: ");
                     queue.add(telegramId + callBackData);
-                    ////////////////////////ADD WORDS BY LIST===========================================
                 } else if (callBackData.equals("/adminMenu/addListAdmin")) {
                     List<String> wordList = new ArrayList<>();
                     File file = new File("C:\\Develop\\Learning\\DeutschTrainer\\src\\main\\resources\\contentList.txt");
@@ -361,7 +359,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                                 //create a lot of russian words
                                 List<Russian> russianTranslate = russianController.createNewWords(str);
                                 //create pairs of words
-                                List<Long> pairs = deRuPairsController.createPairs(germanWord, russianTranslate);
+                                deRuPairsController.createPairs(germanWord, russianTranslate);
                             }
                         }
                     }
@@ -399,8 +397,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                     editKeyboard(update.getCallbackQuery(), mm.mainMenu(adminStatus),
                             EmojiGive.germanFlag + "\n\nЯ тут! Меня кто-то звал???\n\n"
                                     + EmojiGive.joystick + " Главное меню:");
-                } else if (callBackData.startsWith("/Offer=")) {
-
                 }
                 //if user doesn't exist
             } else if (!usersController.registeredOr(telegramId)) {
@@ -422,7 +418,6 @@ public class TelegramBot extends TelegramLongPollingBot {
             } else sendMessage(chatId, "Oooopsie! Sorry, something wrong happened..." +
                     "\nWrite \"/start\" and try again!!");
         }
-
     }
 
     private String getHeaderForTraining(String word) {

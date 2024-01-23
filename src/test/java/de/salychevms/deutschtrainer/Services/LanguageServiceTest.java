@@ -1,7 +1,6 @@
 package de.salychevms.deutschtrainer.Services;
 
 import de.salychevms.deutschtrainer.Models.Language;
-import de.salychevms.deutschtrainer.Models.Users;
 import de.salychevms.deutschtrainer.Repo.LanguageRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

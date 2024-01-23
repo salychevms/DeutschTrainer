@@ -129,7 +129,6 @@ class UserStatisticControllerTest {
         UserDictionary userDictionary = new UserDictionary(new UserLanguage(), new DeRuPairs(), new Date());
         userDictionary.setUserLanguage(userLanguage);
         userDictionary.setId(userDictionaryId);
-        UserStatistic userStatistic = new UserStatistic(userDictionary);
 
         when(userStatisticService.getUserStatisticByUserDictionary(userDictionary)).thenReturn(Optional.empty());
         Optional<UserStatistic> result = userStatisticController.getUserStatisticByUserDictionary(userDictionary, new UserLanguage());

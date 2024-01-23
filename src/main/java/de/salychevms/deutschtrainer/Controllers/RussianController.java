@@ -1,6 +1,5 @@
 package de.salychevms.deutschtrainer.Controllers;
 
-import de.salychevms.deutschtrainer.Models.DeRuPairs;
 import de.salychevms.deutschtrainer.Models.Russian;
 import de.salychevms.deutschtrainer.Services.RussianService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,6 @@ public class RussianController {
         }
         if (data.contains(" // ")) {
             String[] parts = data.split(" // ");
-            //System.out.println("ge: " + parts[0] + "\nru: " + parts[1]);/////////////////////////////////////////////////////////////////////////////////////////////////////
             List<String> translations = List.of(parts[1].split("/"));
             for (String item : translations) {
                 russianList.add(russianService.createNewRussian(item));

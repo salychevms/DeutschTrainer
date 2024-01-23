@@ -76,7 +76,7 @@ class UsersControllerTest {
 
     @Test
     void testUpdateNameByTelegramID() {
-        Long tgId=9988777777777L;
+        long tgId=9988777777777L;
         String newUserName="newName";
 
         usersController.updateNameByTelegramID(tgId, newUserName);
@@ -85,7 +85,7 @@ class UsersControllerTest {
 
     @Test
     void testUpdateSurnameByTelegramId() {
-        Long tgId=7777777779988L;
+        long tgId=7777777779988L;
         String newUserSurName="newSurName";
 
         usersController.updateSurnameByTelegramId(tgId, newUserSurName);

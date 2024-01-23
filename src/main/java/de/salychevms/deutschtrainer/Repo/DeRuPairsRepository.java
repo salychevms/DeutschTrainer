@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-
 @Repository
 public interface DeRuPairsRepository extends JpaRepository<DeRuPairs, Long> {
     Optional<DeRuPairs> getByDeutschIdAndRussianId(Long germanId, Long russianId);

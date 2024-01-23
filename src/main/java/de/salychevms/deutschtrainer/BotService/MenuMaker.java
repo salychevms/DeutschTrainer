@@ -235,9 +235,6 @@ public class MenuMaker {
         //button "change Surname"
         InlineKeyboardButton changeSurnameButton = new InlineKeyboardButton("Сменить фамилию");
         changeSurnameButton.setCallbackData("/settings/changeSurname");
-        //button "set new language"
-        /*InlineKeyboardButton setNewLanguageButton = new InlineKeyboardButton("Установить новый язык");
-        setNewLanguageButton.setCallbackData("/setNewLanguage");*/
         //button "settings menu go back"
         InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
         goToMainMenuButton.setCallbackData("/mainMenu");

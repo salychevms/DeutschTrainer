@@ -14,7 +14,7 @@ public class DatabaseInitializer implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         if(languageRepository.count()==0){
             Language russian=new Language("russian");
             Language german=new Language("german");
