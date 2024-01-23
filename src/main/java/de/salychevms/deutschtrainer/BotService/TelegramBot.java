@@ -193,12 +193,12 @@ public class TelegramBot extends TelegramLongPollingBot {
                     List<String> translationList;
                     if (deRuPairsController.isItGerman(selectedWord[1])) {
                         translationList = deRuPairsController.getTranslations(telegramId, selectedWord[1], "DE");
-                        sendKeyboard(mm.getSearchWordMenu(translationList, selectedWord[1], "yes"), chatId,
-                                "\nВы можете выбрать одно слово и получить все доступные переводы:\n" + selectedWord[2]);
+                        editKeyboard(update.getCallbackQuery(), mm.getSearchWordMenu(translationList, selectedWord[1], "yes"),
+                                "\nВы можете выбрать одно слово и получить все доступные переводы:\n" + selectedWord[1]);
                     } else if (deRuPairsController.isItRussian(selectedWord[1])) {
                         translationList = deRuPairsController.getTranslations(telegramId, selectedWord[1], "RU");
-                        sendKeyboard(mm.getSearchWordMenu(translationList, selectedWord[1], "yes"), chatId,
-                                "\nВы можете выбрать одно слово и получить все доступные переводы:\n" + selectedWord[2]);
+                        editKeyboard(update.getCallbackQuery(), mm.getSearchWordMenu(translationList, selectedWord[1], "yes"),
+                                "\nВы можете выбрать одно слово и получить все доступные переводы:\n" + selectedWord[1]);
                     }
                 } else if (callBackData.startsWith("/TranslationsOffer=")) {
                     String[] selectedWord = callBackData.split("=");
@@ -223,15 +223,17 @@ public class TelegramBot extends TelegramLongPollingBot {
                             }
                             if (!bool) {
                                 userStatisticController.saveNewPairInStatistic(userDictionaryController.saveNewPair(telegramId, "DE", pair.get()));
-                                sendKeyboard(mm.trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(
-                                                telegramId, "DE")), chatId,
+                                editKeyboard(update.getCallbackQuery(),
+                                        mm.trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(
+                                                telegramId, "DE")),
                                         "Вы добавили пару слов:\n" +
                                                 deutsch.get().getDeWord() +
                                                 " = " + russian.get().getRuWord() +
                                                 "\n\n" + EmojiGive.gameDie + " Тренировки:");
                             } else {
-                                sendKeyboard(mm.trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(
-                                                telegramId, "DE")), chatId,
+                                editKeyboard(update.getCallbackQuery(),
+                                        mm.trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(
+                                                telegramId, "DE")),
                                         "Вы у вас уже есть эта пара слов:\n" +
                                                 deutsch.get().getDeWord() +
                                                 " = " + russian.get().getRuWord() +
@@ -356,12 +358,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                             if (!str.isEmpty()) {
                                 //create one german word
                                 Deutsch germanWord = deutschController.createNewWord(str);
-                                //create a lot of russian word
+                                //create a lot of russian words
                                 List<Russian> russianTranslate = russianController.createNewWords(str);
                                 //create pairs of words
                                 List<Long> pairs = deRuPairsController.createPairs(germanWord, russianTranslate);
-                                String result = deRuPairsController.getAllWordPairsByPairId(germanWord.getId(), pairs);
-                                sendMessage(chatId, result);
                             }
                         }
                     }

@@ -53,8 +53,8 @@ public class MenuMaker {
         final String NO = "no";
 
         //first 20 words
-        if (wordCollection.size() >= 20) {
-            wordCollection = wordCollection.subList(0, 19);
+        if (wordCollection.size() > 20) {
+            wordCollection = wordCollection.subList(0, 20);
         }
 
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
@@ -82,7 +82,7 @@ public class MenuMaker {
                 goToTrainingMenuButton = new InlineKeyboardButton("<" + EmojiGive.gameDie + " к меню тренировок");
                 goToTrainingMenuButton.setCallbackData("/training");
             } else if (isTranslate.equalsIgnoreCase(YES)) {
-                //this step get to a user a lot of translations for the search word;
+                //this step gets to a user a lot of translations for the search word;
                 button.setCallbackData("/TranslationsOffer=" + item + "=" + translatableWord);
                 goToTrainingMenuButton = new InlineKeyboardButton("<" + EmojiGive.backArrow + " назад");
                 goToTrainingMenuButton.setCallbackData("/toSearchOffer");

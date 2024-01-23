@@ -1,5 +1,6 @@
 package de.salychevms.deutschtrainer.Controllers;
 
+import de.salychevms.deutschtrainer.Models.DeRuPairs;
 import de.salychevms.deutschtrainer.Models.Russian;
 import de.salychevms.deutschtrainer.Services.RussianService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +20,18 @@ public class RussianController {
     }
 
     public List<Russian> createNewWords(String data) {
-        String[] parts = data.split(" // ");
-        System.out.println("ge: " + parts[0] + "\nru: " + parts[1]);/////////////////////////////////////////////////////////////////////////////////////////////////////
-        List<String> translations = List.of(parts[1].split("/"));
         List<Russian> russianList = new ArrayList<>();
-        for (String item : translations) {
-            russianList.add(russianService.createNewRussian(item));
+        if(data.equals("<<++++++КОНЕЦ++++++>>")){
+            System.out.println("\n\n!!!!!!!!!!!!!!\nThe List is empty or has no more words\n\n");
         }
+        if (data.contains(" // ")) {
+            String[] parts = data.split(" // ");
+            //System.out.println("ge: " + parts[0] + "\nru: " + parts[1]);/////////////////////////////////////////////////////////////////////////////////////////////////////
+            List<String> translations = List.of(parts[1].split("/"));
+            for (String item : translations) {
+                russianList.add(russianService.createNewRussian(item));
+            }
+        } else System.out.println("the data has problems there: \n\n" + data);
         if (!russianList.isEmpty()) {
             return russianList;
         } else return null;
