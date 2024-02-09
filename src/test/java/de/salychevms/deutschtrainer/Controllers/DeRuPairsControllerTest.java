@@ -157,9 +157,9 @@ class DeRuPairsControllerTest {
         found.add(ru1);
         found.add(ru2);
         found.add(ru3);
-        foundedWords.add(dom+ "\n(см. еще варианты)");
+        foundedWords.add(dom+ " <<еще варианты>>");
         foundedWords.add(domashniy);
-        foundedWords.add(upravdom+ "\n(см. еще варианты)");
+        foundedWords.add(upravdom+ " <<еще варианты>>");
 
         when(userDictionaryController.getAllByTelegramId(telegramId)).thenReturn(dictionaryList);
         when(deRuPairsService.findPairById(p1Id)).thenReturn(Optional.of(pair1));
@@ -169,9 +169,9 @@ class DeRuPairsControllerTest {
 
         assertEquals(3, result.size());
         assertEquals(foundedWords, result);
-        assertTrue(result.contains(dom+ "\n(см. еще варианты)"));
+        assertTrue(result.contains(dom+ " <<еще варианты>>"));
         assertTrue(result.contains(domashniy));
-        assertTrue(result.contains(upravdom+ "\n(см. еще варианты)"));
+        assertTrue(result.contains(upravdom+ " <<еще варианты>>"));
     }
 
     @Test

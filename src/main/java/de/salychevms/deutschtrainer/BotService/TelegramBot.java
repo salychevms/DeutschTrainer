@@ -6,7 +6,6 @@ import de.salychevms.deutschtrainer.Emojies.EmojiGive;
 import de.salychevms.deutschtrainer.Models.*;
 import de.salychevms.deutschtrainer.Training.TrainingController;
 import de.salychevms.deutschtrainer.Training.TrainingPair;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -341,10 +340,13 @@ public class TelegramBot extends TelegramLongPollingBot {
                     List<String> wordList = new ArrayList<>();
                     File file = new File("C:\\Develop\\Learning\\DeutschTrainer\\src\\main\\resources\\contentList.txt");
                     try (Scanner scanner = new Scanner(file)) {
+                        int i=0;
                         while (scanner.hasNextLine()) {
                             String string = scanner.nextLine();
                             wordList.add(string);
+                            i++;
                         }
+                        System.out.println("ВСЕ СЛОВА ДОБАВЛЕНЫ!\nВСЕГО СТРОК ПРОЧИТАНО ИЗ ФАЙЛА: "+i);
                     } catch (FileNotFoundException e) {
                         throw new RuntimeException(e);
                     }

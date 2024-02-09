@@ -10,10 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -555,7 +552,13 @@ class UserStatisticServiceTest {
         pair.setId(pairId);
         UserStatistic statistic = new UserStatistic();
         statistic.setId(statisticId);
-        Date lastTrainingDate=new Date();
+        Calendar calendar=Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+        calendar.add(Calendar.HOUR_OF_DAY, 20);
+        calendar.add(Calendar.MINUTE, 5);
+        calendar.add(Calendar.SECOND, 0);
+        calendar.add(Calendar.MILLISECOND, 0);
+        Date lastTrainingDate=calendar.getTime();
         statistic.setLastTraining(lastTrainingDate);
 
         when(userStatisticRepository.findByWord(pair)).thenReturn(Optional.of(statistic));
