@@ -455,6 +455,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         message.setText(msg);
         message.setReplyMarkup(keyboardMarkup);
         try {
+            System.out.println(message);
             execute(message);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
