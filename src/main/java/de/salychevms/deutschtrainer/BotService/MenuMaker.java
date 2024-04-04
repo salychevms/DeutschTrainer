@@ -74,16 +74,16 @@ public class MenuMaker {
                 item=item.replaceAll(substr2, "");
             }
             /* CallbackData constructor:
-            for search words: "/SearchOffer="+item  ==>>  /SearchOffer=rennen
-            for translate words: "/TranslationsOffer="+item  ==>>  /TranslationsOffer=rennen */
+            for search words (/so - searchOffer): "/so="+item  ==>>  /so=rennen
+            for translate words (/to - translationsOffer): "/to="+item  ==>>  /to=rennen */
             if (isTranslate.equalsIgnoreCase(NO)) {
                 //a user looks for a word and can choose from the word list, also we get a translatable word for the next step
-                button.setCallbackData("/SearchOffer=" + item + "=" + translatableWord);
+                button.setCallbackData("/so=" + item + "=" + translatableWord);// /so - searchOffer
                 goToTrainingMenuButton = new InlineKeyboardButton("<" + EmojiGive.gameDie + " к меню тренировок");
-                goToTrainingMenuButton.setCallbackData("/training");
+                goToTrainingMenuButton.setCallbackData("/tr");// /tr - training
             } else if (isTranslate.equalsIgnoreCase(YES)) {
                 //this step gets to a user a lot of translations for the search word;
-                button.setCallbackData("/TranslationsOffer=" + item + "=" + translatableWord);
+                button.setCallbackData("/to=" + item + "=" + translatableWord);// /to - translationsOffer
                 goToTrainingMenuButton = new InlineKeyboardButton("<" + EmojiGive.backArrow + " назад");
                 goToTrainingMenuButton.setCallbackData("/toSearchOffer");
             }
@@ -131,7 +131,7 @@ public class MenuMaker {
         List<UserStatistic> userStatisticListOrderByNewWord = userStatisticController.getAllStatisticWithNewWords(userLanguage);
         if (!userStatisticListOrderByNewWord.isEmpty()) {
             InlineKeyboardButton learningNewWordsTrainingButton = new InlineKeyboardButton(EmojiGive.newButton + " Учить новые слова");
-            learningNewWordsTrainingButton.setCallbackData("/training=/StartLearningTraining");
+            learningNewWordsTrainingButton.setCallbackData("/tr=/sLT");// /tr=/sLT - training/StartLearningTraining
             List<InlineKeyboardButton> row = new ArrayList<>();
             row.add(learningNewWordsTrainingButton);
             rows.add(row);
@@ -146,7 +146,7 @@ public class MenuMaker {
         }
         if (!freshFailsStatistic.isEmpty()) {
             InlineKeyboardButton failsTrainingButton = new InlineKeyboardButton(EmojiGive.redQuestionMark + " Ошиблись - повторите");
-            failsTrainingButton.setCallbackData("/training=/StartFailsTraining");
+            failsTrainingButton.setCallbackData("/tr=/sFT");// /tr=/sFT - training/StartFailsTraining
             List<InlineKeyboardButton> row = new ArrayList<>();
             row.add(failsTrainingButton);
             rows.add(row);
@@ -155,7 +155,7 @@ public class MenuMaker {
         List<UserStatistic> ifWordsExist=userStatisticController.getAllStatisticWithIterationsAllAsc(userLanguage);
         if(!ifWordsExist.isEmpty()) {
             InlineKeyboardButton repeatWordsTrainingButton = new InlineKeyboardButton(EmojiGive.repeatButton + " Ежедневная тренировка");
-            repeatWordsTrainingButton.setCallbackData("/training=/StartRepeatTraining");
+            repeatWordsTrainingButton.setCallbackData("/tr=/sRT");// /tr=/sRT - training/StartRepeatTraining
             List<InlineKeyboardButton> row=new ArrayList<>();
             row.add(repeatWordsTrainingButton);
             rows.add(row);
@@ -163,7 +163,7 @@ public class MenuMaker {
 
         //button "Add new"
         InlineKeyboardButton addNewWordsButton = new InlineKeyboardButton(EmojiGive.inboxTray + " Добавить новые слова");
-        addNewWordsButton.setCallbackData("/training/addNewWords");
+        addNewWordsButton.setCallbackData("/tr/addNewWords");// /tr=/addNewWords - training/addNewWords
         //button "main menu
         InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("<<" + EmojiGive.joystick + " в главное меню");
         goToMainMenuButton.setCallbackData("/mainMenu");
@@ -185,7 +185,7 @@ public class MenuMaker {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //button "Training"
         InlineKeyboardButton trainingButton = new InlineKeyboardButton(EmojiGive.gameDie + " Тренировки");
-        trainingButton.setCallbackData("/training");
+        trainingButton.setCallbackData("/tr");// /tr - training
         //button "Statistic"
         InlineKeyboardButton statisticButton = new InlineKeyboardButton(EmojiGive.barChart + " Статитстика");
         statisticButton.setCallbackData("/statistic");

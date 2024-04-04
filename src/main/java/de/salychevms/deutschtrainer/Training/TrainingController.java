@@ -157,7 +157,7 @@ public class TrainingController {
         }
         //button
         InlineKeyboardButton goToMainMenuButton = new InlineKeyboardButton("=Прервать тренировку=");
-        goToMainMenuButton.setCallbackData("/Trainings=/FinishAllTrainings");
+        goToMainMenuButton.setCallbackData("/tr=/FAT");// /tr/FAT - training/FinishAllTrainings
         //position from left to right
         List<InlineKeyboardButton> row = new ArrayList<>();
         //
@@ -170,11 +170,11 @@ public class TrainingController {
 
     public String getAnswerFromUser(String callBackData) {
         String answerToUser = null;
-        int startIndex = callBackData.indexOf("DeRuId=:");
+        int startIndex = callBackData.indexOf("DRI=:");
         Long userAnswerId = null;
         Long correctPairId = null;
         if (startIndex != -1) {
-            String answer = callBackData.substring(startIndex + "DeRuId=:".length());
+            String answer = callBackData.substring(startIndex + "DRI=:".length());
             String[] parts = answer.split("%");
             userAnswerId = Long.parseLong(parts[0]);
             correctPairId = Long.parseLong(parts[1]);

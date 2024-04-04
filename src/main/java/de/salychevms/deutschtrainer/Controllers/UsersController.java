@@ -28,11 +28,11 @@ public class UsersController {
         return usersService.findUserByTelegramId(telegramId);
     }
 
-    public void updateNameByTelegramID(long telegramId, String name) {
+    public void updateNameByTelegramID(Long telegramId, String name) {
         usersService.updateNameByTelegramID(telegramId, name);
     }
 
-    public void updateSurnameByTelegramId(long telegramId, String surname) {
+    public void updateSurnameByTelegramId(Long telegramId, String surname) {
         usersService.updateSurnameByTelegramId(telegramId, surname);
     }
 
@@ -54,5 +54,10 @@ public class UsersController {
 
     public void deleteAllUsers() {
         usersService.deleteAllUsers();
+    }
+
+    public boolean isAdminChecker(Long telegramId) {
+        Optional<Users> user = usersService.findUserByTelegramId(telegramId);
+        return user.map(Users::isAdmin).orElse(false);
     }
 }
