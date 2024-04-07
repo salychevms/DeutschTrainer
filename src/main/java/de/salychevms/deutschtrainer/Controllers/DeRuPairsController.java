@@ -7,9 +7,7 @@ import de.salychevms.deutschtrainer.Models.UserDictionary;
 import de.salychevms.deutschtrainer.Services.DeRuPairsService;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,7 +64,6 @@ public class DeRuPairsController {
         return matcher.find();
     }
 
-
     public List<String> getWordsWhichUserLooksFor(Long telegramId, String userWord, String languageIdentifier) {
         List<UserDictionary> userDictionaries = userDictionaryController.getAllByTelegramId(telegramId);
         List<DeRuPairs> pairs = new ArrayList<>();
@@ -101,41 +98,72 @@ public class DeRuPairsController {
         return wordList;
     }
 
-    public List<String> getTranslations(Long telegramId, String chosenWord, String fromLanguage) {
+    public Map<Long, String> getWordMapWhichUserLooksFor(Long telegramId, String userWord, String languageIdentifier) {
+        List<UserDictionary> userDictionaries = userDictionaryController.getAllByTelegramId(telegramId);
+        List<DeRuPairs> pairs = new ArrayList<>();
+        for (UserDictionary item : userDictionaries) {
+            Optional<DeRuPairs> pair = deRuPairsService.findPairById(item.getPair().getId());
+            pair.ifPresent(pairs::add);
+        }
+        Map<Long, String> wordMap = new HashMap<>();
+        if (DE.equals(languageIdentifier)) {
+            List<Deutsch> german = deutschController.findAllDeutschWordsWhichContain(userWord);
+            for (Deutsch item : german) {
+                StringBuilder str = new StringBuilder(item.getDeWord());
+                for (DeRuPairs someItem : pairs) {
+                    if (someItem.getDeutsch().getId().equals(item.getId())) {
+                        str.append(" <<еще варианты>>");
+                    }
+                }
+                wordMap.put(item.getId(), str.toString());
+            }
+        } else if (RU.equals(languageIdentifier)) {
+            List<Russian> russian = russianController.findAllRussianWordsWhichContain(userWord);
+            for (Russian item : russian) {
+                StringBuilder str = new StringBuilder(item.getRuWord());
+                for (DeRuPairs someItem : pairs) {
+                    if (someItem.getRussian().getId().equals(item.getId())) {
+                        str.append(" <<еще варианты>>");
+                    }
+                }
+                wordMap.put(item.getId(), str.toString());
+            }
+        } else return null;
+        return wordMap;
+    }
+
+    public Map<Long, String> getTranslations(Long telegramId, String chosenWord, String fromLanguage) {
         List<UserDictionary> userDictionaries = userDictionaryController.getAllByTelegramId(telegramId);
         List<DeRuPairs> userPairs = new ArrayList<>();
         for (UserDictionary item : userDictionaries) {
             Optional<DeRuPairs> pair = deRuPairsService.findPairById(item.getPair().getId());
             pair.ifPresent(userPairs::add);
         }
-        List<String> translationList = new ArrayList<>();
+        Long chosenWordId = Long.valueOf(chosenWord);
+        Map<Long, String> translationList = new HashMap<>();
         if (DE.equalsIgnoreCase(fromLanguage)) {
-            Optional<Deutsch> deutsch = deutschController.findByWord(chosenWord);
-            if (deutsch.isPresent()) {
-                List<DeRuPairs> allPairs = deRuPairsService.findAllByDeutschId(deutsch.get().getId());
-                for (DeRuPairs item : allPairs) {
-                    StringBuilder willSaved= new StringBuilder(russianController.findById(item.getRussian().getId()).getRuWord());
-                    for(DeRuPairs forCompare: userPairs){
-                        if(item.getRussian().getId().equals(forCompare.getRussian().getId())){
-                            willSaved.append(" <<уже добавлено>>");
-                        }
+            List<DeRuPairs> allPairs = deRuPairsService.findAllByDeutschId(chosenWordId);
+            for (DeRuPairs item : allPairs) {
+                Russian russian = russianController.findById(item.getRussian().getId());
+                StringBuilder willSaved = new StringBuilder(russian.getRuWord());
+                for (DeRuPairs forCompare : userPairs) {
+                    if (item.getRussian().getId().equals(forCompare.getRussian().getId())) {
+                        willSaved.append(" <<уже добавлено>>");
                     }
-                    translationList.add(willSaved.toString());
                 }
+                translationList.put(russian.getId(), willSaved.toString());
             }
         } else if (RU.equalsIgnoreCase(fromLanguage)) {
-            Optional<Russian> russian = russianController.findByWord(chosenWord);
-            if (russian.isPresent()) {
-                List<DeRuPairs> allPairs = deRuPairsService.findAllByRussianId(russian.get().getId());
-                for (DeRuPairs item : allPairs) {
-                    StringBuilder willSaved=new StringBuilder(deutschController.findById(item.getDeutsch().getId()).getDeWord());
-                    for(DeRuPairs forCompare:userPairs){
-                        if(item.getDeutsch().getId().equals(forCompare.getDeutsch().getId())){
-                            willSaved.append(" <<уже добавлено>>");
-                        }
+            List<DeRuPairs> allPairs = deRuPairsService.findAllByRussianId(chosenWordId);
+            for (DeRuPairs item : allPairs) {
+                Deutsch deutsch = deutschController.findById(item.getDeutsch().getId());
+                StringBuilder willSaved = new StringBuilder(deutsch.getDeWord());
+                for (DeRuPairs forCompare : userPairs) {
+                    if (item.getDeutsch().getId().equals(forCompare.getDeutsch().getId())) {
+                        willSaved.append(" <<уже добавлено>>");
                     }
-                    translationList.add(willSaved.toString());
                 }
+                translationList.put(deutsch.getId(), willSaved.toString());
             }
         }
         return translationList;

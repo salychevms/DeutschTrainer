@@ -122,9 +122,11 @@ public class TelegramBot extends TelegramLongPollingBot {
                                 iterator.remove();
                                 if (!messageText.isEmpty()) {
                                     if (deRuPairsController.isItGerman(messageText)) {
-                                        List<String> searchList = deRuPairsController.getWordsWhichUserLooksFor(telegramId, messageText, "DE");
-                                        if (!searchList.isEmpty()) {
-                                            sendKeyboard(menuMaker.getSearchWordMenu(searchList, messageText, "no"), chatId,
+                                        //look for a word
+                                        //List<String> searchList = deRuPairsController.getWordsWhichUserLooksFor(telegramId, messageText, "DE");
+                                        Map<Long, String> searchMap = deRuPairsController.getWordMapWhichUserLooksFor(telegramId, messageText, "DE");
+                                        if (!searchMap.isEmpty()) {
+                                            sendKeyboard(menuMaker.getSearchWordMenu(searchMap, messageText, "DE", "no"), chatId,
                                                     "Вы ввели слово: " + messageText + "\nВыберите одно из предложенных слов (первые 20 совпадений)" +
                                                             "\nи получите доступные варианты перевода." +
                                                             "\n\nВажно!!! Выводятся только первые 20 совпадений по запросу пользователя. " +
@@ -137,9 +139,11 @@ public class TelegramBot extends TelegramLongPollingBot {
                                                             EmojiGive.gameDie + " Тренировки:");
                                         }
                                     } else if (deRuPairsController.isItRussian(messageText)) {
-                                        List<String> searchList = deRuPairsController.getWordsWhichUserLooksFor(telegramId, messageText, "RU");
-                                        if (!searchList.isEmpty()) {
-                                            sendKeyboard(menuMaker.getSearchWordMenu(searchList, messageText, "no"), chatId,
+                                        //look for a word
+                                        //List<String> searchList = deRuPairsController.getWordsWhichUserLooksFor(telegramId, messageText, "RU");
+                                        Map<Long, String> searchMap = deRuPairsController.getWordMapWhichUserLooksFor(telegramId, messageText, "RU");
+                                        if (!searchMap.isEmpty()) {
+                                            sendKeyboard(menuMaker.getSearchWordMenu(searchMap, messageText, "RU", "no"), chatId,
                                                     "Вы ввели слово: " + messageText + "\nВыберите одно из преложенных слов (первые 20 совпадений)" +
                                                             "\nи получите доступные варианты перевода." +
                                                             "\n\nВажно!!! Выводятся только первые 20 совпадений по запросу пользователя. " +
@@ -189,55 +193,57 @@ public class TelegramBot extends TelegramLongPollingBot {
                     queue.add(telegramId + callBackData);
                 } else if (callBackData.startsWith("/so=")) {
                     String[] selectedWord = callBackData.split("=");
-                    List<String> translationList;
-                    if (deRuPairsController.isItGerman(selectedWord[1])) {
+                    Map<Long, String> translationList;
+                    if (selectedWord[2].equals("DE")) {
                         translationList = deRuPairsController.getTranslations(telegramId, selectedWord[1], "DE");
-                        editKeyboard(update.getCallbackQuery(), menuMaker.getSearchWordMenu(translationList, selectedWord[1], "yes"),
-                                "\nВы можете выбрать одно слово и получить все доступные переводы:\n" + selectedWord[1]);
-                    } else if (deRuPairsController.isItRussian(selectedWord[1])) {
+                        Deutsch deutsch = deutschController.findById(Long.valueOf(selectedWord[1]));
+                        editKeyboard(update.getCallbackQuery(), menuMaker.getSearchWordMenu(translationList, selectedWord[1], "DE", "yes"),
+                                "\nВы можете выбрать одно слово и получить все доступные переводы:\n" + deutsch.getDeWord());
+                    } else if (selectedWord[2].equals("RU")) {
                         translationList = deRuPairsController.getTranslations(telegramId, selectedWord[1], "RU");
-                        editKeyboard(update.getCallbackQuery(), menuMaker.getSearchWordMenu(translationList, selectedWord[1], "yes"),
-                                "\nВы можете выбрать одно слово и получить все доступные переводы:\n" + selectedWord[1]);
+                        Russian russian = russianController.findById(Long.valueOf(selectedWord[1]));
+                        editKeyboard(update.getCallbackQuery(), menuMaker.getSearchWordMenu(translationList, selectedWord[1], "RU", "yes"),
+                                "\nВы можете выбрать одно слово и получить все доступные переводы:\n" + russian.getRuWord());
                     }
                 } else if (callBackData.startsWith("/to=")) {
                     String[] selectedWord = callBackData.split("=");
-                    Optional<Deutsch> deutsch = Optional.of(new Deutsch());
-                    Optional<Russian> russian = Optional.of(new Russian());
-                    if (deRuPairsController.isItGerman(selectedWord[1]) && deRuPairsController.isItRussian(selectedWord[2])) {
-                        deutsch = deutschController.findByWord(selectedWord[1]);
-                        russian = russianController.findByWord(selectedWord[2]);
-                    } else if (deRuPairsController.isItGerman(selectedWord[2]) && deRuPairsController.isItRussian(selectedWord[1])) {
-                        deutsch = deutschController.findByWord(selectedWord[2]);
-                        russian = russianController.findByWord(selectedWord[1]);
+                    Deutsch deutsch = new Deutsch();
+                    Russian russian = new Russian();
+                    //while a translation is a german: /to , 123(de), RU, 321(ru)
+                    if (selectedWord[2].equals("DE")) {
+                        deutsch = deutschController.findById(Long.valueOf(selectedWord[3]));
+                        russian = russianController.findById(Long.valueOf(selectedWord[1]));
+                        //while a translation is a russian: /to , 123(ru), DE, 321(de)
+                    } else if (selectedWord[2].equals("RU")) {
+                        deutsch = deutschController.findById(Long.valueOf(selectedWord[1]));
+                        russian = russianController.findById(Long.valueOf(selectedWord[3]));
                     }
-                    if (deutsch.isPresent() && russian.isPresent()) {
-                        Optional<DeRuPairs> pair = deRuPairsController.getPairByGermanIdAndRussianId(deutsch.get().getId(), russian.get().getId());
-                        if (pair.isPresent()) {
-                            List<UserDictionary> dictionaries = userDictionaryController.getAllByTelegramId(telegramId);
-                            boolean bool = false;
-                            for (UserDictionary dict : dictionaries) {
-                                if (dict.getPair().getId().equals(pair.get().getId())) {
-                                    bool = true;
-                                }
+                    Optional<DeRuPairs> pair = deRuPairsController.getPairByGermanIdAndRussianId(deutsch.getId(), russian.getId());
+                    if (pair.isPresent()) {
+                        List<UserDictionary> dictionaries = userDictionaryController.getAllByTelegramId(telegramId);
+                        boolean bool = false;
+                        for (UserDictionary dict : dictionaries) {
+                            if (dict.getPair().getId().equals(pair.get().getId())) {
+                                bool = true;
                             }
-                            if (!bool) {
-                                userStatisticController.saveNewPairInStatistic(userDictionaryController.saveNewPair(telegramId, "DE", pair.get()));
-                                editKeyboard(update.getCallbackQuery(),
-                                        menuMaker.trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(
-                                                telegramId, "DE")),
-                                        "Вы добавили пару слов:\n" +
-                                                deutsch.get().getDeWord() +
-                                                " = " + russian.get().getRuWord() +
-                                                "\n\n" + EmojiGive.gameDie + " Тренировки:");
-                            } else {
-                                editKeyboard(update.getCallbackQuery(),
-                                        menuMaker.trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(
-                                                telegramId, "DE")),
-                                        "Вы у вас уже есть эта пара слов:\n" +
-                                                deutsch.get().getDeWord() +
-                                                " = " + russian.get().getRuWord() +
-                                                "\n\n" + EmojiGive.gameDie + " Тренировки:");
-                            }
+                        }
+                        if (!bool) {
+                            userStatisticController.saveNewPairInStatistic(userDictionaryController.saveNewPair(telegramId, "DE", pair.get()));
+                            editKeyboard(update.getCallbackQuery(),
+                                    menuMaker.trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(
+                                            telegramId, "DE")),
+                                    "Вы добавили пару слов:\n" +
+                                            deutsch.getDeWord() +
+                                            " = " + russian.getRuWord() +
+                                            "\n\n" + EmojiGive.gameDie + " Тренировки:");
+                        } else {
+                            editKeyboard(update.getCallbackQuery(),
+                                    menuMaker.trainingMenu(trainingController.getUserLangByTgIdAndLangIdentifier(
+                                            telegramId, "DE")),
+                                    "Вы у вас уже есть эта пара слов:\n" +
+                                            deutsch.getDeWord() +
+                                            " = " + russian.getRuWord() +
+                                            "\n\n" + EmojiGive.gameDie + " Тренировки:");
                         }
                     }
                 } else if (callBackData.startsWith("/tr")) {// /tr= - training
@@ -246,7 +252,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         TrainingPair pair = learningList.get(0);
                         learningList.remove(pair);
                         editKeyboard(callbackQuery,
-                                trainingController.getTestKeyboard(pair, "/tr=/LT/DRI=:"),// /tr=/LT=/DRI=: - training/LearningTraining/DeRuId
+                                trainingController.getTestKeyboard(pair, "/tr=/LT=/DRI=:"),// /tr=/LT=/DRI=: - training/LearningTraining/DeRuId
                                 getHeaderForTraining(pair.getGerman().getDeWord()));
                     } else if (callBackData.equals("/tr=/sRT")) {// /tr=/sRT - training/StartRepeatTraining
                         repeatList = trainingController.createTrainingRepeatList(telegramId);
@@ -339,13 +345,13 @@ public class TelegramBot extends TelegramLongPollingBot {
                     List<String> wordList = new ArrayList<>();
                     File file = new File("C:\\Develop\\Learning\\DeutschTrainer\\src\\main\\resources\\contentList.txt");
                     try (Scanner scanner = new Scanner(file)) {
-                        int i=0;
+                        int i = 0;
                         while (scanner.hasNextLine()) {
                             String string = scanner.nextLine();
                             wordList.add(string);
                             i++;
                         }
-                        System.out.println("ВСЕ СЛОВА ДОБАВЛЕНЫ!\nВСЕГО СТРОК ПРОЧИТАНО ИЗ ФАЙЛА: "+i);
+                        System.out.println("ВСЕ СЛОВА ДОБАВЛЕНЫ!\nВСЕГО СТРОК ПРОЧИТАНО ИЗ ФАЙЛА: " + i);
                     } catch (FileNotFoundException e) {
                         throw new RuntimeException(e);
                     }

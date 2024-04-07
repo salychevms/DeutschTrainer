@@ -10,7 +10,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 @Component
 public class MenuMaker {
@@ -48,42 +51,52 @@ public class MenuMaker {
         return keyboardMarkup;
     }
 
-    InlineKeyboardMarkup getSearchWordMenu(List<String> wordCollection, String translatableWord, String isTranslate) {
+    InlineKeyboardMarkup getSearchWordMenu(Map<Long, String> forTrimming, String translatableWord, String lang, String isTranslate) {
         final String YES = "yes";
         final String NO = "no";
 
+        Map<Long, String> mapCollection = new HashMap<>();
+        int count = 0;
         //first 20 words
-        if (wordCollection.size() > 20) {
-            wordCollection = wordCollection.subList(0, 20);
+        if (forTrimming.size() > 20) {
+            for (Entry<Long, String> entry : forTrimming.entrySet()) {
+                if (count > 20) {
+                    break;
+                }
+                mapCollection.put(entry.getKey(), entry.getValue());
+                count++;
+            }
+        } else {
+            mapCollection = forTrimming;
         }
 
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
         //button
         InlineKeyboardButton goToTrainingMenuButton = new InlineKeyboardButton();
-        for (String item : wordCollection) {
+        for (Entry<Long, String> item : mapCollection.entrySet()) {
             InlineKeyboardButton button = new InlineKeyboardButton();
             List<InlineKeyboardButton> buttons = new ArrayList<>();
-            button.setText(item);
-            String substr1=" <<еще варианты>>";
-            String substr2=" <<уже добавлено>>";
-            if(item.contains(substr1)){
-                item=item.replaceAll(substr1,"");
+            button.setText(item.getValue());
+            String substr1 = " <<еще варианты>>";
+            String substr2 = " <<уже добавлено>>";
+            if (item.getValue().contains(substr1)) {
+                mapCollection.put(item.getKey(), "");
             }
-            if(item.contains(substr2)){
-                item=item.replaceAll(substr2, "");
+            if (item.getValue().contains(substr2)) {
+                mapCollection.put(item.getKey(), "");
             }
             /* CallbackData constructor:
             for search words (/so - searchOffer): "/so="+item  ==>>  /so=rennen
             for translate words (/to - translationsOffer): "/to="+item  ==>>  /to=rennen */
             if (isTranslate.equalsIgnoreCase(NO)) {
                 //a user looks for a word and can choose from the word list, also we get a translatable word for the next step
-                button.setCallbackData("/so=" + item + "=" + translatableWord);// /so - searchOffer
+                button.setCallbackData("/so=" + item.getKey().toString() + "=" + lang + "=" + translatableWord);// /so - searchOffer
                 goToTrainingMenuButton = new InlineKeyboardButton("<" + EmojiGive.gameDie + " к меню тренировок");
                 goToTrainingMenuButton.setCallbackData("/tr");// /tr - training
             } else if (isTranslate.equalsIgnoreCase(YES)) {
                 //this step gets to a user a lot of translations for the search word;
-                button.setCallbackData("/to=" + item + "=" + translatableWord);// /to - translationsOffer
+                button.setCallbackData("/to=" + item.getKey().toString() + "=" + lang + "=" + translatableWord);// /to - translationsOffer
                 goToTrainingMenuButton = new InlineKeyboardButton("<" + EmojiGive.backArrow + " назад");
                 goToTrainingMenuButton.setCallbackData("/toSearchOffer");
             }
@@ -152,11 +165,11 @@ public class MenuMaker {
             rows.add(row);
         }
 
-        List<UserStatistic> ifWordsExist=userStatisticController.getAllStatisticWithIterationsAllAsc(userLanguage);
-        if(!ifWordsExist.isEmpty()) {
+        List<UserStatistic> ifWordsExist = userStatisticController.getAllStatisticWithIterationsAllAsc(userLanguage);
+        if (!ifWordsExist.isEmpty()) {
             InlineKeyboardButton repeatWordsTrainingButton = new InlineKeyboardButton(EmojiGive.repeatButton + " Ежедневная тренировка");
             repeatWordsTrainingButton.setCallbackData("/tr=/sRT");// /tr=/sRT - training/StartRepeatTraining
-            List<InlineKeyboardButton> row=new ArrayList<>();
+            List<InlineKeyboardButton> row = new ArrayList<>();
             row.add(repeatWordsTrainingButton);
             rows.add(row);
         }
