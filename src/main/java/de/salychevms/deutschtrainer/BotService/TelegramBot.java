@@ -2,6 +2,10 @@ package de.salychevms.deutschtrainer.BotService;
 
 import de.salychevms.deutschtrainer.BotConfig.BotConfig;
 import de.salychevms.deutschtrainer.Controllers.*;
+import de.salychevms.deutschtrainer.DataExchange.Classes.BasicPairStatisticInfoClass;
+import de.salychevms.deutschtrainer.DataExchange.Classes.UserPairStatisticInfoClass;
+import de.salychevms.deutschtrainer.DataExchange.Controlles.DataExchangeInOutController;
+import de.salychevms.deutschtrainer.DataExchange.Controlles.VocabularyController;
 import de.salychevms.deutschtrainer.Emojies.EmojiGive;
 import de.salychevms.deutschtrainer.Models.*;
 import de.salychevms.deutschtrainer.Training.TrainingController;
@@ -32,6 +36,8 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final UserDictionaryController userDictionaryController;
     private final TrainingController trainingController;
     private final MenuMaker menuMaker;
+    private final VocabularyController vocabularyController;
+    private final DataExchangeInOutController dataExchangeInOutController;
     private List<TrainingPair> learningList = new ArrayList<>();
     private List<TrainingPair> failList = new ArrayList<>();
     private List<TrainingPair> repeatList = new ArrayList<>();
@@ -41,7 +47,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                        UserLanguageController userLanguageController, DeutschController deutschController,
                        RussianController russianController, DeRuPairsController deRuPairsController,
                        UserStatisticController userStatisticController, UserDictionaryController userDictionaryController,
-                       TrainingController trainingController, MenuMaker menuMaker) {
+                       TrainingController trainingController, MenuMaker menuMaker, VocabularyController vocabularyController, DataExchangeInOutController dataExchangeInOutController) {
         this.config = config;
         this.usersController = usersController;
         this.languageController = languageController;
@@ -53,6 +59,8 @@ public class TelegramBot extends TelegramLongPollingBot {
         this.userDictionaryController = userDictionaryController;
         this.trainingController = trainingController;
         this.menuMaker = menuMaker;
+        this.vocabularyController = vocabularyController;
+        this.dataExchangeInOutController = dataExchangeInOutController;
     }
 
     @Override
@@ -321,6 +329,12 @@ public class TelegramBot extends TelegramLongPollingBot {
                         failList.clear();
                     }
                 } else if (callBackData.equals("/statistic")) {
+                    //////////////////////////////
+                    /*List<BasicPairStatisticInfoClass> basicPairStatistic=vocabularyController.getUserPairStatisticInfo(telegramId, 2L);
+                    System.out.println(basicPairStatistic);*/
+                    List<UserPairStatisticInfoClass> userStatisticList=vocabularyController.getAllUserPairStatisticInfo(telegramId, "DE");
+                    dataExchangeInOutController.writeUserStatisticToExcel(userStatisticList);
+                    //////////////////////////////
                     String basicStatistic = userStatisticController.getBasicStatistic(telegramId);
                     editKeyboard(update.getCallbackQuery(), menuMaker.statisticMenu(), EmojiGive.barChart + " Статистика: \n\n" + basicStatistic);
                 } else if (callBackData.equals("/settings")) {

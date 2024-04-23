@@ -2,7 +2,6 @@ package de.salychevms.deutschtrainer.Controllers;
 
 import de.salychevms.deutschtrainer.Models.*;
 import de.salychevms.deutschtrainer.Services.UserDictionaryService;
-import org.apache.catalina.User;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -28,12 +27,14 @@ public class UserDictionaryController {
         Optional<Language> language = languageController.getLanguageByIdentifier(languageIdentifier);
         if (language.isPresent() && user.isPresent()) {
             Optional<UserLanguage> userLanguage = userLanguageController.getByUserIdAndLanguageId(user.get().getTelegramId(), language.get().getId());
-            if(userLanguage.isPresent()) {
+            if (userLanguage.isPresent()) {
                 return userDictionaryService.saveNewPair(userLanguage.get(), pair);
             } else {
                 userLanguageController.createUserLanguage(user.get().getTelegramId(), language.get().getId());
-                Optional<UserLanguage> newUserLanguage=userLanguageController.getByUserIdAndLanguageId(user.get().getTelegramId(), language.get().getId());
-                return userDictionaryService.saveNewPair(newUserLanguage.get(), pair);
+                Optional<UserLanguage> newUserLanguage = userLanguageController.getByUserIdAndLanguageId(user.get().getTelegramId(), language.get().getId());
+                if (newUserLanguage.isPresent()) {
+                    return userDictionaryService.saveNewPair(newUserLanguage.get(), pair);
+                }
             }
         }
         return null;
@@ -59,5 +60,13 @@ public class UserDictionaryController {
                 return userDictionaryService.getAllByUserLanguage(userLanguage.get());
             } else return Collections.emptyList();
         } else return Collections.emptyList();
+    }
+
+    public Optional<UserDictionary> getUserDictionaryByPairIdAndUserLanguageId(Long pairId, Long userLanguageId) {
+        return userDictionaryService.getUserDictionaryByPairIdAndUserLanguageId(pairId, userLanguageId);
+    }
+
+    public List<UserDictionary> getAllByUserLanguageId(Long userLanguageId) {
+        return userDictionaryService.getAllByUserLanguageId(userLanguageId);
     }
 }

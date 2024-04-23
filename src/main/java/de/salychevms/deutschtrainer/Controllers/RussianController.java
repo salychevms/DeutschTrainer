@@ -55,4 +55,8 @@ public class RussianController {
     public Optional<Russian> get1RandomRussian() {
         return russianService.get1RandomRussian();
     }
+
+    public List<Russian> getAll(){
+        return russianService.getAll();
+    }
 }

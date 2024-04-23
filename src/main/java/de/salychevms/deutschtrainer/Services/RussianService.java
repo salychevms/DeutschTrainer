@@ -46,4 +46,9 @@ public class RussianService {
     public Optional<Russian> get1RandomRussian(){
         return russianRepository.find1RandomRussian();
     }
+
+    @Transactional
+    public List<Russian> getAll(){
+        return russianRepository.getAll();
+    }
 }

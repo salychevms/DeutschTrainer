@@ -45,4 +45,9 @@ public class UserLanguageService {
     public Optional<UserLanguage> getById(Long id){
         return userLanguageRepository.findById(id);
     }
+
+    @Transactional
+    public List<Long> getAllLanguageIdsByTelegramId(Long telegramId){
+        return userLanguageRepository.getAllUserLanguageIdByUser_TelegramId(telegramId);
+    }
 }

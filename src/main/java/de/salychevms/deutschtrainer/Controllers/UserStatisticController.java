@@ -67,8 +67,11 @@ public class UserStatisticController {
 
     public Optional<UserStatistic> getUserStatisticByUserDictionary(UserDictionary userDictionary, UserLanguage userLanguage) {
         Optional<UserStatistic> statistic = userStatisticService.getUserStatisticByUserDictionary(userDictionary);
-        if (statistic.isPresent() && userDictionary.getUserLanguage().equals(userLanguage))
-            return statistic;
+        if (statistic.isPresent()) {
+            if (userDictionary.getUserLanguage().getId().equals(userLanguage.getId())) {
+                return statistic;
+            }
+        }
         return Optional.empty();
     }
 

@@ -2,6 +2,7 @@ package de.salychevms.deutschtrainer.Repo;
 
 import de.salychevms.deutschtrainer.Models.DeRuPairs;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 
@@ -15,4 +16,7 @@ public interface DeRuPairsRepository extends JpaRepository<DeRuPairs, Long> {
     List<DeRuPairs> getAllByDeutschId(Long id);
 
     List<DeRuPairs> getAllByRussianId(Long id);
+
+    @Query("SELECT pair FROM DeRuPairs pair")
+    List<DeRuPairs> getAll();
 }

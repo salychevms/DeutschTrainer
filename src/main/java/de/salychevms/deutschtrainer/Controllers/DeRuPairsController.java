@@ -176,4 +176,8 @@ public class DeRuPairsController {
     public Optional<DeRuPairs> getDeRuById(Long id) {
         return deRuPairsService.findPairById(id);
     }
+
+    public List<DeRuPairs> getAll(){
+        return deRuPairsService.getAll();
+    }
 }

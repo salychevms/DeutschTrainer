@@ -34,4 +34,7 @@ public class DeutschController {
         return deutschService.findByWord(word);
     }
 
+    public List<Deutsch> getAll(){
+        return deutschService.getAll();
+    }
 }

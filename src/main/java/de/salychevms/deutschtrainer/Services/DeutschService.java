@@ -37,4 +37,9 @@ public class DeutschService {
     public Optional<Deutsch> findByWord(String word){
         return deutschRepository.findByDeWord(word);
     }
+
+    @Transactional
+    public List<Deutsch> getAll(){
+        return deutschRepository.getAll();
+    }
 }

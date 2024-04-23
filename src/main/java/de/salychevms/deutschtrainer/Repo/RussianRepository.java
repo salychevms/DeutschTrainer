@@ -21,4 +21,7 @@ public interface RussianRepository extends JpaRepository<Russian, Long> {
 
     @Query(value = "SELECT * FROM russian ORDER BY RANDOM() LIMIT 1", nativeQuery = true)
     Optional<Russian> find1RandomRussian();
+
+    @Query("SELECT r FROM Russian r")
+    List<Russian> getAll();
 }

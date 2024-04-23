@@ -48,4 +48,9 @@ public class DeRuPairsService {
     public Optional<DeRuPairs> findPairById(Long id) {
         return deRuPairsRepository.findById(id);
     }
+
+    @Transactional
+    public List<DeRuPairs> getAll(){
+        return deRuPairsRepository.getAll();
+    }
 }

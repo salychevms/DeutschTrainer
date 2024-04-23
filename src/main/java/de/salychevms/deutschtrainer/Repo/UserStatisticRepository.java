@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserStatisticRepository extends JpaRepository<UserStatistic, Long> {
+
     Optional<UserStatistic> findByWord(UserDictionary userDictionary);
 
     List<UserStatistic> findAllByNewWordIsTrue();

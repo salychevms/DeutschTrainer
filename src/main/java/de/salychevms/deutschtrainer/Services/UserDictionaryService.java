@@ -18,8 +18,8 @@ public class UserDictionaryService {
     }
 
     @Transactional
-    public UserDictionary saveNewPair(UserLanguage userLanguage, DeRuPairs pair){
-        UserDictionary userDictionary=new UserDictionary();
+    public UserDictionary saveNewPair(UserLanguage userLanguage, DeRuPairs pair) {
+        UserDictionary userDictionary = new UserDictionary();
         userDictionary.setUserLanguage(userLanguage);
         userDictionary.setPair(pair);
         userDictionary.setDateAdded(new Date());
@@ -27,12 +27,12 @@ public class UserDictionaryService {
     }
 
     @Transactional
-    public Optional<UserDictionary> findById(Long id){
+    public Optional<UserDictionary> findById(Long id) {
         return userDictionaryRepository.findById(id);
     }
 
     @Transactional
-    public Optional<UserDictionary> getUserDictionaryByPairId(Long id){
+    public Optional<UserDictionary> getUserDictionaryByPairId(Long id) {
         return userDictionaryRepository.getUserDictionaryByPairId(id);
     }
 
@@ -42,7 +42,23 @@ public class UserDictionaryService {
     }
 
     @Transactional
-    public List<UserDictionary> getAllByUserLanguage(UserLanguage userLanguage){
+    public List<UserDictionary> getAllByUserLanguage(UserLanguage userLanguage) {
         return userDictionaryRepository.getAllByUserLanguage(userLanguage);
+    }
+
+    @Transactional
+    public Optional<UserDictionary> getUserDictionaryByPairIdAndUserLanguageId(Long pairId, Long userLanguageId) {
+        return userDictionaryRepository.getUserDictionaryByPairIdAndUserLanguageId(pairId, userLanguageId);
+    }
+
+    @Transactional
+    public List<UserDictionary> getAllByUserLanguageId(Long userLanguageId) {
+        List<UserDictionary> userDictionaryList = userDictionaryRepository.findAllByUserLanguageId(userLanguageId);
+        System.out.println(userLanguageId);
+        if (!userDictionaryList.isEmpty()) {
+            System.out.println(userDictionaryList);
+            return userDictionaryList;
+        }
+        return null;
     }
 }

@@ -62,6 +62,7 @@ public class TrainingController {
                 }
             }
         }
+        Collections.shuffle(trainingPairList);
         if (trainingPairList.size() >= 50) {
             trainingPairList = trainingPairList.subList(0, 49);
         }
@@ -97,6 +98,7 @@ public class TrainingController {
                 }
             }
         }
+        Collections.shuffle(trainingFailList);
         if (trainingFailList.size() >= 50) {
             trainingFailList = trainingFailList.subList(0, 49);
         }
@@ -132,6 +134,7 @@ public class TrainingController {
                 }
             }
         }
+        Collections.shuffle(learningPairList);
         if (learningPairList.size() >= 25) {
             learningPairList = learningPairList.subList(0, 24);
         }

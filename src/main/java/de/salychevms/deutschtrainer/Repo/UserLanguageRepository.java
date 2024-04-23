@@ -16,4 +16,7 @@ public interface UserLanguageRepository extends JpaRepository<UserLanguage, Long
     List<UserLanguage> findAllByUser_TelegramId(Long telegramId);
 
     Optional<UserLanguage> findByUserAndLanguageId(Users user, Long languageId);
+
+    @EntityGraph(attributePaths = "language")
+    List<Long> getAllUserLanguageIdByUser_TelegramId(Long telegramId);
 }
