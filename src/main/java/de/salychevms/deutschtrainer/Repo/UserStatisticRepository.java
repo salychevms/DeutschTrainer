@@ -16,10 +16,10 @@ public interface UserStatisticRepository extends JpaRepository<UserStatistic, Lo
 
     List<UserStatistic> findAllByNewWordIsTrue();
 
-    @Query("SELECT us FROM UserStatistic us ORDER BY us.failsAll DESC")
+    @Query("SELECT us FROM UserStatistic us WHERE us.newWord =  false ORDER BY us.failsAll DESC")
     List<UserStatistic> findAllOrderByFailsAllDesc();
 
-    @Query("SELECT us FROM UserStatistic us ORDER BY us.iterationsAll ASC")
+    @Query("SELECT us FROM UserStatistic us WHERE us.newWord =  false ORDER BY us.iterationsAll ASC")
     List<UserStatistic> findAllOrderByIterationsAllAsc();
 
 }

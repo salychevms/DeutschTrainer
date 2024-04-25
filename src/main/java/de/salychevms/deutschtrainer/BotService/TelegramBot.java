@@ -10,6 +10,7 @@ import de.salychevms.deutschtrainer.Emojies.EmojiGive;
 import de.salychevms.deutschtrainer.Models.*;
 import de.salychevms.deutschtrainer.Training.TrainingController;
 import de.salychevms.deutschtrainer.Training.TrainingPair;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -23,6 +24,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 
+@EnableScheduling //ResetStatisticTask.java activate
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
     private final BotConfig config;

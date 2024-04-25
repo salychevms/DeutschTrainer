@@ -14,7 +14,7 @@ public class ResetStatisticsTask {
         this.userStatisticService = userStatisticService;
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 0 9 * * *")
     public void dailyReset (){
         List<UserStatistic> allStatistic=userStatisticService.findAll();
         if(!allStatistic.isEmpty()){
@@ -24,7 +24,7 @@ public class ResetStatisticsTask {
         }
     }
 
-    @Scheduled(cron = "0 0 0 * * MON")
+    @Scheduled(cron = "0 0 9 * * MON")
     public void weeklyReset (){
         List<UserStatistic> allStatistic=userStatisticService.findAll();
         if(!allStatistic.isEmpty()){
@@ -34,7 +34,7 @@ public class ResetStatisticsTask {
         }
     }
 
-    @Scheduled(cron = "0 0 0 1 * *")
+    @Scheduled(cron = "0 0 9 1 * *")
     public void monthlyReset (){
         List<UserStatistic> allStatistic=userStatisticService.findAll();
         if(!allStatistic.isEmpty()){

@@ -32,6 +32,10 @@ public class UserStatistic {
     private Long iterationsPerWeek;
     @Column(name = "iterations_per_day")
     private Long iterationsPerDay;
+    @Column(name="fail_training")
+    private int failTraining;
+    @Column(name="fail_status")
+    private boolean failStatus;
     @Column(name = "fails_all")
     private Long failsAll;
     @Column(name="fails_per_month")
@@ -60,6 +64,8 @@ public class UserStatistic {
                 ", iterationsPerMonth=" + iterationsPerMonth +'\'' +
                 ", iterationsPerWeek=" + iterationsPerWeek +'\'' +
                 ", iterationsPerDay=" + iterationsPerDay +'\'' +
+                ", failTraining=" + failTraining +'\'' +
+                ", failStatus=" + failStatus +'\'' +
                 ", failsAll=" + failsAll +'\'' +
                 ", failsPerMonth=" + failsPerMonth +'\'' +
                 ", failsPerWeek=" + failsPerWeek +'\'' +
