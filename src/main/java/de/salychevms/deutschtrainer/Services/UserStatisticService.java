@@ -263,4 +263,46 @@ public class UserStatisticService {
             return allStatistic;
         } else return null;
     }
+
+    @Transactional
+    public void setFailStatusTrue(UserDictionary userDictionary) {
+        Optional<UserStatistic> statistic = userStatisticRepository.findByWord(userDictionary);
+        if (statistic.isPresent()) {
+            UserStatistic updatableStatistic = statistic.get();
+            if (!updatableStatistic.isFailStatus()) {
+                updatableStatistic.setFailStatus(true);
+            }
+            updatableStatistic.setFailTraining(5);
+            userStatisticRepository.save(updatableStatistic);
+        }
+    }
+
+    @Transactional
+    public void setFailStatusFalse(UserDictionary userDictionary) {
+        Optional<UserStatistic> statistic = userStatisticRepository.findByWord(userDictionary);
+        if (statistic.isPresent()) {
+            UserStatistic updatableStatistic = statistic.get();
+            if (updatableStatistic.isFailStatus()) {
+                updatableStatistic.setFailStatus(false);
+            }
+            updatableStatistic.setFailTraining(null);
+            userStatisticRepository.save(updatableStatistic);
+        }
+    }
+
+    @Transactional
+    public void decreaseFailTraining(UserDictionary userDictionary) {
+        Optional<UserStatistic> statistic = userStatisticRepository.findByWord(userDictionary);
+        statistic.ifPresent(updatableStatistic -> {
+            Integer failTraining = updatableStatistic.getFailTraining();
+            if (failTraining != null) {
+                int newFailTraining = failTraining - 1;
+                updatableStatistic.setFailTraining(newFailTraining <= 0 ? null : newFailTraining);
+                if (newFailTraining <= 0) {
+                    updatableStatistic.setFailStatus(false);
+                }
+                userStatisticRepository.save(updatableStatistic);
+            }
+        });
+    }
 }

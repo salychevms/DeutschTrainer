@@ -33,7 +33,7 @@ public class UserStatistic {
     @Column(name = "iterations_per_day")
     private Long iterationsPerDay;
     @Column(name="fail_training")
-    private int failTraining;
+    private Integer failTraining;
     @Column(name="fail_status")
     private boolean failStatus;
     @Column(name = "fails_all")

@@ -21,5 +21,4 @@ public interface UserStatisticRepository extends JpaRepository<UserStatistic, Lo
 
     @Query("SELECT us FROM UserStatistic us WHERE us.newWord =  false ORDER BY us.iterationsAll ASC")
     List<UserStatistic> findAllOrderByIterationsAllAsc();
-
 }

@@ -160,4 +160,16 @@ public class UserStatisticController {
                 "\nКоличество ошибок с этой парой = " + errorMax +
                 "\nВаша последняя тренировка была: " + dateString + "\n\n";
     }
+
+    public void setFailStatusTrue(UserDictionary userDictionary){
+        userStatisticService.setFailStatusTrue(userDictionary);
+    }
+
+    public void setFailStatusFalse(UserDictionary userDictionary){
+        userStatisticService.setFailStatusFalse(userDictionary);
+    }
+
+    public void decreaseFailTraining(UserDictionary userDictionary){
+        userStatisticService.decreaseFailTraining(userDictionary);
+    }
 }
