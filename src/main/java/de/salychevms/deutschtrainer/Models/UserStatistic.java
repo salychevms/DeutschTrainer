@@ -52,6 +52,7 @@ public class UserStatistic {
     public UserStatistic(UserDictionary word){
         this.word=word;
         this.newWord=true;
+        this.failStatus=false;
     }
 
     @Override

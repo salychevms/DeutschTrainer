@@ -172,7 +172,11 @@ public class TrainingController {
     }
 
     public String getAnswerFromUser(String callBackData) {
+        final String repeatTrainingMarker = "RT=";
+        final String failTrainingMarker = "FT=";
+        final String learningTrainingMarker = "TR=";
         String answerToUser = null;
+        String[] selector = callBackData.split("/");
         int startIndex = callBackData.indexOf("DRI=:");
         Long userAnswerId = null;
         Long correctPairId = null;
@@ -196,10 +200,22 @@ public class TrainingController {
                             + german.get().getDeWord() + " --> " + ruCorrect.get().getRuWord()
                             + "\n\n*******************\n"
                             + EmojiGive.greyCheck;
+                    if (selector[2].contains(failTrainingMarker)) {
+                        forStatistic.ifPresent(userStatisticController::decreaseFailTraining);
+                    }
                 } else {
                     Optional<UserDictionary> forStatistic = userDictionaryController.getUserDictionaryByPairId(correctPairId);
-                    forStatistic.ifPresent(userStatisticController::updateAllIterationsAndNewWordStatus);
-                    forStatistic.ifPresent(userStatisticController::updateAllFails);
+                    if(forStatistic.isPresent()) {
+                        userStatisticController.updateAllIterationsAndNewWordStatus(forStatistic.get());
+                        if( selector[2].contains(repeatTrainingMarker)){
+                            userStatisticController.updateAllFails(forStatistic.get());
+                            userStatisticController.setFailStatusTrue(forStatistic.get());
+                        }
+                        if( selector[2].contains(failTrainingMarker)){
+                            userStatisticController.updateAllFails(forStatistic.get());
+                            userStatisticController.setFailStatusTrue(forStatistic.get());
+                        }
+                    }
                     answerToUser = "***** ОШИБКА!!! *****"
                             + "\n\nВы выбрали: " + ruFromUser.getRuWord()
                             + "\n\n--- Верный ответ ---\n\n"
