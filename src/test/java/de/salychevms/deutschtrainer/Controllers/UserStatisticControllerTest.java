@@ -4,14 +4,12 @@ import de.salychevms.deutschtrainer.Models.*;
 import de.salychevms.deutschtrainer.Services.UserStatisticService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -22,6 +20,12 @@ class UserStatisticControllerTest {
     private UserStatisticService userStatisticService;
     @Mock
     private UserDictionaryController userDictionaryController;
+    @Mock
+    private  DeRuPairsController deRuPairsController;
+    @Mock
+    private DeutschController deutschController;
+    @Mock
+    private RussianController russianController;
     @InjectMocks
     private UserStatisticController userStatisticController;
 
@@ -166,5 +170,80 @@ class UserStatisticControllerTest {
         verify(userStatisticService, times(1)).updateWeekFails(userDictionary);
         verify(userStatisticService, times(1)).updateDayFails(userDictionary);
         verify(userStatisticService, times(1)).updateAllFails(userDictionary);
+    }
+
+    @Test
+    void testSetFailStatusTrueAndFalseAndGetFailStatus(){
+        UserDictionary userDictionary=new UserDictionary();
+
+        userStatisticController.setFailStatusFalse(userDictionary);
+        verify(userStatisticService, times(1)).setFailStatusFalse(userDictionary);
+
+        userStatisticController.setFailStatusTrue(userDictionary);
+        verify(userStatisticService, times(1)).setFailStatusTrue(userDictionary);
+    }
+
+    @Test
+    void testGetBasicStatistic(){
+        //chatGPT has helped me
+        Long telegramId = 123L;
+        Date currentDate = new Date();
+        Date yesterdayDate = new Date(currentDate.getTime() - 24 * 60 * 60 * 1000);
+
+        UserDictionary userDictionary1 = new UserDictionary();
+        DeRuPairs pair1 = new DeRuPairs();
+        pair1.setId(1L);
+        Deutsch deutsch1 = new Deutsch();
+        deutsch1.setId(1L);
+        deutsch1.setDeWord("das Haus");
+        Russian russian1 = new Russian();
+        russian1.setId(1L);
+        russian1.setRuWord("дом");
+        pair1.setDeutsch(deutsch1);
+        pair1.setRussian(russian1);
+        userDictionary1.setPair(pair1);
+
+        UserStatistic userStatistic1 = new UserStatistic();
+        userStatistic1.setNewWord(true);
+        userStatistic1.setFailsAll(3L);
+        userStatistic1.setLastTraining(yesterdayDate);
+
+        List<UserDictionary> userDictionaries = Collections.singletonList(userDictionary1);
+        List<DeRuPairs> pairs = Collections.singletonList(pair1);
+
+        String expected = "В Вашем словаре 1 немецких уникальных слов.\n" +
+                "С этими словами у Вас 1 пар.\n" +
+                "Из них 1 новых пар, которые вам еще предстоит учить.\n" +
+                "Пара слов, в которой вы чаще всего ошибаетесь:\ndas Haus - дом" +
+                "\nКоличество ошибок с этой парой = 3" +
+                "\nВаша последняя тренировка была: вчера\n\n";
+
+        when(userDictionaryController.getAllByTelegramId(telegramId)).thenReturn(userDictionaries);
+        when(deRuPairsController.getDeRuById(1L)).thenReturn(Optional.of(pair1));
+        when(userStatisticService.getUserStatisticByUserDictionary(userDictionary1)).thenReturn(Optional.of(userStatistic1));
+        when(deutschController.findById(1L)).thenReturn(deutsch1);
+        when(russianController.findById(1L)).thenReturn(russian1);
+
+        String result = userStatisticController.getBasicStatistic(telegramId);
+
+        System.out.println(expected);
+        System.out.println(result);
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void testDecreaseFailTraining(){
+        UserDictionary userDictionary = new UserDictionary();
+        Long userDictionaryId = 123456789L;
+        userDictionary.setId(userDictionaryId);
+
+        UserStatistic statistic=new UserStatistic();
+        statistic.setWord(userDictionary);
+        statistic.setFailStatus(true);
+        statistic.setFailTraining(3);
+
+        userStatisticService.decreaseFailTraining(userDictionary);
+        verify(userStatisticService, times(1)).decreaseFailTraining(userDictionary);
     }
 }

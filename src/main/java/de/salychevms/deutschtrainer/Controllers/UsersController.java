@@ -28,8 +28,8 @@ public class UsersController {
         return usersService.findUserByTelegramId(telegramId);
     }
 
-    public void updateNameByTelegramID(Long telegramId, String name) {
-        usersService.updateNameByTelegramID(telegramId, name);
+    public void updateNameByTelegramId(Long telegramId, String name) {
+        usersService.updateNameByTelegramId(telegramId, name);
     }
 
     public void updateSurnameByTelegramId(Long telegramId, String surname) {

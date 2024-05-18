@@ -107,7 +107,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         if (item.startsWith(String.valueOf(telegramId))) {
                             String userText = item.substring(String.valueOf(telegramId).length());
                             if (userText.equals("/settings/changeName")) {
-                                usersController.updateNameByTelegramID(telegramId, messageText);
+                                usersController.updateNameByTelegramId(telegramId, messageText);
                                 iterator.remove();
                                 sendKeyboard(menuMaker.settingsMenu(), chatId, "Ваше имя изменено! \""
                                         + messageText + "\""
@@ -334,7 +334,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     //////////////////////////////
                     /*List<BasicPairStatisticInfoClass> basicPairStatistic=vocabularyController.getUserPairStatisticInfo(telegramId, 2L);
                     System.out.println(basicPairStatistic);*/
-                    List<UserPairStatisticInfoClass> userStatisticList=vocabularyController.getAllUserPairStatisticInfo(telegramId, "DE");
+                    List<UserPairStatisticInfoClass> userStatisticList = vocabularyController.getAllUserPairStatisticInfo(telegramId, "DE");
                     dataExchangeInOutController.writeUserStatisticToExcel(userStatisticList);
                     //////////////////////////////
                     String basicStatistic = userStatisticController.getBasicStatistic(telegramId);

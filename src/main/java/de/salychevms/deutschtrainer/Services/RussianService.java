@@ -24,9 +24,7 @@ public class RussianService {
 
     @Transactional
     public Russian createNewRussian(String word) {
-        System.out.println(word);//////////////////
         Optional<Russian> exist = russianRepository.findByRuWordIgnoreCase(word);
-        System.out.println(exist.isPresent());//////////////////
         return exist.orElseGet(() -> russianRepository.save(new Russian(word)));
     }
 
@@ -52,6 +50,6 @@ public class RussianService {
 
     @Transactional
     public List<Russian> getAll() {
-        return russianRepository.getAll();
+        return russianRepository.findAll();
     }
 }

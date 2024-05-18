@@ -132,4 +132,39 @@ class UserLanguageServiceTest {
 
         result.ifPresent(value -> assertEquals(userLanguage, value));
     }
+
+    @Test
+    void testGetAllLanguageIdsByTelegramId(){
+        Long telegramId=73607626072L;
+        Users user=new Users();
+        user.setTelegramId(telegramId);
+
+        Language language1=new Language();
+        language1.setIdentifier("language1");
+
+        UserLanguage userLanguage=new UserLanguage();
+        userLanguage.setLanguage(language1);
+        userLanguage.setUser(user);
+
+        Language language2=new Language();
+        language2.setIdentifier("language2");
+
+        UserLanguage someUserLanguage=new UserLanguage();
+        someUserLanguage.setLanguage(language2);
+        someUserLanguage.setUser(user);
+
+        List<UserLanguage> userLanguageList = new ArrayList<>();
+        userLanguageList.add(userLanguage);
+        userLanguageList.add(someUserLanguage);
+
+        List<String> languageNames=new ArrayList<>();
+        languageNames.add("language1");
+        languageNames.add("language2");
+
+        when(userLanguageRepository.findAllByUser_TelegramId(telegramId)).thenReturn(userLanguageList);
+        List<String> result=userLanguageService.getAllLanguagesByTelegramId(telegramId);
+
+        assertFalse(result.isEmpty());
+        assertEquals(languageNames, result);
+    }
 }

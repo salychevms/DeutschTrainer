@@ -114,4 +114,21 @@ class DeutschServiceTest {
 
         result.ifPresent(value -> assertEquals(deutsch, value));
     }
+
+    @Test
+    void testGetAll(){
+        Deutsch deutsch1=new Deutsch("d1");
+        Deutsch deutsch2=new Deutsch("d2");
+        Deutsch deutsch3=new Deutsch("some Deutsch");
+        List<Deutsch> deutschList = new ArrayList<>();
+        deutschList.add(deutsch1);
+        deutschList.add(deutsch2);
+        deutschList.add(deutsch3);
+
+        when(deutschRepository.getAll()).thenReturn(deutschList);
+        List<Deutsch> result = deutschService.getAll();
+
+        assertEquals(deutschList, result);
+        assertFalse(result.isEmpty());
+    }
 }

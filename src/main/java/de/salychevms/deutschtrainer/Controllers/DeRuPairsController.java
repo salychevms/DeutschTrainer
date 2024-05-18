@@ -142,6 +142,7 @@ public class DeRuPairsController {
         Long chosenWordId = Long.valueOf(chosenWord);
         Map<Long, String> translationList = new HashMap<>();
         if (DE.equalsIgnoreCase(fromLanguage)) {
+
             List<DeRuPairs> allPairs = deRuPairsService.findAllByDeutschId(chosenWordId);
             for (DeRuPairs item : allPairs) {
                 Russian russian = russianController.findById(item.getRussian().getId());
@@ -177,7 +178,7 @@ public class DeRuPairsController {
         return deRuPairsService.findPairById(id);
     }
 
-    public List<DeRuPairs> getAll(){
+    public List<DeRuPairs> getAll() {
         return deRuPairsService.getAll();
     }
 }

@@ -81,7 +81,7 @@ class UsersServiceTest {
         Users user = new Users(testTgId, testUserName, testDate);
 
         when(usersRepository.findByTelegramId(testTgId)).thenReturn(Optional.of(user));
-        usersService.updateNameByTelegramID(testTgId, newTestName);
+        usersService.updateNameByTelegramId(testTgId, newTestName);
 
         verify(usersRepository, times(1)).findByTelegramId(testTgId);
         ArgumentCaptor<Users> userCaptor = ArgumentCaptor.forClass(Users.class);
@@ -156,7 +156,7 @@ class UsersServiceTest {
     }
 
     @Test
-    void updateAdminStatusOn() {
+    void testUpdateAdminStatusOn() {
         Long testTgId = 2201030405060L;
         String testUserName = "testUserName";
         Date testDate = new Date();
@@ -176,7 +176,7 @@ class UsersServiceTest {
     }
 
     @Test
-    void deleteUserByTelegramId() {
+    void testDeleteUserByTelegramId() {
         Long testTgId = 3304050607080L;
         String testUserName = "testUserName";
         Date testDate = new Date();
@@ -193,7 +193,7 @@ class UsersServiceTest {
     }
 
     @Test
-    void deleteAllUsers() {
+    void testDeleteAllUsers() {
         Long firstTestTgId = 3123032101230123L;
         String firstTestUserName = "firstTestUserName";
         Date firstTestDate = new Date();

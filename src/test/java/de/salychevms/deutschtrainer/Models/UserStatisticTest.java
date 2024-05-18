@@ -56,7 +56,7 @@ class UserStatisticTest {
     }
 
     @Test
-    void testIsNewWord() {
+    void testSetAndIsNewWord() {
         UserStatistic userStatistic=new UserStatistic(new UserDictionary());
         //test basic parameter - 'true'
         assertTrue(userStatistic.isNewWord());
@@ -129,5 +129,27 @@ class UserStatisticTest {
         UserStatistic userStatistic=new UserStatistic();
         userStatistic.setLastTraining(testDate);
         assertEquals(testDate, userStatistic.getLastTraining());
+    }
+
+    @Test
+    void testSetAndGetFailTraining() {
+        UserStatistic userStatistic=new UserStatistic();
+        userStatistic.setFailTraining(5);
+
+        assertEquals(5, userStatistic.getFailTraining());
+        userStatistic.setFailTraining(3);
+        assertEquals(3, userStatistic.getFailTraining());
+    }
+
+    @Test
+    void testSetAndIsFailStatus() {
+        UserStatistic userStatistic=new UserStatistic();
+        //basically is false
+        assertFalse(userStatistic.isFailStatus());
+
+        userStatistic.setFailStatus(true);
+        assertTrue(userStatistic.isFailStatus());
+        userStatistic.setFailStatus(false);
+        assertFalse(userStatistic.isFailStatus());
     }
 }

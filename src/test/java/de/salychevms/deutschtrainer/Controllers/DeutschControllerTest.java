@@ -79,6 +79,7 @@ class DeutschControllerTest {
 
         assertTrue(result.isEmpty());
     }
+
     @Test
     void testFindByWordIfExists() {
         Long id=665489784654351L;
@@ -100,5 +101,20 @@ class DeutschControllerTest {
         Optional<Deutsch> result=deutschController.findByWord(word);
 
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testFindAll(){
+        Deutsch deutsch1=new Deutsch();
+        Deutsch deutsch2=new Deutsch();
+
+        List<Deutsch> deutschList=new ArrayList<>();
+        deutschList.add(deutsch1);
+
+        when(deutschService.getAll()).thenReturn(deutschList);
+        List<Deutsch> result=deutschController.getAll();
+
+        assertFalse(result.isEmpty());
+        assertEquals(deutschList, result);
     }
 }

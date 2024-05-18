@@ -50,7 +50,7 @@ class DeRuPairsServiceTest {
     }
 
     @Test
-    void createNewPairsIfPairDExists() {
+    void createNewPairsIfPairExists() {
         Russian russian = new Russian("russian");
         Deutsch deutsch = new Deutsch("deutsch");
         Long deutschId = 5654615132L;
@@ -146,5 +146,20 @@ class DeRuPairsServiceTest {
         Optional<DeRuPairs> result= deRuPairsService.findPairById(deRuId);
 
         result.ifPresent(value->assertEquals(deRuPairs, value));
+    }
+
+    @Test
+    void testGetAll(){
+        DeRuPairs deRuPair1=new DeRuPairs(new Deutsch("d1"),new Russian("r1"));
+        DeRuPairs deRuPair2=new DeRuPairs(new Deutsch("d2"),new Russian("r2"));
+        List<DeRuPairs> deRuPairsList=new ArrayList<>();
+        deRuPairsList.add(deRuPair1);
+        deRuPairsList.add(deRuPair2);
+
+        when(deRuPairsRepository.getAll()).thenReturn(deRuPairsList);
+        List<DeRuPairs> result= deRuPairsService.getAll();
+
+        assertFalse(result.isEmpty());
+        assertEquals(deRuPairsList, result);
     }
 }

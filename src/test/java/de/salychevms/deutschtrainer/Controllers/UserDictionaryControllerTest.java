@@ -105,4 +105,85 @@ class UserDictionaryControllerTest {
         assertNotNull(result);
         assertEquals(userDictionaryList, result);
     }
+
+    @Test
+    void getAllByTelegramId() {
+        Long telegramId=156546L;
+        Users user=new Users();
+        user.setTelegramId(telegramId);
+
+        String languageIdentifier="DE";
+        Language language=new Language();
+        language.setIdentifier(languageIdentifier);
+
+        UserLanguage userLanguage=new UserLanguage();
+        userLanguage.setLanguage(language);
+        userLanguage.setUser(user);
+
+        DeRuPairs pair1=new DeRuPairs();
+        DeRuPairs pair2=new DeRuPairs();
+
+        UserDictionary dictionary1=new UserDictionary();
+        UserDictionary dictionary2=new UserDictionary();
+        dictionary1.setUserLanguage(userLanguage);
+        dictionary1.setPair(pair1);
+        dictionary2.setUserLanguage(userLanguage);
+        dictionary2.setPair(pair2);
+
+        List<UserDictionary> userDictionaryList=new ArrayList<>();
+        userDictionaryList.add(dictionary1);
+        userDictionaryList.add(dictionary2);
+
+        when(languageController.getLanguageByIdentifier(languageIdentifier)).thenReturn(Optional.of(language));
+        when(userLanguageController.getByUserIdAndLanguageId(user.getTelegramId(), language.getId())).thenReturn(Optional.of(userLanguage));
+        when(userDictionaryService.getAllByUserLanguage(userLanguage)).thenReturn(userDictionaryList);
+        List<UserDictionary> result=userDictionaryController.getAllByTelegramId(telegramId);
+
+        assertNotNull(result);
+        assertEquals(userDictionaryList, result);
+    }
+
+    @Test
+    void getUserDictionaryByPairIdAndUserLanguageId() {
+        DeRuPairs pair=new DeRuPairs();
+        Long pairId=156546L;
+        pair.setId(pairId);
+
+        UserLanguage userLanguage=new UserLanguage();
+        Long userLanguageId=687L;
+        userLanguage.setId(userLanguageId);
+
+        UserDictionary userDictionary=new UserDictionary();
+        userDictionary.setId(1234L);
+        userDictionary.setPair(pair);
+        userDictionary.setUserLanguage(userLanguage);
+
+        when(userDictionaryService.getUserDictionaryByPairIdAndUserLanguageId(pairId, userLanguageId)).thenReturn(Optional.of(userDictionary));
+        Optional<UserDictionary> result=userDictionaryController.getUserDictionaryByPairIdAndUserLanguageId(pairId, userLanguageId);
+
+        assertTrue(result.isPresent());
+        assertEquals(userDictionary, result.get());
+    }
+
+    @Test
+    void getAllByUserLanguageId() {
+        Long userLanguageId=556684L;
+        UserLanguage userLanguage=new UserLanguage();
+        userLanguage.setId(userLanguageId);
+
+        UserDictionary userDictionary=new UserDictionary();
+        userDictionary.setUserLanguage(userLanguage);
+        UserDictionary userDictionary1=new UserDictionary();
+        userDictionary1.setUserLanguage(userLanguage);
+
+        List<UserDictionary> userDictionaryList=new ArrayList<>();
+        userDictionaryList.add(userDictionary1);
+        userDictionaryList.add(userDictionary);
+
+        when(userDictionaryService.getAllByUserLanguageId(userLanguageId)).thenReturn(userDictionaryList);
+        List<UserDictionary> result=userDictionaryController.getAllByUserLanguageId(userLanguageId);
+
+        assertNotNull(result);
+        assertEquals(userDictionaryList, result);
+    }
 }

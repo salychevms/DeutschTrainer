@@ -4,6 +4,7 @@ import de.salychevms.deutschtrainer.Models.DeRuPairs;
 import de.salychevms.deutschtrainer.Models.UserDictionary;
 import de.salychevms.deutschtrainer.Models.UserLanguage;
 import de.salychevms.deutschtrainer.Repo.UserDictionaryRepository;
+import org.apache.poi.sl.draw.geom.GuideIf;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -29,7 +30,7 @@ class UserDictionaryServiceTest {
     private UserDictionaryService userDictionaryService;
 
     @Test
-    void saveNewPair() {
+    void testSaveNewPair() {
         Long userLanguageId = 884578548L;
         Long deRuId = 66663624664L;
         Long userDictionaryId = 2233344555L;
@@ -54,7 +55,7 @@ class UserDictionaryServiceTest {
     }
 
     @Test
-    void findById() {
+    void testFindById() {
         UserLanguage userLanguage = new UserLanguage();
         DeRuPairs deRuPairs = new DeRuPairs();
         UserDictionary userDictionary = new UserDictionary(userLanguage, deRuPairs, new Date());
@@ -68,7 +69,7 @@ class UserDictionaryServiceTest {
     }
 
     @Test
-    void getUserDictionaryByPairId() {
+    void testGetUserDictionaryByPairId() {
         UserLanguage userLanguage = new UserLanguage();
         DeRuPairs pair = new DeRuPairs();
         Long pairId = 8273568273568723L;
@@ -82,7 +83,7 @@ class UserDictionaryServiceTest {
     }
 
     @Test
-    void getAll() {
+    void testGetAll() {
         UserDictionary firstUserDictionary = new UserDictionary();
         UserDictionary secondUserDictionary = new UserDictionary();
         UserDictionary thirdUserDictionary = new UserDictionary();
@@ -117,6 +118,37 @@ class UserDictionaryServiceTest {
         List<UserDictionary> result = userDictionaryService.getAllByUserLanguage(userLanguage);
 
         assertEquals(3, result.size());
+        assertEquals(userDictionaries, result);
+    }
+
+    @Test
+    void testGetUserDictionaryByPairIdAndUserLanguageId(){
+        UserLanguage userLanguage = new UserLanguage();
+        DeRuPairs deRuPairs = new DeRuPairs();
+        userLanguage.setId(123L);
+        deRuPairs.setId(456L);
+        UserDictionary userDictionary = new UserDictionary(userLanguage, deRuPairs, new Date());
+
+        when(userDictionaryRepository.getUserDictionaryByPairIdAndUserLanguageId(userLanguage.getId(), deRuPairs.getId())).thenReturn(Optional.of(userDictionary));
+        Optional<UserDictionary> result = userDictionaryService.getUserDictionaryByPairIdAndUserLanguageId(userLanguage.getId(), deRuPairs.getId());
+
+        result.ifPresent(value -> assertEquals(userDictionary, value));
+    }
+
+    @Test
+    void testGetAllByUserLanguageId(){
+        UserLanguage userLanguage = new UserLanguage();
+        userLanguage.setId(123L);
+        UserDictionary userDictionary = new UserDictionary(userLanguage, new DeRuPairs(), new Date());
+        UserDictionary someUserDictionary=new UserDictionary(userLanguage, new DeRuPairs(), new Date());
+        List<UserDictionary> userDictionaries = new ArrayList<>();
+        userDictionaries.add(someUserDictionary);
+        userDictionaries.add(userDictionary);
+
+        when(userDictionaryRepository.findAllByUserLanguageId(userLanguage.getId())).thenReturn(userDictionaries);
+        List<UserDictionary> result=userDictionaryService.getAllByUserLanguageId(userLanguage.getId());
+
+        assertFalse(result.isEmpty());
         assertEquals(userDictionaries, result);
     }
 }

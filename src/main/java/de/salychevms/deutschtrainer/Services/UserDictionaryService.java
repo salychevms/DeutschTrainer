@@ -54,9 +54,7 @@ public class UserDictionaryService {
     @Transactional
     public List<UserDictionary> getAllByUserLanguageId(Long userLanguageId) {
         List<UserDictionary> userDictionaryList = userDictionaryRepository.findAllByUserLanguageId(userLanguageId);
-        System.out.println(userLanguageId);
         if (!userDictionaryList.isEmpty()) {
-            System.out.println(userDictionaryList);
             return userDictionaryList;
         }
         return null;

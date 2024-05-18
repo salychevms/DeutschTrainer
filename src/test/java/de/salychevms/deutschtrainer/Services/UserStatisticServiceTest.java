@@ -209,6 +209,7 @@ class UserStatisticServiceTest {
         verify(userStatisticRepository, times(1)).save(statistic);
         assertEquals(1L, statistic.getIterationsPerMonth());
     }
+
     @Test
     void testUpdateMonthIterationWhenEqualsNotNull() {
         Long statisticId = 123456789L;
@@ -262,6 +263,7 @@ class UserStatisticServiceTest {
         verify(userStatisticRepository, times(1)).save(statistic);
         assertEquals(1L, statistic.getIterationsPerWeek());
     }
+
     @Test
     void testUpdateWeekIterationWhenEqualsNotNull() {
         Long statisticId = 123456789L;
@@ -315,6 +317,7 @@ class UserStatisticServiceTest {
         verify(userStatisticRepository, times(1)).save(statistic);
         assertEquals(1L, statistic.getIterationsPerDay());
     }
+
     @Test
     void testUpdateDayIterationWhenEqualsNotNull() {
         Long statisticId = 123456789L;
@@ -368,6 +371,7 @@ class UserStatisticServiceTest {
         verify(userStatisticRepository, times(1)).save(statistic);
         assertEquals(1L, statistic.getFailsAll());
     }
+
     @Test
     void testUpdateAllFailsWhenEqualsNotNull() {
         Long statisticId = 123456789L;
@@ -403,6 +407,7 @@ class UserStatisticServiceTest {
         verify(userStatisticRepository, times(1)).save(statistic);
         assertEquals(1L, statistic.getFailsPerMonth());
     }
+
     @Test
     void testUpdateMonthFailsWhenEqualsNotNull() {
         Long statisticId = 123456789L;
@@ -456,6 +461,7 @@ class UserStatisticServiceTest {
         verify(userStatisticRepository, times(1)).save(statistic);
         assertEquals(1L, statistic.getFailsPerWeek());
     }
+
     @Test
     void testUpdateWeekFailsWhenEqualsNotNull() {
         Long statisticId = 123456789L;
@@ -509,6 +515,7 @@ class UserStatisticServiceTest {
         verify(userStatisticRepository, times(1)).save(statistic);
         assertEquals(1L, statistic.getFailsPerDay());
     }
+
     @Test
     void testUpdateDayFailsWhenEqualsNotNull() {
         Long statisticId = 123456789L;
@@ -544,6 +551,7 @@ class UserStatisticServiceTest {
         verify(userStatisticRepository, times(1)).save(statistic);
         assertNull(statistic.getFailsPerDay());
     }
+
     @Test
     void testUpdateLastTraining() {
         Long statisticId = 123456789L;
@@ -584,5 +592,48 @@ class UserStatisticServiceTest {
         List<UserStatistic> result=userStatisticService.findAll();
         assertFalse(result.isEmpty());
         assertEquals(statisticList, result);
+    }
+
+    @Test
+    void testSetFailStatusTrueAndFalseAndIsFailStatus() {
+        UserDictionary pair = new UserDictionary();
+        Long userDictionaryId = 123456789L;
+        pair.setId(userDictionaryId);
+
+        UserStatistic statistic=new UserStatistic();
+        statistic.setWord(pair);
+
+        when(userStatisticRepository.findByWord(pair)).thenReturn(Optional.of(statistic));
+        userStatisticService.setFailStatusTrue(pair);
+
+        assertTrue(statistic.isFailStatus());
+
+        userStatisticService.setFailStatusFalse(pair);
+
+        assertFalse(statistic.isFailStatus());
+    }
+
+    @Test
+    void testDecreaseFailTraining() {
+        UserDictionary pair = new UserDictionary();
+        Long userDictionaryId = 123456789L;
+        pair.setId(userDictionaryId);
+
+        UserStatistic statistic=new UserStatistic();
+        statistic.setWord(pair);
+        statistic.setFailTraining(4);
+
+        when(userStatisticRepository.findByWord(pair)).thenReturn(Optional.of(statistic));
+        userStatisticService.decreaseFailTraining(pair);
+
+        assertEquals(3, statistic.getFailTraining());
+
+        statistic.setFailTraining(1);
+
+        when(userStatisticRepository.findByWord(pair)).thenReturn(Optional.of(statistic));
+        userStatisticService.decreaseFailTraining(pair);
+
+        assertNull(statistic.getFailTraining());
+        assertFalse(statistic.isFailStatus());
     }
 }

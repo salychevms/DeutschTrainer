@@ -121,4 +121,21 @@ class RussianServiceTest {
 
         result.ifPresent(value -> assertEquals(randomRussian, value));
     }
+
+    @Test
+    void testGetAll(){
+        Russian russian1=new Russian("r1");
+        Russian russian2=new Russian("r2");
+        Russian someRussian=new Russian("someRussian");
+        List<Russian> russianList = new ArrayList<>();
+        russianList.add(russian1);
+        russianList.add(russian2);
+        russianList.add(someRussian);
+
+        when(russianRepository.findAll()).thenReturn(russianList);
+        List<Russian> result=russianService.getAll();
+
+        assertFalse(result.isEmpty());
+        assertEquals(russianList, result);
+    }
 }

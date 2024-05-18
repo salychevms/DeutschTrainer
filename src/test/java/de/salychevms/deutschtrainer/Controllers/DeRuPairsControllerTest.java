@@ -60,16 +60,16 @@ class DeRuPairsControllerTest {
         pairsId.add(3L);
         Deutsch deutsch = new Deutsch("deutsch");
         deutsch.setId(germanId);
-        Long ru1Id=4L;
-        Long ru2Id=5L;
+        Long ru1Id = 4L;
+        Long ru2Id = 5L;
         Russian russian1 = new Russian("ru1");
         Russian russian2 = new Russian("ru2");
         russian1.setId(ru1Id);
         russian2.setId(ru2Id);
         DeRuPairs pair1 = new DeRuPairs(deutsch, russian1);
         DeRuPairs pair2 = new DeRuPairs(deutsch, russian2);
-        String expected = "Вы добавили перевод слова: "+deutsch.getDeWord()+
-                "\nНа русском это будет:\n\t"+russian1.getRuWord()+"\n\t"+russian2.getRuWord();
+        String expected = "Вы добавили перевод слова: " + deutsch.getDeWord() +
+                "\nНа русском это будет:\n\t" + russian1.getRuWord() + "\n\t" + russian2.getRuWord();
 
         when(deutschController.findById(germanId)).thenReturn(deutsch);
         when(deRuPairsService.findById(2L)).thenReturn(Optional.of(pair1));
@@ -90,102 +90,102 @@ class DeRuPairsControllerTest {
 
     @Test
     void testIsItRussianYes() {
-        String isItRu="рофывждфлдв";
+        String isItRu = "рофывждфлдв";
 
-        boolean yes= deRuPairsController.isItRussian(isItRu);
+        boolean yes = deRuPairsController.isItRussian(isItRu);
 
         assertTrue(yes);
     }
 
     @Test
     void testIsItRussianNo() {
-        String isItRu="üapsifanß";
+        String isItRu = "üapsifanß";
 
-        boolean no= deRuPairsController.isItRussian(isItRu);
+        boolean no = deRuPairsController.isItRussian(isItRu);
 
         assertFalse(no);
     }
 
     @Test
     void testIsItGermanYes() {
-        String isItDe="üapsifanß";
+        String isItDe = "üapsifanß";
 
-        boolean yes= deRuPairsController.isItGerman(isItDe);
+        boolean yes = deRuPairsController.isItGerman(isItDe);
 
         assertTrue(yes);
     }
 
     @Test
     void testIsItGermanNo() {
-        String isItDe="рофывждфлдв";
+        String isItDe = "рофывждфлдв";
 
-        boolean no= deRuPairsController.isItGerman(isItDe);
+        boolean no = deRuPairsController.isItGerman(isItDe);
 
         assertFalse(no);
     }
 
     @Test
     void TestGetRUWordsWhichUserLooksFor() {
-        Long telegramId=123L;
-        String identifier="RU";
-        String looksFor="дом";
-        String dom="дом";
-        String domashniy="домашний";
-        String upravdom="управдом";
+        Long telegramId = 123L;
+        String identifier = "RU";
+        String looksFor = "дом";
+        String dom = "дом";
+        String domashniy = "домашний";
+        String upravdom = "управдом";
 
-        Deutsch de=new Deutsch("was???");
+        Deutsch de = new Deutsch("was???");
         de.setId(999L);
-        Russian ru1=new Russian(dom);
-        Russian ru2=new Russian(domashniy);
-        Russian ru3=new Russian(upravdom);
+        Russian ru1 = new Russian(dom);
+        Russian ru2 = new Russian(domashniy);
+        Russian ru3 = new Russian(upravdom);
         ru1.setId(555L);
         ru2.setId(666L);
         ru3.setId(777L);
-        DeRuPairs pair1=new DeRuPairs(de, ru1);
-        DeRuPairs pair2=new DeRuPairs(de, ru3);
-        Long p1Id=789L;
-        Long p2Id=890L;
+        DeRuPairs pair1 = new DeRuPairs(de, ru1);
+        DeRuPairs pair2 = new DeRuPairs(de, ru3);
+        Long p1Id = 789L;
+        Long p2Id = 890L;
         pair1.setId(p1Id);
         pair2.setId(p2Id);
-        List<UserDictionary> dictionaryList=new ArrayList<>();
-        UserDictionary ud1=new UserDictionary(new UserLanguage(),pair1,new Date());
-        UserDictionary ud2=new UserDictionary(new UserLanguage(), pair2, new Date());
+        List<UserDictionary> dictionaryList = new ArrayList<>();
+        UserDictionary ud1 = new UserDictionary(new UserLanguage(), pair1, new Date());
+        UserDictionary ud2 = new UserDictionary(new UserLanguage(), pair2, new Date());
         dictionaryList.add(ud1);
         dictionaryList.add(ud2);
-        List<Russian> found=new ArrayList<>();
-        List<String> foundedWords=new ArrayList<>();
+        List<Russian> found = new ArrayList<>();
+        List<String> foundedWords = new ArrayList<>();
         found.add(ru1);
         found.add(ru2);
         found.add(ru3);
-        foundedWords.add(dom+ " <<еще варианты>>");
+        foundedWords.add(dom + " <<еще варианты>>");
         foundedWords.add(domashniy);
-        foundedWords.add(upravdom+ " <<еще варианты>>");
+        foundedWords.add(upravdom + " <<еще варианты>>");
 
         when(userDictionaryController.getAllByTelegramId(telegramId)).thenReturn(dictionaryList);
         when(deRuPairsService.findPairById(p1Id)).thenReturn(Optional.of(pair1));
         when(deRuPairsService.findPairById(p2Id)).thenReturn(Optional.of(pair2));
         when(russianController.findAllRussianWordsWhichContain(looksFor)).thenReturn(found);
-        List<String> result=deRuPairsController.getWordsWhichUserLooksFor(telegramId, looksFor, identifier);
+        List<String> result = deRuPairsController.getWordsWhichUserLooksFor(telegramId, looksFor, identifier);
 
         assertEquals(3, result.size());
         assertEquals(foundedWords, result);
-        assertTrue(result.contains(dom+ " <<еще варианты>>"));
+        assertTrue(result.contains(dom + " <<еще варианты>>"));
         assertTrue(result.contains(domashniy));
-        assertTrue(result.contains(upravdom+ " <<еще варианты>>"));
+        assertTrue(result.contains(upravdom + " <<еще варианты>>"));
     }
 
     @Test
     void TestGetDEWordsWhichUserLooksFor() {
-        Long telegramId=123L;
+        Long telegramId = 123L;
 
-        String identifier="DE";
-        String looksFor="unter";
-        String verb="unternehmen";
-        String nomen="das Unternehmen";
-        String unterstutzung="die Unterstützung";
+        String identifier = "DE";
+        String looksFor = "unter";
+        String verb = "unternehmen";
+        String nomen = "das Unternehmen";
+        String unterstutzung = "die Unterstützung";
 
-        List<Deutsch> found=new ArrayList<>();
-        List<String> foundedWords=new ArrayList<>();
+        List<Deutsch> found = new ArrayList<>();
+        List<String> foundedWords = new ArrayList<>();
         found.add(new Deutsch(verb));
         found.add(new Deutsch(nomen));
         found.add(new Deutsch(unterstutzung));
@@ -194,7 +194,7 @@ class DeRuPairsControllerTest {
         foundedWords.add(unterstutzung);
 
         when(deutschController.findAllDeutschWordsWhichContain(looksFor)).thenReturn(found);
-        List<String> result=deRuPairsController.getWordsWhichUserLooksFor(telegramId, looksFor, identifier);
+        List<String> result = deRuPairsController.getWordsWhichUserLooksFor(telegramId, looksFor, identifier);
 
         assertNotNull(result);
         assertEquals(foundedWords, result);
@@ -203,98 +203,164 @@ class DeRuPairsControllerTest {
         assertTrue(result.contains(unterstutzung));
     }
 
-    /*@Test
-    void testGetDETranslations() {
-        Long telegramId=123L;
-        String chosenWord="дом";
-        String identifier="RU";
-        String haus="das Haus";
-        String gebaude="das Gebaude";
-
-        Russian chosenRu= new Russian(chosenWord);
-        chosenRu.setId(111L);
-
-        Deutsch de1=new Deutsch(haus);
-        Deutsch de2=new Deutsch(gebaude);
-        de1.setId(555L);
-        de2.setId(666L);
-
-        List<DeRuPairs> pairs=new ArrayList<>();
-        pairs.add(new DeRuPairs(de1, chosenRu));
-        pairs.add(new DeRuPairs(de2, chosenRu));
-
-        List<String> translationList=new ArrayList<>();
-        translationList.add(haus);
-        translationList.add(gebaude);
-
-        when(russianController.findByWord(chosenWord)).thenReturn(Optional.of(chosenRu));
-        when(deRuPairsService.findAllByRussianId(chosenRu.getId())).thenReturn(pairs);
-        when(deutschController.findById(555L)).thenReturn(de1);
-        when(deutschController.findById(666L)).thenReturn(de2);
-        Map<Long, String> result=deRuPairsController.getTranslations(telegramId, chosenWord, identifier);
-
-        assertNotNull(result);
-        assertEquals(translationList, result);
-        assertTrue(result..contains(haus));
-        assertTrue(result.contains(gebaude));
-    }*/
-
-    /*@Test
-    void testGetRUTranslations() {
-        Long telegramId=234L;
-        String chosenWord="das Haus";
-        String identifier="DE";
-        String dom="дом";
-        String zdanie="здание";
-
-        Deutsch chosenDe= new Deutsch(chosenWord);
-        chosenDe.setId(222L);
-
-        Russian ru1=new Russian(dom);
-        Russian ru2=new Russian(zdanie);
-        ru1.setId(888L);
-        ru2.setId(999L);
-
-        List<DeRuPairs> pairs=new ArrayList<>();
-        pairs.add(new DeRuPairs(chosenDe, ru1));
-        pairs.add(new DeRuPairs(chosenDe, ru2));
-
-        List<String> translationList=new ArrayList<>();
-        translationList.add(dom);
-        translationList.add(zdanie);
-
-        when(deutschController.findByWord(chosenWord)).thenReturn(Optional.of(chosenDe));
-        when(deRuPairsService.findAllByDeutschId(chosenDe.getId())).thenReturn(pairs);
-        when(russianController.findById(888L)).thenReturn(ru1);
-        when(russianController.findById(999L)).thenReturn(ru2);
-        List<String> result=deRuPairsController.getTranslations(telegramId, chosenWord, identifier);
-
-        assertNotNull(result);
-        assertEquals(translationList, result);
-        assertTrue(result.contains(dom));
-        assertTrue(result.contains(zdanie));
-    }*/
-
     @Test
     void testGetPairByGermanIdAndRussianId() {
-        Long ruId=1111L;
-        Long deId=3333L;
-        DeRuPairs pair=new DeRuPairs(new Deutsch("deutsch"), new Russian("russian"));
+        Long ruId = 1111L;
+        Long deId = 3333L;
+        DeRuPairs pair = new DeRuPairs(new Deutsch("deutsch"), new Russian("russian"));
 
-        when(deRuPairsService.findByGermanIdAndRussianId(deId,ruId)).thenReturn(Optional.of(pair));
-        Optional<DeRuPairs> result=deRuPairsController.getPairByGermanIdAndRussianId(deId, ruId);
+        when(deRuPairsService.findByGermanIdAndRussianId(deId, ruId)).thenReturn(Optional.of(pair));
+        Optional<DeRuPairs> result = deRuPairsController.getPairByGermanIdAndRussianId(deId, ruId);
 
-        result.ifPresent(value->assertEquals(pair, value));
+        result.ifPresent(value -> assertEquals(pair, value));
     }
 
     @Test
     void getDeRuById() {
-        Long id=123456L;
-        DeRuPairs pair=new DeRuPairs(new Deutsch("de"), new Russian("ru"));
+        Long id = 123456L;
+        DeRuPairs pair = new DeRuPairs(new Deutsch("de"), new Russian("ru"));
 
         when(deRuPairsService.findPairById(id)).thenReturn(Optional.of(pair));
-        Optional<DeRuPairs> result=deRuPairsController.getDeRuById(id);
+        Optional<DeRuPairs> result = deRuPairsController.getDeRuById(id);
 
-        result.ifPresent(value-> assertEquals(pair, value));
+        result.ifPresent(value -> assertEquals(pair, value));
+    }
+
+    @Test
+    void testGetDETranslations() {
+        String fromLanguage = "RU";
+        Long telegramId = 123L;
+
+        String chosenWord = "111";
+        Long chosenWordId = 111L;
+        String ruWord="дом";
+        Russian chosenRu = new Russian();
+        chosenRu.setRuWord(ruWord);
+        chosenRu.setId(chosenWordId);
+
+        String haus = "das Haus";
+        String gebaude = "das Gebaude";
+        Deutsch de1 = new Deutsch();
+        Deutsch de2 = new Deutsch();
+        de1.setId(555L);
+        de1.setDeWord(haus);
+        de2.setId(666L);
+        de2.setDeWord(gebaude);
+
+        Map<Long, String> expected = new HashMap<>();
+        expected.put(de1.getId(), haus+ " <<уже добавлено>>");
+        expected.put(de2.getId(), gebaude+ " <<уже добавлено>>");
+
+        DeRuPairs pair1 = new DeRuPairs();
+        DeRuPairs pair2 = new DeRuPairs();
+        pair1.setId(777L);
+        pair1.setDeutsch(de1);
+        pair1.setRussian(chosenRu);
+        pair2.setId(888L);
+        pair2.setDeutsch(de2);
+        pair2.setRussian(chosenRu);
+        List<DeRuPairs> pairs = new ArrayList<>();
+        pairs.add(pair1);
+        pairs.add(pair2);
+
+        UserDictionary userDictionary1 = new UserDictionary();
+        userDictionary1.setPair(pair1);
+        userDictionary1.setId(505L);
+        UserDictionary userDictionary2 = new UserDictionary();
+        userDictionary2.setPair(pair2);
+        userDictionary2.setId(606L);
+        List<UserDictionary> userDictionaryList = new ArrayList<>();
+        userDictionaryList.add(userDictionary1);
+        userDictionaryList.add(userDictionary2);
+
+        when(userDictionaryController.getAllByTelegramId(telegramId)).thenReturn(userDictionaryList);
+        when(deRuPairsService.findPairById(pair1.getId())).thenReturn(Optional.of(pair1));
+        when(deRuPairsService.findPairById(pair2.getId())).thenReturn(Optional.of(pair2));
+        when(deRuPairsService.findAllByRussianId(chosenWordId)).thenReturn(pairs);
+        when(deutschController.findById(de1.getId())).thenReturn(de1);
+        when(deutschController.findById(de2.getId())).thenReturn(de2);
+
+        Map<Long, String> result = deRuPairsController.getTranslations(telegramId, chosenWord, fromLanguage);
+
+        assertFalse(result.isEmpty());
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void testGetRUTranslations() {
+        String fromLanguage="DE";
+        Long telegramId=234L;
+
+        String chosenWord="222";
+        Long chosenWordId=222L;
+        String deWord="das Haus";
+        Deutsch chosenDe = new Deutsch();
+        chosenDe.setDeWord(deWord);
+        chosenDe.setId(chosenWordId);
+
+        String dom="дом";
+        String zdanie="здание";
+        Russian ru1=new Russian(dom);
+        Russian ru2=new Russian(zdanie);
+        ru1.setId(888L);
+        ru1.setRuWord(dom);
+        ru2.setId(999L);
+        ru2.setRuWord(zdanie);
+
+        Map<Long, String> expected = new HashMap<>();
+        expected.put(ru1.getId(), dom+ " <<уже добавлено>>");
+        expected.put(ru2.getId(), zdanie+ " <<уже добавлено>>");
+
+        List<DeRuPairs> pairs=new ArrayList<>();
+        DeRuPairs pair1 = new DeRuPairs();
+        pair1.setId(707L);
+        pair1.setDeutsch(chosenDe);
+        pair1.setRussian(ru1);
+        DeRuPairs pair2 = new DeRuPairs();
+        pair2.setDeutsch(chosenDe);
+        pair2.setRussian(ru2);
+        pair2.setId(808L);
+        pairs.add(pair1);
+        pairs.add(pair2);
+
+        UserDictionary userDictionary1 = new UserDictionary();
+        userDictionary1.setPair(pair1);
+        userDictionary1.setId(505L);
+        UserDictionary userDictionary2 = new UserDictionary();
+        userDictionary2.setPair(pair2);
+        userDictionary2.setId(606L);
+        List<UserDictionary> userDictionaryList = new ArrayList<>();
+        userDictionaryList.add(userDictionary1);
+        userDictionaryList.add(userDictionary2);
+
+        when(userDictionaryController.getAllByTelegramId(telegramId)).thenReturn(userDictionaryList);
+        when(deRuPairsService.findPairById(pair1.getId())).thenReturn(Optional.of(pair1));
+        when(deRuPairsService.findPairById(pair2.getId())).thenReturn(Optional.of(pair2));
+        when(deRuPairsService.findAllByDeutschId(chosenWordId)).thenReturn(pairs);
+        when(russianController.findById(ru1.getId())).thenReturn(ru1);
+        when(russianController.findById(ru2.getId())).thenReturn(ru2);
+
+        Map<Long, String> result = deRuPairsController.getTranslations(telegramId, chosenWord, fromLanguage);
+
+        assertNotNull(result);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void getAll() {
+        DeRuPairs pair1 = new DeRuPairs();
+        DeRuPairs pair2 = new DeRuPairs();
+        DeRuPairs pair3 = new DeRuPairs();
+
+        List<DeRuPairs> pairs = new ArrayList<>();
+        pairs.add(pair1);
+        pairs.add(pair2);
+        pairs.add(pair3);
+
+        when(deRuPairsService.getAll()).thenReturn(pairs);
+        List<DeRuPairs> result = deRuPairsController.getAll();
+
+        assertFalse(result.isEmpty());
+        assertEquals(pairs, result);
     }
 }

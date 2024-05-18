@@ -94,7 +94,7 @@ class RussianControllerTest {
     }
 
     @Test
-    void findAllRussianWordsWhichContainIfDoNotContain() {
+    void findAllRussianWordsWhichContainIfDoesNotContain() {
         String part = "part";
 
         when(russianService.findWordsContaining(part)).thenReturn(Collections.emptyList());
@@ -154,5 +154,21 @@ class RussianControllerTest {
         Optional<Russian> result=russianController.get1RandomRussian();
 
         result.ifPresent(value->assertEquals(russian, value));
+    }
+
+    @Test
+    void testGetAll(){
+        Russian russian1=new Russian();
+        Russian russian2=new Russian();
+
+        List<Russian> russianList = new ArrayList<>();
+        russianList.add(russian1);
+        russianList.add(russian2);
+
+        when(russianService.getAll()).thenReturn(russianList);
+        List<Russian> result = russianController.getAll();
+
+        assertFalse(result.isEmpty());
+        assertEquals(russianList, result);
     }
 }

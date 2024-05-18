@@ -2,7 +2,11 @@ package de.salychevms.deutschtrainer.Models;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 class DeRuPairsTest {
 
@@ -49,4 +53,6 @@ class DeRuPairsTest {
         deRuPairs.setRussian(testRussian);
         assertEquals(testRussian, deRuPairs.getRussian());
     }
+
+
 }

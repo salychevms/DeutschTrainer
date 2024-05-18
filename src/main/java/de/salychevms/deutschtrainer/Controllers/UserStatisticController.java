@@ -162,7 +162,7 @@ public class UserStatisticController {
     }
 
     public void setFailStatusTrue(UserDictionary userDictionary){
-        userStatisticService.setFailStatusTrue(userDictionary);
+        userStatisticService.updateDayFails(userDictionary);
     }
 
     public void setFailStatusFalse(UserDictionary userDictionary){

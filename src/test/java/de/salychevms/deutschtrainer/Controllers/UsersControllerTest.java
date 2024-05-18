@@ -44,7 +44,7 @@ class UsersControllerTest {
     }
 
     @Test
-    void createNewUser() {
+    void testCreateNewUser() {
         Long tgId = 6547989456L;
         String usrName = "usrName";
 
@@ -75,12 +75,12 @@ class UsersControllerTest {
     }
 
     @Test
-    void testUpdateNameByTelegramID() {
+    void testUpdateNameByTelegramId() {
         long tgId=9988777777777L;
         String newUserName="newName";
 
-        usersController.updateNameByTelegramID(tgId, newUserName);
-        verify(usersService, times(1)).updateNameByTelegramID(tgId, newUserName);
+        usersController.updateNameByTelegramId(tgId, newUserName);
+        verify(usersService, times(1)).updateNameByTelegramId(tgId, newUserName);
     }
 
     @Test

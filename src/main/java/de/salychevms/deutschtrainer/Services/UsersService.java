@@ -39,7 +39,7 @@ public class UsersService {
     }
 
     @Transactional
-    public void updateNameByTelegramID(long telegramId, String name) {
+    public void updateNameByTelegramId(long telegramId, String name) {
         Optional<Users> user = (usersRepository.findByTelegramId(telegramId));
         if (user.isPresent()) {
             Users update = user.get();
