@@ -2,6 +2,7 @@ package de.salychevms.deutschtrainer.Services;
 
 import de.salychevms.deutschtrainer.Models.Russian;
 import de.salychevms.deutschtrainer.Repo.RussianRepository;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,38 +18,40 @@ public class RussianService {
     }
 
     @Transactional
-    public Optional<Russian> findById(Long id){
+    public Optional<Russian> findById(Long id) {
         return russianRepository.findById(id);
     }
 
     @Transactional
-    public Russian createNewRussian(String word){
-        Optional<Russian> exist=russianRepository.findByRuWordIgnoreCase(word);
+    public Russian createNewRussian(String word) {
+        System.out.println(word);//////////////////
+        Optional<Russian> exist = russianRepository.findByRuWordIgnoreCase(word);
+        System.out.println(exist.isPresent());//////////////////
         return exist.orElseGet(() -> russianRepository.save(new Russian(word)));
     }
 
     @Transactional
-    public List<Russian> findWordsContaining(String russian){
+    public List<Russian> findWordsContaining(String russian) {
         return russianRepository.findByRuWordContainingIgnoreCase(russian);
     }
 
     @Transactional
-    public Optional<Russian> findByWord(String word){
+    public Optional<Russian> findByWord(String word) {
         return russianRepository.findByRuWord(word);
     }
 
     @Transactional
-    public List<Russian> get3RandomRussian(){
+    public List<Russian> get3RandomRussian() {
         return russianRepository.find3RandomRussian();
     }
 
     @Transactional
-    public Optional<Russian> get1RandomRussian(){
+    public Optional<Russian> get1RandomRussian() {
         return russianRepository.find1RandomRussian();
     }
 
     @Transactional
-    public List<Russian> getAll(){
+    public List<Russian> getAll() {
         return russianRepository.getAll();
     }
 }

@@ -2,7 +2,6 @@ package de.salychevms.deutschtrainer.BotService;
 
 import de.salychevms.deutschtrainer.BotConfig.BotConfig;
 import de.salychevms.deutschtrainer.Controllers.*;
-import de.salychevms.deutschtrainer.DataExchange.Classes.BasicPairStatisticInfoClass;
 import de.salychevms.deutschtrainer.DataExchange.Classes.UserPairStatisticInfoClass;
 import de.salychevms.deutschtrainer.DataExchange.Controlles.DataExchangeInOutController;
 import de.salychevms.deutschtrainer.DataExchange.Controlles.VocabularyController;
@@ -49,7 +48,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                        UserLanguageController userLanguageController, DeutschController deutschController,
                        RussianController russianController, DeRuPairsController deRuPairsController,
                        UserStatisticController userStatisticController, UserDictionaryController userDictionaryController,
-                       TrainingController trainingController, MenuMaker menuMaker, VocabularyController vocabularyController, DataExchangeInOutController dataExchangeInOutController) {
+                       TrainingController trainingController, MenuMaker menuMaker, VocabularyController vocabularyController,
+                       DataExchangeInOutController dataExchangeInOutController) {
         this.config = config;
         this.usersController = usersController;
         this.languageController = languageController;
