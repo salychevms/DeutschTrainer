@@ -5,10 +5,7 @@ import de.salychevms.deutschtrainer.Services.UserStatisticService;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -96,80 +93,62 @@ public class UserStatisticController {
     }
 
     public String getBasicStatistic(Long telegramId) {
-        String dateString = null;
-        List<DeRuPairs> pairs = new ArrayList<>();
-        int newWordsCounter = 0;
-        int pairCounter = 0;
-        int errorMax = 0;
-        String maximumErrors = null;
-        UserStatistic lastTrainingStatistic = new UserStatistic();
-        Date currentDate = new Date();
-        long closesDifference = Long.MAX_VALUE;
-
-        List<UserDictionary> userDictionaries = userDictionaryController.getAllByTelegramId(telegramId);
-        if (!userDictionaries.isEmpty()) {
-            for (UserDictionary value : userDictionaries) {
-                Optional<DeRuPairs> pair = deRuPairsController.getDeRuById(value.getPair().getId());
-                pair.ifPresent(pairs::add);
-                Optional<UserStatistic> userStatistic = userStatisticService.getUserStatisticByUserDictionary(value);
-                if (userStatistic.isPresent()) {
-                    pairCounter++;
-                    if (userStatistic.get().isNewWord()) {
-                        newWordsCounter++;
-                    }
-                    Long allFails = userStatistic.get().getFailsAll();
-                    if (allFails != null && allFails >= errorMax) {
-                        Optional<DeRuPairs> failPair = deRuPairsController.getDeRuById(value.getPair().getId());
-                        if (failPair.isPresent()) {
-                            Deutsch deutsch = deutschController.findById(failPair.get().getDeutsch().getId());
-                            Russian russian = russianController.findById(failPair.get().getRussian().getId());
-                            maximumErrors = deutsch.getDeWord() + " - " + russian.getRuWord();
-                        }
-                        errorMax = Math.toIntExact(userStatistic.get().getFailsAll());
-                    }
-                    Date tempDate = userStatistic.get().getLastTraining();
-                    if (tempDate.before(currentDate)) {
-                        long difference = Math.abs(TimeUnit.DAYS.convert(
-                                currentDate.getTime() - tempDate.getTime(), TimeUnit.MILLISECONDS));
-
-                        if (difference < closesDifference) {
-                            closesDifference = difference;
-                            lastTrainingStatistic = userStatistic.get();
-                        }
-                    }
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-                    if (dateFormat.format(lastTrainingStatistic.getLastTraining()).equals(dateFormat.format(new Date()))) {
-                        dateString = "сегодня";
-                    } else if (dateFormat.format(lastTrainingStatistic.getLastTraining())
-                            .equals(dateFormat.format(new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000)))) {
-                        dateString = "вчера";
-                    } else {
-                        dateString = dateFormat.format(lastTrainingStatistic.getLastTraining());
+        String dateString;
+        int failsCount=0;
+        Date tempDate = userStatisticService.findLastTrainingForUserAndLanguage(telegramId, "DE");
+        int countUniqueDEWords = userDictionaryController.getCountUniqueGermanWordsForTelegramIdAndLanguageIdentifier(telegramId, "DE");
+        int countUserPairs = userDictionaryController.getCountPairsForUserAndLanguageIdentifier(telegramId, "DE");
+        int countWordsToLearn = userStatisticService.getCountPairsWithNewWordForUserAndLanguage(telegramId, "DE");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        if (dateFormat.format(tempDate).equals(dateFormat.format(new Date()))) {
+            dateString = "сегодня";
+        } else if (dateFormat.format(tempDate)
+                .equals(dateFormat.format(new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000)))) {
+            dateString = "вчера";
+        } else {
+            dateString = dateFormat.format(tempDate);
+        }
+        StringBuilder pairsString = new StringBuilder();
+        List<UserStatistic> failedUserStatistic = userStatisticService.findWordsWithMaxFailsAllForUserAndLanguageIdentifier(telegramId, "DE");
+        if (!failedUserStatistic.isEmpty()) {
+            if(failedUserStatistic.size()>=5){
+                failedUserStatistic=failedUserStatistic.subList(0, 5);
+            }
+            failsCount = Math.toIntExact(failedUserStatistic.get(0).getFailsAll());
+            for (UserStatistic statistic : failedUserStatistic) {
+                Optional<UserDictionary> userDictionary = userDictionaryController.getById(statistic.getWord().getId());
+                if (userDictionary.isPresent()) {
+                    Optional<DeRuPairs> pair = deRuPairsController.getDeRuById(userDictionary.get().getPair().getId());
+                    if (pair.isPresent()) {
+                        Deutsch deutsch = deutschController.findById(pair.get().getDeutsch().getId());
+                        Russian russian = russianController.findById(pair.get().getRussian().getId());
+                        String ruWord = russian.getRuWord();
+                        String deWord = deutsch.getDeWord();
+                        String concat = deWord + " - " + ruWord + "\n";
+                        pairsString.append("\n").append(concat);
                     }
                 }
             }
+        } else {
+            pairsString = new StringBuilder(("\n*** у вас пока нет статистики по тренировкам ***\n"));
         }
-        List<DeRuPairs> uniquePairs = pairs.stream()
-                .collect(Collectors.toMap(DeRuPairs::getDeutsch, Function.identity(), (existing, replacement) -> existing))
-                .values().stream().toList();
-        int wordCounter = uniquePairs.size();
-        return "В Вашем словаре " + wordCounter + " немецких уникальных слов.\n" +
-                "С этими словами у Вас " + pairCounter + " пар.\n" +
-                "Из них " + newWordsCounter + " новых пар, которые вам еще предстоит учить.\n" +
-                "Пара слов, в которой вы чаще всего ошибаетесь:\n" + maximumErrors +
-                "\nКоличество ошибок с этой парой = " + errorMax +
-                "\nВаша последняя тренировка была: " + dateString + "\n\n";
+        return "В Вашем словаре " + countUniqueDEWords + " немецких уникальных слов.\n" +
+                "\nС этими словами у Вас " + countUserPairs + " пар.\n" +
+                "\nИз них " + countWordsToLearn + " новых пар, которые вам еще предстоит учить.\n" +
+                "\nПара(ы) слов, в которой(ых) вы чаще всего ошибаетесь:\n" + pairsString +
+                "\nКоличество ошибок с этой парой = " + failsCount +
+                "\n\nВаша последняя тренировка была: " + dateString + "\n\n";
     }
 
-    public void setFailStatusTrue(UserDictionary userDictionary){
+    public void setFailStatusTrue(UserDictionary userDictionary) {
         userStatisticService.updateDayFails(userDictionary);
     }
 
-    public void setFailStatusFalse(UserDictionary userDictionary){
+    public void setFailStatusFalse(UserDictionary userDictionary) {
         userStatisticService.setFailStatusFalse(userDictionary);
     }
 
-    public void decreaseFailTraining(UserDictionary userDictionary){
+    public void decreaseFailTraining(UserDictionary userDictionary) {
         userStatisticService.decreaseFailTraining(userDictionary);
     }
 }

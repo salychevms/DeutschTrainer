@@ -151,4 +151,16 @@ class UserDictionaryServiceTest {
         assertFalse(result.isEmpty());
         assertEquals(userDictionaries, result);
     }
+
+    @Test
+    void getCountPairsForUserAndLanguageIdentifier() {
+        Long count=3L;
+        Long telegramId=6114L;
+        String identifier="DE";
+
+        when(userDictionaryRepository.countPairsForTelegramIdAndLanguageIdentifier(telegramId, identifier)).thenReturn(count);
+        int result=userDictionaryService.getCountPairsForUserAndLanguageIdentifier(telegramId, identifier);
+
+        assertEquals(count, result);
+    }
 }

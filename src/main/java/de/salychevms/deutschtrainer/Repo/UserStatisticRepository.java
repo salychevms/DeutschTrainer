@@ -4,8 +4,10 @@ import de.salychevms.deutschtrainer.Models.UserDictionary;
 import de.salychevms.deutschtrainer.Models.UserStatistic;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,4 +23,18 @@ public interface UserStatisticRepository extends JpaRepository<UserStatistic, Lo
 
     @Query("SELECT us FROM UserStatistic us WHERE us.newWord =  false ORDER BY us.iterationsAll ASC")
     List<UserStatistic> findAllOrderByIterationsAllAsc();
+
+    // count of new words to learn by telegramId and languageIdentifier
+    @Query("SELECT COUNT(us) FROM UserStatistic us JOIN us.word ud JOIN ud.userLanguage ul JOIN ul.language l JOIN ul.user u WHERE u.telegramId = :telegramId AND l.identifier = :languageIdentifier AND us.newWord = true")
+    Long countPairsWithNewWordForUserAndLanguage(@Param("telegramId") Long telegramId, @Param("languageIdentifier") String languageIdentifier);
+
+    // pairs list for pairs which have maximum fails
+    @Query("SELECT us FROM UserStatistic us " +
+            "WHERE us.word.userLanguage.user.telegramId = :telegramId " +
+            "AND us.word.userLanguage.language.identifier = :languageIdentifier " +
+            "AND us.failsAll = (SELECT MAX(us2.failsAll) FROM UserStatistic us2 WHERE us2.word.userLanguage.user.telegramId = :telegramId AND us2.word.userLanguage.language.identifier = :languageIdentifier)")
+    List<UserStatistic> findWordsWithMaxFailsAllForUserAndLanguageIdentifier(Long telegramId, String languageIdentifier);
+
+    @Query("SELECT MAX(us.lastTraining) FROM UserStatistic us JOIN us.word ud JOIN ud.userLanguage ul JOIN ul.language l JOIN ul.user u WHERE u.telegramId = :telegramId AND l.identifier = :languageIdentifier")
+    Date findLastTrainingForUserAndLanguage(@Param("telegramId") Long telegramId, @Param("languageIdentifier") String languageIdentifier);
 }

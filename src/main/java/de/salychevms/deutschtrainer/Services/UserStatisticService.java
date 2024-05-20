@@ -305,4 +305,19 @@ public class UserStatisticService {
             }
         });
     }
+
+    @Transactional
+    public int getCountPairsWithNewWordForUserAndLanguage(Long telegramId, String languageIdentifier){
+        return Math.toIntExact(userStatisticRepository.countPairsWithNewWordForUserAndLanguage(telegramId, languageIdentifier));
+    }
+
+    @Transactional
+    public Date findLastTrainingForUserAndLanguage(Long telegramId, String languageIdentifier){
+        return userStatisticRepository.findLastTrainingForUserAndLanguage(telegramId, languageIdentifier);
+    }
+
+    @Transactional
+    public List<UserStatistic> findWordsWithMaxFailsAllForUserAndLanguageIdentifier(Long telegramId, String languageIdentifier){
+        return userStatisticRepository.findWordsWithMaxFailsAllForUserAndLanguageIdentifier(telegramId, languageIdentifier);
+    }
 }

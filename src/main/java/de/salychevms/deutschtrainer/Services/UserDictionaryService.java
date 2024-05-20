@@ -59,4 +59,14 @@ public class UserDictionaryService {
         }
         return null;
     }
+
+    @Transactional
+    public int getCountPairsForUserAndLanguageIdentifier(Long telegramId, String languageIdentifier) {
+        return Math.toIntExact(userDictionaryRepository.countPairsForTelegramIdAndLanguageIdentifier(telegramId, languageIdentifier));
+    }
+
+    @Transactional
+    public int getCountUniqueGermanWordsForTelegramIdAndLanguageIdentifier(Long telegramId, String languageIdentifier) {
+        return Math.toIntExact(userDictionaryRepository.countUniqueGermanWordsForTelegramIdAndLanguageIdentifier(telegramId, languageIdentifier));
+    }
 }

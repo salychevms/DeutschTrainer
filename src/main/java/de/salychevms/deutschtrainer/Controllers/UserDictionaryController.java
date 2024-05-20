@@ -69,4 +69,12 @@ public class UserDictionaryController {
     public List<UserDictionary> getAllByUserLanguageId(Long userLanguageId) {
         return userDictionaryService.getAllByUserLanguageId(userLanguageId);
     }
+
+    public int getCountPairsForUserAndLanguageIdentifier(Long telegramId, String languageIdentifier){
+        return userDictionaryService.getCountPairsForUserAndLanguageIdentifier(telegramId, languageIdentifier);
+    }
+
+    public int getCountUniqueGermanWordsForTelegramIdAndLanguageIdentifier(Long telegramId, String languageIdentifier){
+        return userDictionaryService.getCountUniqueGermanWordsForTelegramIdAndLanguageIdentifier(telegramId,languageIdentifier);
+    }
 }

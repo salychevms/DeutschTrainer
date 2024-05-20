@@ -334,8 +334,8 @@ public class TelegramBot extends TelegramLongPollingBot {
                     //////////////////////////////
                     /*List<BasicPairStatisticInfoClass> basicPairStatistic=vocabularyController.getUserPairStatisticInfo(telegramId, 2L);
                     System.out.println(basicPairStatistic);*/
-                    List<UserPairStatisticInfoClass> userStatisticList = vocabularyController.getAllUserPairStatisticInfo(telegramId, "DE");
-                    dataExchangeInOutController.writeUserStatisticToExcel(userStatisticList);
+                    /*List<UserPairStatisticInfoClass> userStatisticList = vocabularyController.getAllUserPairStatisticInfo(telegramId, "DE");
+                    dataExchangeInOutController.writeUserStatisticToExcel(userStatisticList);*/
                     //////////////////////////////
                     String basicStatistic = userStatisticController.getBasicStatistic(telegramId);
                     editKeyboard(update.getCallbackQuery(), menuMaker.statisticMenu(), EmojiGive.barChart + " Статистика: \n\n" + basicStatistic);
