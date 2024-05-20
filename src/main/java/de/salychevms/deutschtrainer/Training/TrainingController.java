@@ -64,7 +64,7 @@ public class TrainingController {
         }
         Collections.shuffle(trainingPairList);
         if (trainingPairList.size() >= 50) {
-            trainingPairList = trainingPairList.subList(0, 49);
+            trainingPairList = trainingPairList.subList(0, 50);
         }
         return trainingPairList;
     }
@@ -100,7 +100,7 @@ public class TrainingController {
         }
         Collections.shuffle(trainingFailList);
         if (trainingFailList.size() >= 50) {
-            trainingFailList = trainingFailList.subList(0, 49);
+            trainingFailList = trainingFailList.subList(0, 50);
         }
         return trainingFailList;
     }
@@ -136,7 +136,7 @@ public class TrainingController {
         }
         Collections.shuffle(learningPairList);
         if (learningPairList.size() >= 25) {
-            learningPairList = learningPairList.subList(0, 24);
+            learningPairList = learningPairList.subList(0, 25);
         }
         return learningPairList;
     }

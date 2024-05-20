@@ -37,4 +37,10 @@ public interface UserStatisticRepository extends JpaRepository<UserStatistic, Lo
 
     @Query("SELECT MAX(us.lastTraining) FROM UserStatistic us JOIN us.word ud JOIN ud.userLanguage ul JOIN ul.language l JOIN ul.user u WHERE u.telegramId = :telegramId AND l.identifier = :languageIdentifier")
     Date findLastTrainingForUserAndLanguage(@Param("telegramId") Long telegramId, @Param("languageIdentifier") String languageIdentifier);
+
+    @Query("SELECT COUNT(us) FROM UserStatistic us " +
+            "WHERE us.word.userLanguage.user.telegramId = :telegramId " +
+            "AND us.word.userLanguage.language.identifier = :languageIdentifier " +
+            "AND us.failStatus = true")
+    int countWordsWithFailStatusForUserAndLanguage(Long telegramId, String languageIdentifier);
 }

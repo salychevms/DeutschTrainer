@@ -136,14 +136,17 @@ public class MenuMaker {
         return keyboardMarkup;
     }
 
-    InlineKeyboardMarkup trainingMenu(UserLanguage userLanguage) {
+    InlineKeyboardMarkup trainingMenu(Long telegramId, UserLanguage userLanguage, String languageIdentifier) {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         //position from up to down
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        int countNewWords= userStatisticController.getCountPairsWithNewWordForUserAndLanguage(telegramId, languageIdentifier);
+        int countWordsWithFailStatusTrue= userStatisticController.countWordsWithFailStatusForUserAndLanguage(telegramId, languageIdentifier);
         //new words training button
         List<UserStatistic> userStatisticListOrderByNewWord = userStatisticController.getAllStatisticWithNewWords(userLanguage);
         if (!userStatisticListOrderByNewWord.isEmpty()) {
-            InlineKeyboardButton learningNewWordsTrainingButton = new InlineKeyboardButton(EmojiGive.newButton + " Учить новые слова");
+
+            InlineKeyboardButton learningNewWordsTrainingButton = new InlineKeyboardButton(EmojiGive.newButton + " Учить новые слова ("+countNewWords+")");
             learningNewWordsTrainingButton.setCallbackData("/tr=/sLT");// /tr=/sLT - training/StartLearningTraining
             List<InlineKeyboardButton> row = new ArrayList<>();
             row.add(learningNewWordsTrainingButton);
@@ -158,7 +161,7 @@ public class MenuMaker {
             }
         }
         if (!freshFailsStatistic.isEmpty()) {
-            InlineKeyboardButton failsTrainingButton = new InlineKeyboardButton(EmojiGive.redQuestionMark + " Ошиблись - повторите");
+            InlineKeyboardButton failsTrainingButton = new InlineKeyboardButton(EmojiGive.redQuestionMark + " Ошиблись - повторите ("+countWordsWithFailStatusTrue+")");
             failsTrainingButton.setCallbackData("/tr=/sFT");// /tr=/sFT - training/StartFailsTraining
             List<InlineKeyboardButton> row = new ArrayList<>();
             row.add(failsTrainingButton);

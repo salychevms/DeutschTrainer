@@ -94,7 +94,7 @@ public class UserStatisticController {
 
     public String getBasicStatistic(Long telegramId) {
         String dateString;
-        int failsCount=0;
+        int failsCount = 0;
         Date tempDate = userStatisticService.findLastTrainingForUserAndLanguage(telegramId, "DE");
         int countUniqueDEWords = userDictionaryController.getCountUniqueGermanWordsForTelegramIdAndLanguageIdentifier(telegramId, "DE");
         int countUserPairs = userDictionaryController.getCountPairsForUserAndLanguageIdentifier(telegramId, "DE");
@@ -111,8 +111,8 @@ public class UserStatisticController {
         StringBuilder pairsString = new StringBuilder();
         List<UserStatistic> failedUserStatistic = userStatisticService.findWordsWithMaxFailsAllForUserAndLanguageIdentifier(telegramId, "DE");
         if (!failedUserStatistic.isEmpty()) {
-            if(failedUserStatistic.size()>=5){
-                failedUserStatistic=failedUserStatistic.subList(0, 5);
+            if (failedUserStatistic.size() >= 5) {
+                failedUserStatistic = failedUserStatistic.subList(0, 5);
             }
             failsCount = Math.toIntExact(failedUserStatistic.get(0).getFailsAll());
             for (UserStatistic statistic : failedUserStatistic) {
@@ -150,5 +150,13 @@ public class UserStatisticController {
 
     public void decreaseFailTraining(UserDictionary userDictionary) {
         userStatisticService.decreaseFailTraining(userDictionary);
+    }
+
+    public int getCountPairsWithNewWordForUserAndLanguage(Long telegramId, String languageIdentifier) {
+        return userStatisticService.getCountPairsWithNewWordForUserAndLanguage(telegramId, languageIdentifier);
+    }
+
+    public int countWordsWithFailStatusForUserAndLanguage(Long telegramId, String languageIdentifier){
+        return userStatisticService.countWordsWithFailStatusForUserAndLanguage(telegramId, languageIdentifier);
     }
 }

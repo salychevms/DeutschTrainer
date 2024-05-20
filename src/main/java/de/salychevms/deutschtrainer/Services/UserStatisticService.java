@@ -320,4 +320,9 @@ public class UserStatisticService {
     public List<UserStatistic> findWordsWithMaxFailsAllForUserAndLanguageIdentifier(Long telegramId, String languageIdentifier){
         return userStatisticRepository.findWordsWithMaxFailsAllForUserAndLanguageIdentifier(telegramId, languageIdentifier);
     }
+
+    @Transactional
+    public int countWordsWithFailStatusForUserAndLanguage(Long telegramId, String languageIdentifier){
+        return userStatisticRepository.countWordsWithFailStatusForUserAndLanguage(telegramId, languageIdentifier);
+    }
 }
