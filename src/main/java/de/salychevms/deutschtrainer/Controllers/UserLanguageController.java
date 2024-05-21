@@ -1,12 +1,9 @@
 package de.salychevms.deutschtrainer.Controllers;
 
 import de.salychevms.deutschtrainer.Models.Language;
-import de.salychevms.deutschtrainer.Models.UserDictionary;
 import de.salychevms.deutschtrainer.Models.UserLanguage;
 import de.salychevms.deutschtrainer.Models.Users;
-import de.salychevms.deutschtrainer.Services.UserDictionaryService;
 import de.salychevms.deutschtrainer.Services.UserLanguageService;
-import org.bouncycastle.pqc.crypto.newhope.NHSecretKeyProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,17 +13,16 @@ import java.util.Optional;
 
 @Component
 public class UserLanguageController {
-    final UserLanguageService userLanguageService;
-    final UsersController usersController;
-    final LanguageController languageController;
-    private final UserDictionaryService userDictionaryService;
+    private final UserLanguageService userLanguageService;
+    private final UsersController usersController;
+    private final LanguageController languageController;
+
 
     @Autowired
-    public UserLanguageController(UserLanguageService userLanguageService, UsersController usersController, LanguageController languageController, UserDictionaryService userDictionaryService) {
+    public UserLanguageController(UserLanguageService userLanguageService, UsersController usersController, LanguageController languageController) {
         this.userLanguageService = userLanguageService;
         this.usersController = usersController;
         this.languageController = languageController;
-        this.userDictionaryService = userDictionaryService;
     }
 
     public void createUserLanguage(Long telegramId, Long languageId) {

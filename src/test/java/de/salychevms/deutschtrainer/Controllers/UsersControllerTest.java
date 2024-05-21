@@ -142,4 +142,17 @@ class UsersControllerTest {
         usersController.deleteAllUsers();
         verify(usersService, times(1)).deleteAllUsers();
     }
+
+    @Test
+    void isAdminChecker(){
+        Long telegramId=55555555555L;
+        Users user=new Users();
+        user.setAdmin(true);
+        user.setTelegramId(telegramId);
+
+        when(usersService.findUserByTelegramId(telegramId)).thenReturn(Optional.of(user));
+        boolean result=usersController.isAdminChecker(telegramId);
+
+        assertTrue(result);
+    }
 }

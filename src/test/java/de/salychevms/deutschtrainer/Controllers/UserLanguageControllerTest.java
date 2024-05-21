@@ -132,17 +132,8 @@ class UserLanguageControllerTest {
     @Test
     void getLanguageIdsByTelegramId() {
         Long telegramId=897351L;
-        Users user=new Users();
-        user.setTelegramId(telegramId);
-
         Long userLanguageId1=3223L;
-        UserLanguage userLanguage1=new UserLanguage();
-        userLanguage1.setId(userLanguageId1);
-        userLanguage1.setUser(user);
         Long userLanguageId2=3233L;
-        UserLanguage userLanguage2=new UserLanguage();
-        userLanguage2.setId(userLanguageId2);
-        userLanguage2.setUser(user);
 
         List<Long> userLanguageIds=new ArrayList<>();
         userLanguageIds.add(userLanguageId1);

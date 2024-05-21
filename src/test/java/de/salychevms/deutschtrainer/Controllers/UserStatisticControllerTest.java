@@ -4,7 +4,6 @@ import de.salychevms.deutschtrainer.Models.*;
 import de.salychevms.deutschtrainer.Services.UserStatisticService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,7 +20,7 @@ class UserStatisticControllerTest {
     @Mock
     private UserDictionaryController userDictionaryController;
     @Mock
-    private  DeRuPairsController deRuPairsController;
+    private DeRuPairsController deRuPairsController;
     @Mock
     private DeutschController deutschController;
     @Mock
@@ -63,9 +62,9 @@ class UserStatisticControllerTest {
         ud1.setId(987L);
         ud2.setId(98L);
         ud3.setId(9L);
-        UserStatistic us1=new UserStatistic(ud1);
-        UserStatistic us2=new UserStatistic(ud2);
-        UserStatistic us3=new UserStatistic(ud3);
+        UserStatistic us1 = new UserStatistic(ud1);
+        UserStatistic us2 = new UserStatistic(ud2);
+        UserStatistic us3 = new UserStatistic(ud3);
         List<UserStatistic> userStatistics = new ArrayList<>();
         userStatistics.add(us1);
         userStatistics.add(us2);
@@ -91,9 +90,9 @@ class UserStatisticControllerTest {
         ud1.setId(777L);
         ud2.setId(69L);
         ud3.setId(1L);
-        UserStatistic us1=new UserStatistic(ud1);
-        UserStatistic us2=new UserStatistic(ud2);
-        UserStatistic us3=new UserStatistic(ud3);
+        UserStatistic us1 = new UserStatistic(ud1);
+        UserStatistic us2 = new UserStatistic(ud2);
+        UserStatistic us3 = new UserStatistic(ud3);
         List<UserStatistic> userStatistics = new ArrayList<>();
         userStatistics.add(us1);
         userStatistics.add(us2);
@@ -114,7 +113,9 @@ class UserStatisticControllerTest {
     @Test
     void testGetUserStatisticByUserDictionaryIfExists() {
         Long userDictionaryId = 789L;
+        Long userLanguageId = 678L;
         UserLanguage userLanguage = new UserLanguage(new Users(), new Language());
+        userLanguage.setId(userLanguageId);
         UserDictionary userDictionary = new UserDictionary(new UserLanguage(), new DeRuPairs(), new Date());
         userDictionary.setUserLanguage(userLanguage);
         userDictionary.setId(userDictionaryId);
@@ -173,8 +174,8 @@ class UserStatisticControllerTest {
     }
 
     @Test
-    void testSetFailStatusTrueAndFalseAndGetFailStatus(){
-        UserDictionary userDictionary=new UserDictionary();
+    void testSetFailStatusTrueAndFalseAndGetFailStatus() {
+        UserDictionary userDictionary = new UserDictionary();
 
         userStatisticController.setFailStatusFalse(userDictionary);
         verify(userStatisticService, times(1)).setFailStatusFalse(userDictionary);
@@ -184,64 +185,51 @@ class UserStatisticControllerTest {
     }
 
     @Test
-    void testGetBasicStatistic(){
-        //chatGPT has helped me
+    public void testGetBasicStatistic() {
         Long telegramId = 123L;
-        Date currentDate = new Date();
-        Date yesterdayDate = new Date(currentDate.getTime() - 24 * 60 * 60 * 1000);
+        Date date=new Date();
+        String languageIdentifier = "DE";
+        Deutsch deutsch = new Deutsch("Haus");
+        deutsch.setId(153L);
+        Russian russian = new Russian("дом");
+        russian.setId(9784L);
+        DeRuPairs pairs = new DeRuPairs(deutsch, russian);
+        pairs.setId(5555L);
+        UserDictionary userDictionary = new UserDictionary(new UserLanguage(), pairs, new Date());
+        userDictionary.setId(8946566L);
+        UserStatistic userStatistic = new UserStatistic(userDictionary);
+        userStatistic.setFailsAll(10L);
+        userStatistic.setId(65456454L);
+        List<UserStatistic> statistics = new ArrayList<>();
+        statistics.add(userStatistic);
 
-        UserDictionary userDictionary1 = new UserDictionary();
-        DeRuPairs pair1 = new DeRuPairs();
-        pair1.setId(1L);
-        Deutsch deutsch1 = new Deutsch();
-        deutsch1.setId(1L);
-        deutsch1.setDeWord("das Haus");
-        Russian russian1 = new Russian();
-        russian1.setId(1L);
-        russian1.setRuWord("дом");
-        pair1.setDeutsch(deutsch1);
-        pair1.setRussian(russian1);
-        userDictionary1.setPair(pair1);
-
-        UserStatistic userStatistic1 = new UserStatistic();
-        userStatistic1.setNewWord(true);
-        userStatistic1.setFailsAll(3L);
-        userStatistic1.setLastTraining(yesterdayDate);
-
-        List<UserDictionary> userDictionaries = Collections.singletonList(userDictionary1);
-        List<DeRuPairs> pairs = Collections.singletonList(pair1);
+        when(userStatisticService.findLastTrainingForUserAndLanguage(telegramId, languageIdentifier)).thenReturn(date);
+        when(userDictionaryController.getCountUniqueGermanWordsForTelegramIdAndLanguageIdentifier(telegramId, "DE")).thenReturn(1);
+        when(userDictionaryController.getCountPairsForUserAndLanguageIdentifier(telegramId, "DE")).thenReturn(10);
+        when(userStatisticService.getCountPairsWithNewWordForUserAndLanguage(telegramId, "DE")).thenReturn(20);
+        when(userStatisticService.findWordsWithMaxFailsAllForUserAndLanguageIdentifier(telegramId, "DE")).thenReturn(statistics);
+        when(userDictionaryController.getById(userStatistic.getWord().getId())).thenReturn(Optional.of(userDictionary));
+        when(deRuPairsController.getDeRuById(userDictionary.getPair().getId())).thenReturn(Optional.of(pairs));
+        when(deutschController.findById(deutsch.getId())).thenReturn(deutsch);
+        when(russianController.findById(russian.getId())).thenReturn(russian);
+        String result=userStatisticController.getBasicStatistic(telegramId);
 
         String expected = "В Вашем словаре 1 немецких уникальных слов.\n" +
-                "С этими словами у Вас 1 пар.\n" +
-                "Из них 1 новых пар, которые вам еще предстоит учить.\n" +
-                "Пара слов, в которой вы чаще всего ошибаетесь:\ndas Haus - дом" +
-                "\nКоличество ошибок с этой парой = 3" +
-                "\nВаша последняя тренировка была: вчера\n\n";
+                "\nС этими словами у Вас 10 пар.\n" +
+                "\nИз них 20 новых пар, которые вам еще предстоит учить.\n" +
+                "\nПара(ы) слов, в которой(ых) вы чаще всего ошибаетесь:\n" +
+                "\nHaus - дом\n" +
+                "\nКоличество ошибок с этой парой = 10" +
+                "\n\nВаша последняя тренировка была: сегодня\n\n";
 
-        when(userDictionaryController.getAllByTelegramId(telegramId)).thenReturn(userDictionaries);
-        when(deRuPairsController.getDeRuById(1L)).thenReturn(Optional.of(pair1));
-        when(userStatisticService.getUserStatisticByUserDictionary(userDictionary1)).thenReturn(Optional.of(userStatistic1));
-        when(deutschController.findById(1L)).thenReturn(deutsch1);
-        when(russianController.findById(1L)).thenReturn(russian1);
-
-        String result = userStatisticController.getBasicStatistic(telegramId);
-
-        System.out.println(expected);
-        System.out.println(result);
-
-        assertEquals(expected, result);
+        assertEquals(expected, result );
     }
 
     @Test
-    void testDecreaseFailTraining(){
+    void testDecreaseFailTraining() {
         UserDictionary userDictionary = new UserDictionary();
         Long userDictionaryId = 123456789L;
         userDictionary.setId(userDictionaryId);
-
-        UserStatistic statistic=new UserStatistic();
-        statistic.setWord(userDictionary);
-        statistic.setFailStatus(true);
-        statistic.setFailTraining(3);
 
         userStatisticService.decreaseFailTraining(userDictionary);
         verify(userStatisticService, times(1)).decreaseFailTraining(userDictionary);

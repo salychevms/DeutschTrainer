@@ -1,7 +1,6 @@
 package de.salychevms.deutschtrainer.Services;
 
-import de.salychevms.deutschtrainer.Models.UserDictionary;
-import de.salychevms.deutschtrainer.Models.UserStatistic;
+import de.salychevms.deutschtrainer.Models.*;
 import de.salychevms.deutschtrainer.Repo.UserStatisticRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -97,7 +96,7 @@ class UserStatisticServiceTest {
         List<UserStatistic> result = userStatisticService.getUserStatisticNewWordIsTrue();
 
         assertNotNull(result);
-        assertEquals(statistics,result);
+        assertEquals(statistics, result);
     }
 
     @Test
@@ -560,13 +559,13 @@ class UserStatisticServiceTest {
         pair.setId(pairId);
         UserStatistic statistic = new UserStatistic();
         statistic.setId(statisticId);
-        Calendar calendar=Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, -1);
         calendar.add(Calendar.HOUR_OF_DAY, 20);
         calendar.add(Calendar.MINUTE, 5);
         calendar.add(Calendar.SECOND, 0);
         calendar.add(Calendar.MILLISECOND, 0);
-        Date lastTrainingDate=calendar.getTime();
+        Date lastTrainingDate = calendar.getTime();
         statistic.setLastTraining(lastTrainingDate);
 
         when(userStatisticRepository.findByWord(pair)).thenReturn(Optional.of(statistic));
@@ -580,16 +579,16 @@ class UserStatisticServiceTest {
 
     @Test
     void testFindAll() {
-        UserStatistic statistic=new UserStatistic();
-        UserStatistic someOneStatistic=new UserStatistic();
-        UserStatistic nextStatistic=new UserStatistic();
-        List<UserStatistic> statisticList=new ArrayList<>();
+        UserStatistic statistic = new UserStatistic();
+        UserStatistic someOneStatistic = new UserStatistic();
+        UserStatistic nextStatistic = new UserStatistic();
+        List<UserStatistic> statisticList = new ArrayList<>();
         statisticList.add(statistic);
         statisticList.add(someOneStatistic);
         statisticList.add(nextStatistic);
 
         when(userStatisticRepository.findAll()).thenReturn(statisticList);
-        List<UserStatistic> result=userStatisticService.findAll();
+        List<UserStatistic> result = userStatisticService.findAll();
         assertFalse(result.isEmpty());
         assertEquals(statisticList, result);
     }
@@ -600,7 +599,7 @@ class UserStatisticServiceTest {
         Long userDictionaryId = 123456789L;
         pair.setId(userDictionaryId);
 
-        UserStatistic statistic=new UserStatistic();
+        UserStatistic statistic = new UserStatistic();
         statistic.setWord(pair);
 
         when(userStatisticRepository.findByWord(pair)).thenReturn(Optional.of(statistic));
@@ -619,7 +618,7 @@ class UserStatisticServiceTest {
         Long userDictionaryId = 123456789L;
         pair.setId(userDictionaryId);
 
-        UserStatistic statistic=new UserStatistic();
+        UserStatistic statistic = new UserStatistic();
         statistic.setWord(pair);
         statistic.setFailTraining(4);
 
@@ -635,5 +634,76 @@ class UserStatisticServiceTest {
 
         assertNull(statistic.getFailTraining());
         assertFalse(statistic.isFailStatus());
+    }
+
+    @Test
+    void getCountPairsWithNewWordForUserAndLanguage() {
+        Long telegramId = 41143L;
+        String languageIdentifier = "DE";
+        int count = 4;
+
+        when(userStatisticRepository.countPairsWithNewWordForUserAndLanguage(telegramId, languageIdentifier)).thenReturn((long) count);
+        int result = userStatisticService.getCountPairsWithNewWordForUserAndLanguage(telegramId, languageIdentifier);
+
+        assertEquals(count, result);
+    }
+
+    @Test
+    void findLastTrainingForUserAndLanguage() {
+        Long telegramId = 357847L;
+        String languageIdentifier = "DE";
+        Date date = new Date();
+
+        when(userStatisticRepository.findLastTrainingForUserAndLanguage(telegramId, languageIdentifier)).thenReturn(date);
+        Date result = userStatisticService.findLastTrainingForUserAndLanguage(telegramId, languageIdentifier);
+
+        assertEquals(date, result);
+    }
+
+    @Test
+    void findWordsWithMaxFailsAllForUserAndLanguageIdentifier() {
+        Long telegramId = 357847L;
+        Long someTelegramId = 8671364L;
+        String languageIdentifier = "DE";
+
+        UserStatistic statistic = new UserStatistic();
+        statistic.setFailsAll(5L);
+        statistic.setWord(new UserDictionary(new UserLanguage(new Users(), new Language("n")), new DeRuPairs(new Deutsch("d"), new Russian("r")), new Date()));
+
+        UserStatistic someOneStatistic = new UserStatistic();
+        someOneStatistic.setFailsAll(3L);
+        someOneStatistic.setWord(new UserDictionary(new UserLanguage(new Users(), new Language("n")), new DeRuPairs(new Deutsch("dd"), new Russian("rr")), new Date()));
+
+        UserStatistic nextStatistic = new UserStatistic();
+        nextStatistic.setFailsAll(3L);
+        nextStatistic.setWord(new UserDictionary(new UserLanguage(new Users(), new Language("n")), new DeRuPairs(new Deutsch("dddd"), new Russian("rrrr")), new Date()));
+
+        List<UserStatistic> statisticList = new ArrayList<>();
+        statisticList.add(statistic);
+
+        List<UserStatistic> someOneStatisticList = new ArrayList<>();
+        someOneStatisticList.add(someOneStatistic);
+        someOneStatisticList.add(nextStatistic);
+
+        when(userStatisticRepository.findWordsWithMaxFailsAllForUserAndLanguageIdentifier(telegramId, languageIdentifier)).thenReturn(statisticList);
+        when(userStatisticRepository.findWordsWithMaxFailsAllForUserAndLanguageIdentifier(someTelegramId, languageIdentifier)).thenReturn(someOneStatisticList);
+
+        List<UserStatistic> result1 = userStatisticService.findWordsWithMaxFailsAllForUserAndLanguageIdentifier(telegramId, languageIdentifier);
+        List<UserStatistic> result2 = userStatisticService.findWordsWithMaxFailsAllForUserAndLanguageIdentifier(someTelegramId, languageIdentifier);
+
+        assertEquals(statisticList, result1);
+        assertEquals(someOneStatisticList, result2);
+    }
+
+    @Test
+    void countWordsWithFailStatusForUserAndLanguage() {
+        int count = 7;
+        Long telegramId = 87163L;
+        String languageIdentifier = "DE";
+
+        when(userStatisticRepository.countWordsWithFailStatusForUserAndLanguage(telegramId, languageIdentifier)).thenReturn(count);
+        int result = userStatisticService.countWordsWithFailStatusForUserAndLanguage(telegramId, languageIdentifier);
+
+        assertEquals(count, result);
     }
 }

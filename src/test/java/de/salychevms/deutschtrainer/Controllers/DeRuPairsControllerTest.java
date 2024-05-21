@@ -363,4 +363,111 @@ class DeRuPairsControllerTest {
         assertFalse(result.isEmpty());
         assertEquals(pairs, result);
     }
+
+    @Test
+    void getWordMapWhichUserLooksFor() {
+        /*Long telegramId=234L;
+        String userRUWord="ru";
+        String userDEWord="de";
+        String postfix=" <<уже добавлено>>";
+        Deutsch deutsch1=new Deutsch("de1");
+        Deutsch deutsch2=new Deutsch("de2");
+        deutsch1.setId(123L);
+        deutsch2.setId(234L);
+        List<Deutsch> deutschList = new ArrayList<>();
+        deutschList.add(deutsch1);
+        deutschList.add(deutsch2);
+        Russian russian1=new Russian("ru1");
+        Russian russian2=new Russian("ru2");
+        russian1.setId(345L);
+        russian2.setId(456L);
+        List<Russian> russianList = new ArrayList<>();
+        russianList.add(russian1);
+        russianList.add(russian2);
+        DeRuPairs pair1 = new DeRuPairs(deutsch1,russian1);
+        DeRuPairs pair2 = new DeRuPairs(deutsch2,russian2);
+        UserDictionary userDictionary1 = new UserDictionary();
+        UserDictionary userDictionary2 = new UserDictionary();
+        userDictionary1.setPair(pair1);
+        userDictionary2.setPair(pair2);
+        List<UserDictionary> userDictionaryList = new ArrayList<>();
+        userDictionaryList.add(userDictionary1);
+        userDictionaryList.add(userDictionary2);
+        Map<Long, String> expectedRu = new HashMap<>();
+        Map<Long, String> expectedDe = new HashMap<>();
+        StringBuilder b1=new StringBuilder(deutsch1.getDeWord());
+        StringBuilder b2=new StringBuilder(deutsch2.getDeWord());
+        StringBuilder b3=new StringBuilder(russian1.getRuWord());
+        StringBuilder b4=new StringBuilder(russian2.getRuWord());
+        b1.append(postfix);
+        b2.append(postfix);
+        b3.append(postfix);
+        b4.append(postfix);
+        expectedDe.put(deutsch1.getId(), b1.toString());
+        expectedDe.put(deutsch2.getId(), b2.toString());
+        expectedRu.put(russian1.getId(), b3.toString());
+        expectedRu.put(russian2.getId(), b4.toString());
+
+        when(userDictionaryController.getAllByTelegramId(telegramId)).thenReturn(userDictionaryList);
+        when(deRuPairsService.findPairById(pair1.getId())).thenReturn(Optional.of(pair1));
+        when(deRuPairsService.findPairById(pair2.getId())).thenReturn(Optional.of(pair2));
+        when(deutschController.findAllDeutschWordsWhichContain(userRUWord)).thenReturn(deutschList);
+        when(russianController.findAllRussianWordsWhichContain(userDEWord)).thenReturn(russianList);
+        System.out.println(expectedDe);
+        System.out.println(expectedRu);
+
+        Map<Long, String> resultDe=deRuPairsController.getWordMapWhichUserLooksFor(telegramId, userDEWord, "DE");
+        System.out.println(resultDe);
+        Map<Long, String> resultRu=deRuPairsController.getWordMapWhichUserLooksFor(telegramId, userRUWord, "RU");
+        System.out.println(resultRu);
+
+        assertEquals(expectedDe, resultDe);
+        assertEquals(expectedRu, resultRu);*/
+        Long telegramId = 234L;
+        String userRUWord = "ru";
+        String userDEWord = "de";
+        String postfix = " <<еще варианты>>";
+
+        Deutsch deutsch1 = new Deutsch("de1");
+        Deutsch deutsch2 = new Deutsch("de2");
+        deutsch1.setId(123L);
+        deutsch2.setId(234L);
+        List<Deutsch> deutschList = List.of(deutsch1, deutsch2);
+
+        Russian russian1 = new Russian("ru1");
+        Russian russian2 = new Russian("ru2");
+        russian1.setId(345L);
+        russian2.setId(456L);
+        List<Russian> russianList = List.of(russian1, russian2);
+
+        DeRuPairs pair1 = new DeRuPairs(deutsch1, russian1);
+        DeRuPairs pair2 = new DeRuPairs(deutsch2, russian2);
+        UserDictionary userDictionary1 = new UserDictionary();
+        UserDictionary userDictionary2 = new UserDictionary();
+        userDictionary1.setPair(pair1);
+        userDictionary2.setPair(pair2);
+        List<UserDictionary> userDictionaryList = List.of(userDictionary1, userDictionary2);
+
+        Map<Long, String> expectedRu = Map.of(
+                russian1.getId(), russian1.getRuWord(),
+                russian2.getId(), russian2.getRuWord() + postfix
+        );
+
+        Map<Long, String> expectedDe = Map.of(
+                deutsch1.getId(), deutsch1.getDeWord(),
+                deutsch2.getId(), deutsch2.getDeWord() + postfix
+        );
+
+        when(userDictionaryController.getAllByTelegramId(telegramId)).thenReturn(userDictionaryList);
+        when(deRuPairsService.findPairById(pair1.getId())).thenReturn(Optional.of(pair1));
+        when(deRuPairsService.findPairById(pair2.getId())).thenReturn(Optional.of(pair2));
+        when(deutschController.findAllDeutschWordsWhichContain(userDEWord)).thenReturn(deutschList);
+        when(russianController.findAllRussianWordsWhichContain(userRUWord)).thenReturn(russianList);
+
+        Map<Long, String> resultDe = deRuPairsController.getWordMapWhichUserLooksFor(telegramId, userDEWord, "DE");
+        Map<Long, String> resultRu = deRuPairsController.getWordMapWhichUserLooksFor(telegramId, userRUWord, "RU");
+
+        assertEquals(expectedDe, resultDe);
+        assertEquals(expectedRu, resultRu);
+    }
 }

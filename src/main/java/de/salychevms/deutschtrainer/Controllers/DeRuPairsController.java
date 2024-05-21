@@ -76,9 +76,12 @@ public class DeRuPairsController {
             List<Deutsch> german = deutschController.findAllDeutschWordsWhichContain(userWord);
             for (Deutsch item : german) {
                 StringBuilder str = new StringBuilder(item.getDeWord());
+                boolean postfixAdded = false;
                 for (DeRuPairs someItem : pairs) {
                     if (someItem.getDeutsch().getId().equals(item.getId())) {
-                        str.append(" <<еще варианты>>");
+                        if (!postfixAdded) {
+                            str.append(" <<еще варианты>>");
+                        }
                     }
                 }
                 wordList.add(str.toString());
@@ -87,9 +90,12 @@ public class DeRuPairsController {
             List<Russian> russian = russianController.findAllRussianWordsWhichContain(userWord);
             for (Russian item : russian) {
                 StringBuilder str = new StringBuilder(item.getRuWord());
+                boolean postfixAdded = false;
                 for (DeRuPairs someItem : pairs) {
                     if (someItem.getRussian().getId().equals(item.getId())) {
-                        str.append(" <<еще варианты>>");
+                        if (!postfixAdded) {
+                            str.append(" <<еще варианты>>");
+                        }
                     }
                 }
                 wordList.add(str.toString());
@@ -105,14 +111,18 @@ public class DeRuPairsController {
             Optional<DeRuPairs> pair = deRuPairsService.findPairById(item.getPair().getId());
             pair.ifPresent(pairs::add);
         }
-        Map<Long, String> wordMap = new HashMap<>();
+        Map<Long, String> wordMap = new LinkedHashMap<>();
         if (DE.equals(languageIdentifier)) {
             List<Deutsch> german = deutschController.findAllDeutschWordsWhichContain(userWord);
             for (Deutsch item : german) {
                 StringBuilder str = new StringBuilder(item.getDeWord());
+                boolean postfixAdded = false;
                 for (DeRuPairs someItem : pairs) {
                     if (someItem.getDeutsch().getId().equals(item.getId())) {
-                        str.append(" <<еще варианты>>");
+                        if (!postfixAdded) { // Добавляем постфикс только если он еще не был добавлен
+                            str.append(" <<еще варианты>>");
+                            postfixAdded = true;
+                        }
                     }
                 }
                 wordMap.put(item.getId(), str.toString());
@@ -121,9 +131,13 @@ public class DeRuPairsController {
             List<Russian> russian = russianController.findAllRussianWordsWhichContain(userWord);
             for (Russian item : russian) {
                 StringBuilder str = new StringBuilder(item.getRuWord());
+                boolean postfixAdded = false;
                 for (DeRuPairs someItem : pairs) {
                     if (someItem.getRussian().getId().equals(item.getId())) {
-                        str.append(" <<еще варианты>>");
+                        if (!postfixAdded) { // Добавляем постфикс только если он еще не был добавлен
+                            str.append(" <<еще варианты>>");
+                            postfixAdded = true;
+                        }
                     }
                 }
                 wordMap.put(item.getId(), str.toString());

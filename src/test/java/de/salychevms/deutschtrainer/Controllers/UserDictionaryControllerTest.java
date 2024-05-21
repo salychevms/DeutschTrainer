@@ -186,4 +186,28 @@ class UserDictionaryControllerTest {
         assertNotNull(result);
         assertEquals(userDictionaryList, result);
     }
+
+    @Test
+    void getCountPairsForUserAndLanguageIdentifier() {
+        Long telegramId=2311L;
+        String languageIdentifier="DE";
+        int count=4;
+
+        when(userDictionaryService.getCountPairsForUserAndLanguageIdentifier(telegramId,languageIdentifier)).thenReturn(count);
+        int result= userDictionaryController.getCountPairsForUserAndLanguageIdentifier(telegramId,languageIdentifier);
+
+        assertEquals(count,result);
+    }
+
+    @Test
+    void getCountUniqueGermanWordsForTelegramIdAndLanguageIdentifier() {
+        Long telegramId=231121313L;
+        String languageIdentifier="DE";
+        int count=5;
+
+        when(userDictionaryService.getCountUniqueGermanWordsForTelegramIdAndLanguageIdentifier(telegramId,languageIdentifier)).thenReturn(count);
+        int result=userDictionaryController.getCountUniqueGermanWordsForTelegramIdAndLanguageIdentifier(telegramId,languageIdentifier);
+
+        assertEquals(count,result);
+    }
 }
