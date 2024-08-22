@@ -32,6 +32,8 @@ class UserStatisticTest {
                 ", iterationsPerMonth=" + 10L +'\'' +
                 ", iterationsPerWeek=" + null +'\'' +
                 ", iterationsPerDay=" + null +'\'' +
+                ", failTraining=" + null +'\'' +
+                ", failStatus=" + false +'\'' +
                 ", failsAll=" + 5L +'\'' +
                 ", failsPerMonth=" + null +'\'' +
                 ", failsPerWeek=" + null +'\'' +

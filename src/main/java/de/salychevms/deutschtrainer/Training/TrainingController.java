@@ -216,11 +216,11 @@ public class TrainingController {
                             userStatisticController.setFailStatusTrue(forStatistic.get());
                         }
                     }
-                    answerToUser = "***** ОШИБКА!!! *****"
+                    answerToUser = "xXxXx ОШИБКА!!! xXxXx"
                             + "\n\nВы выбрали: " + ruFromUser.getRuWord()
                             + "\n\n--- Верный ответ ---\n\n"
                             + german.get().getDeWord() + " --> " + ruCorrect.get().getRuWord()
-                            + "\n\n********************\n"
+                            + "\n\nxXxXxxXxXxxXxXxxXxXx\n"
                             + EmojiGive.redCross;
                 }
             }
