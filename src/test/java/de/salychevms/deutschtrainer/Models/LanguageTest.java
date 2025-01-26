@@ -1,5 +1,6 @@
 package de.salychevms.deutschtrainer.Models;
 
+import de.salychevms.deutschtrainer.TrainerDataBase.Models.Language;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

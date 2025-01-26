@@ -1,9 +1,10 @@
 package de.salychevms.deutschtrainer.Services;
 
-import de.salychevms.deutschtrainer.Models.DeRuPairs;
-import de.salychevms.deutschtrainer.Models.Deutsch;
-import de.salychevms.deutschtrainer.Models.Russian;
-import de.salychevms.deutschtrainer.Repo.DeRuPairsRepository;
+import de.salychevms.deutschtrainer.TrainerDataBase.Models.DeRuPairs;
+import de.salychevms.deutschtrainer.TrainerDataBase.Models.Deutsch;
+import de.salychevms.deutschtrainer.TrainerDataBase.Models.Russian;
+import de.salychevms.deutschtrainer.TrainerDataBase.Repo.DeRuPairsRepository;
+import de.salychevms.deutschtrainer.TrainerDataBase.Services.DeRuPairsService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

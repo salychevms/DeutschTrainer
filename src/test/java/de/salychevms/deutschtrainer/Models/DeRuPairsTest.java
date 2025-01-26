@@ -1,12 +1,11 @@
 package de.salychevms.deutschtrainer.Models;
 
+import de.salychevms.deutschtrainer.TrainerDataBase.Models.DeRuPairs;
+import de.salychevms.deutschtrainer.TrainerDataBase.Models.Deutsch;
+import de.salychevms.deutschtrainer.TrainerDataBase.Models.Russian;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 class DeRuPairsTest {
 

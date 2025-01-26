@@ -1,7 +1,8 @@
 package de.salychevms.deutschtrainer.Services;
 
-import de.salychevms.deutschtrainer.Models.Deutsch;
-import de.salychevms.deutschtrainer.Repo.DeutschRepository;
+import de.salychevms.deutschtrainer.TrainerDataBase.Models.Deutsch;
+import de.salychevms.deutschtrainer.TrainerDataBase.Repo.DeutschRepository;
+import de.salychevms.deutschtrainer.TrainerDataBase.Services.DeutschService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

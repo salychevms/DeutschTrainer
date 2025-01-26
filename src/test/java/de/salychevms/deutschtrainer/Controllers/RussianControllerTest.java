@@ -1,7 +1,8 @@
 package de.salychevms.deutschtrainer.Controllers;
 
-import de.salychevms.deutschtrainer.Models.Russian;
-import de.salychevms.deutschtrainer.Services.RussianService;
+import de.salychevms.deutschtrainer.TrainerDataBase.Controllers.RussianController;
+import de.salychevms.deutschtrainer.TrainerDataBase.Models.Russian;
+import de.salychevms.deutschtrainer.TrainerDataBase.Services.RussianService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

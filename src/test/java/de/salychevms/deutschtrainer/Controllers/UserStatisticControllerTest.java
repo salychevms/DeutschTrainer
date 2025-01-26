@@ -1,7 +1,8 @@
 package de.salychevms.deutschtrainer.Controllers;
 
-import de.salychevms.deutschtrainer.Models.*;
-import de.salychevms.deutschtrainer.Services.UserStatisticService;
+import de.salychevms.deutschtrainer.TrainerDataBase.Controllers.*;
+import de.salychevms.deutschtrainer.TrainerDataBase.Models.*;
+import de.salychevms.deutschtrainer.TrainerDataBase.Services.UserStatisticService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -1,5 +1,8 @@
 package de.salychevms.deutschtrainer.Models;
 
+import de.salychevms.deutschtrainer.TrainerDataBase.Models.DeRuPairs;
+import de.salychevms.deutschtrainer.TrainerDataBase.Models.UserDictionary;
+import de.salychevms.deutschtrainer.TrainerDataBase.Models.UserLanguage;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;

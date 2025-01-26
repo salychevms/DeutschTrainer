@@ -1,7 +1,11 @@
 package de.salychevms.deutschtrainer.Controllers;
 
-import de.salychevms.deutschtrainer.Models.*;
-import de.salychevms.deutschtrainer.Services.UserDictionaryService;
+import de.salychevms.deutschtrainer.TrainerDataBase.Controllers.LanguageController;
+import de.salychevms.deutschtrainer.TrainerDataBase.Controllers.UserDictionaryController;
+import de.salychevms.deutschtrainer.TrainerDataBase.Controllers.UserLanguageController;
+import de.salychevms.deutschtrainer.TrainerDataBase.Controllers.UsersController;
+import de.salychevms.deutschtrainer.TrainerDataBase.Models.*;
+import de.salychevms.deutschtrainer.TrainerDataBase.Services.UserDictionaryService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

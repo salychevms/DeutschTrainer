@@ -1,9 +1,12 @@
 package de.salychevms.deutschtrainer.Controllers;
 
-import de.salychevms.deutschtrainer.Models.Language;
-import de.salychevms.deutschtrainer.Models.UserLanguage;
-import de.salychevms.deutschtrainer.Models.Users;
-import de.salychevms.deutschtrainer.Services.UserLanguageService;
+import de.salychevms.deutschtrainer.TrainerDataBase.Controllers.LanguageController;
+import de.salychevms.deutschtrainer.TrainerDataBase.Controllers.UserLanguageController;
+import de.salychevms.deutschtrainer.TrainerDataBase.Controllers.UsersController;
+import de.salychevms.deutschtrainer.TrainerDataBase.Models.Language;
+import de.salychevms.deutschtrainer.TrainerDataBase.Models.UserLanguage;
+import de.salychevms.deutschtrainer.TrainerDataBase.Models.Users;
+import de.salychevms.deutschtrainer.TrainerDataBase.Services.UserLanguageService;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
