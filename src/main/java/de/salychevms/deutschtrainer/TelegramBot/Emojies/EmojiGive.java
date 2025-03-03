@@ -24,5 +24,4 @@ public class EmojiGive {
     public static String tongue=EmojiParser.parseToUnicode("\uD83D\uDC45");
     public static String redQuestionMark=EmojiParser.parseToUnicode("❓");
     public static String inboxTray=EmojiParser.parseToUnicode("\uD83D\uDCE5");
-
 }

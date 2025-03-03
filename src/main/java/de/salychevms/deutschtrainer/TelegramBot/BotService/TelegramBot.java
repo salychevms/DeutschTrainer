@@ -6,8 +6,6 @@ import de.salychevms.deutschtrainer.TelegramBot.Emojies.EmojiGive;
 import de.salychevms.deutschtrainer.TrainerDataBase.Models.*;
 import de.salychevms.deutschtrainer.TelegramBot.Training.TrainingController;
 import de.salychevms.deutschtrainer.TelegramBot.Training.TrainingPair;
-import de.salychevms.deutschtrainer.TrainerDataBase.Controllers.*;
-import de.salychevms.deutschtrainer.TrainerDataBase.Models.*;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -80,7 +78,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 //if user sent /start
                 if (messageText.equals("/start")) {
                     //give a start menu
-                    sendKeyboard(menuMaker.registration(), chatId, "Вы активировали бота-тренера." + "\nВы должны зарегистрироваться.");
+                    sendKeyboard(menuMaker.registration(), chatId, "Вы активировали бота-тренера.\nВы должны зарегистрироваться.");
                     //if something unusual happened
                 } else {
                     sendMessage(chatId, "Упс! Так не пойдет!\nВведите снова команду \"/start\" пожалуйста!");
@@ -195,6 +193,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                             """);
                     sendMessage(chatId, "Введите немецкое или русское слово: ");
                     queue.add(telegramId + callBackData);
+                    // /so= - searchOffer
                 } else if (callBackData.startsWith("/so=")) {
                     String[] selectedWord = callBackData.split("=");
                     Map<Long, String> translationList;
@@ -209,6 +208,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         editKeyboard(update.getCallbackQuery(), menuMaker.getSearchWordMenu(translationList, selectedWord[1], "RU", "yes"),
                                 "\nВы можете выбрать одно слово и получить все доступные переводы:\n" + russian.getRuWord());
                     }
+                    // /to= - translationOffer
                 } else if (callBackData.startsWith("/to=")) {
                     String[] selectedWord = callBackData.split("=");
                     Deutsch deutsch = new Deutsch();
