@@ -29,11 +29,6 @@ public class DeutschService {
     }
 
     @Transactional
-    public List<Deutsch> findWordsContaining(String german){
-        return deutschRepository.findAllByDeWordIsContainingIgnoreCase(german);
-    }
-
-    @Transactional
     public Optional<Deutsch> findByWord(String word){
         return deutschRepository.findByDeWord(word);
     }
@@ -41,5 +36,10 @@ public class DeutschService {
     @Transactional
     public List<Deutsch> getAll(){
         return deutschRepository.getAll();
+    }
+
+    @Transactional
+    public List<Deutsch> findSmartMatches(String input) {
+        return deutschRepository.findSmartMatches(input);
     }
 }

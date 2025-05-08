@@ -87,8 +87,8 @@ class DeutschServiceTest {
 
         String iLookFor = "DEUTSCH";
 
-        when(deutschRepository.findAllByDeWordIsContainingIgnoreCase(iLookFor)).thenReturn(deutschList);
-        List<Deutsch> result = deutschService.findWordsContaining(iLookFor);
+        when(deutschRepository.findSmartMatches(iLookFor)).thenReturn(deutschList);
+        List<Deutsch> result = deutschService.findSmartMatches(iLookFor);
 
         assertFalse(result.isEmpty());
         assertEquals(deutschList, result);
@@ -98,8 +98,8 @@ class DeutschServiceTest {
     void testFindWordsContainingIfDoNotExists() {
         String iLookFor = "DEUTSCH";
 
-        when(deutschRepository.findAllByDeWordIsContainingIgnoreCase(iLookFor)).thenReturn(Collections.emptyList());
-        List<Deutsch> result = deutschService.findWordsContaining(iLookFor);
+        when(deutschRepository.findSmartMatches(iLookFor)).thenReturn(Collections.emptyList());
+        List<Deutsch> result = deutschService.findSmartMatches(iLookFor);
 
         assertTrue(result.isEmpty());
     }

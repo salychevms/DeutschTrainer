@@ -64,8 +64,8 @@ class DeutschControllerTest {
         deutschList.add(someOneDeutsch);
         deutschList.add(nextDeutsch);
 
-        when(deutschService.findWordsContaining(partOfWord)).thenReturn(deutschList);
-        List<Deutsch> result=deutschController.findAllDeutschWordsWhichContain(partOfWord);
+        when(deutschService.findSmartMatches(partOfWord)).thenReturn(deutschList);
+        List<Deutsch> result=deutschController.findSmartMatches(partOfWord);
 
         assertFalse(result.isEmpty());
         assertEquals(deutschList, result);
@@ -75,8 +75,8 @@ class DeutschControllerTest {
     void testFindAllDeutschWordsWhichContainIfDoNotExist() {
         String partOfWord="part";
 
-        when(deutschService.findWordsContaining(partOfWord)).thenReturn(Collections.emptyList());
-        List<Deutsch> result=deutschController.findAllDeutschWordsWhichContain(partOfWord);
+        when(deutschService.findSmartMatches(partOfWord)).thenReturn(Collections.emptyList());
+        List<Deutsch> result=deutschController.findSmartMatches(partOfWord);
 
         assertTrue(result.isEmpty());
     }

@@ -73,7 +73,7 @@ public class DeRuPairsController {
         }
         List<String> wordList = new ArrayList<>();
         if (DE.equals(languageIdentifier)) {
-            List<Deutsch> german = deutschController.findAllDeutschWordsWhichContain(userWord);
+            List<Deutsch> german = deutschController.findSmartMatches(userWord);
             for (Deutsch item : german) {
                 StringBuilder str = new StringBuilder(item.getDeWord());
                 boolean postfixAdded = false;
@@ -113,7 +113,7 @@ public class DeRuPairsController {
         }
         Map<Long, String> wordMap = new LinkedHashMap<>();
         if (DE.equals(languageIdentifier)) {
-            List<Deutsch> german = deutschController.findAllDeutschWordsWhichContain(userWord);
+            List<Deutsch> german = deutschController.findSmartMatches(userWord);
             for (Deutsch item : german) {
                 StringBuilder str = new StringBuilder(item.getDeWord());
                 boolean postfixAdded = false;

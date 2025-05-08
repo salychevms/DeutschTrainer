@@ -26,15 +26,15 @@ public class DeutschController {
         return deutschService.findById(id);
     }
 
-    public List<Deutsch> findAllDeutschWordsWhichContain(String german){
-        return deutschService.findWordsContaining(german);
-    }
-
     public Optional<Deutsch> findByWord(String word){
         return deutschService.findByWord(word);
     }
 
     public List<Deutsch> getAll(){
         return deutschService.getAll();
+    }
+
+    public List<Deutsch> findSmartMatches(String input) {
+        return deutschService.findSmartMatches(input);
     }
 }
