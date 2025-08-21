@@ -40,10 +40,6 @@ public class RussianController {
         return russian.orElse(null);
     }
 
-    public List<Russian> findAllRussianWordsWhichContain(String russian) {
-        return russianService.findWordsContaining(russian);
-    }
-
     public Optional<Russian> findByWord(String word) {
         return russianService.findByWord(word);
     }
@@ -58,5 +54,9 @@ public class RussianController {
 
     public List<Russian> getAll(){
         return russianService.getAll();
+    }
+
+    public List<Russian> findSmartMatches(String input) {
+        return russianService.findSmartMatches(input);
     }
 }

@@ -3,6 +3,7 @@ package de.salychevms.deutschtrainer.TrainerDataBase.Repo;
 import de.salychevms.deutschtrainer.TrainerDataBase.Models.Russian;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,11 +15,23 @@ public interface RussianRepository extends JpaRepository<Russian, Long> {
 
     Optional<Russian> findByRuWord(String word);
 
-    List<Russian> findByRuWordContainingIgnoreCase(String word);
-
     @Query(value = "SELECT * FROM russian ORDER BY RANDOM() LIMIT 3", nativeQuery = true)
     List<Russian> find3RandomRussian();
 
     @Query(value = "SELECT * FROM russian ORDER BY RANDOM() LIMIT 1", nativeQuery = true)
     Optional<Russian> find1RandomRussian();
+
+    @Query(value = """
+    SELECT * FROM russian
+    WHERE lower(ru_word) LIKE CONCAT('%', lower(:input), '%')
+    ORDER BY 
+        CASE 
+            WHEN lower(ru_word) = lower(:input) THEN 0
+            WHEN lower(ru_word) LIKE lower(:input) || '%' THEN 1
+            ELSE 2
+        END,
+        length(ru_word)
+    LIMIT 20
+    """, nativeQuery = true)
+    List<Russian> findSmartMatches(@Param("input") String input);
 }

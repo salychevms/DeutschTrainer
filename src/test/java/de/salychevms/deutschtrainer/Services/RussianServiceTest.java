@@ -63,8 +63,8 @@ class RussianServiceTest {
 
         String iLookFor = "RUSSIAN";
 
-        when(russianRepository.findByRuWordContainingIgnoreCase(iLookFor)).thenReturn(russianList);
-        List<Russian> result = russianService.findWordsContaining(iLookFor);
+        when(russianRepository.findSmartMatches(iLookFor)).thenReturn(russianList);
+        List<Russian> result = russianService.findSmartMatches(iLookFor);
 
         assertFalse(result.isEmpty());
         assertEquals(russianList, result);
@@ -74,8 +74,8 @@ class RussianServiceTest {
     void findWordsContainingIfDoNotExist(){
         String iLookFor = "RUSSIAN";
 
-        when(russianRepository.findByRuWordContainingIgnoreCase(iLookFor)).thenReturn(Collections.emptyList());
-        List<Russian> result = russianService.findWordsContaining(iLookFor);
+        when(russianRepository.findSmartMatches(iLookFor)).thenReturn(Collections.emptyList());
+        List<Russian> result = russianService.findSmartMatches(iLookFor);
 
         assertTrue(result.isEmpty());
     }

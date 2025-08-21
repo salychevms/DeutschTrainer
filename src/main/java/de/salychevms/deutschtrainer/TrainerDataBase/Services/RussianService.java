@@ -28,11 +28,6 @@ public class RussianService {
     }
 
     @Transactional
-    public List<Russian> findWordsContaining(String russian) {
-        return russianRepository.findByRuWordContainingIgnoreCase(russian);
-    }
-
-    @Transactional
     public Optional<Russian> findByWord(String word) {
         return russianRepository.findByRuWord(word);
     }
@@ -50,5 +45,10 @@ public class RussianService {
     @Transactional
     public List<Russian> getAll() {
         return russianRepository.findAll();
+    }
+
+    @Transactional
+    public List<Russian> findSmartMatches(String input) {
+        return russianRepository.findSmartMatches(input);
     }
 }

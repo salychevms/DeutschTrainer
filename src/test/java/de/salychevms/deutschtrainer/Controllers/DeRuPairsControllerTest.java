@@ -168,7 +168,7 @@ class DeRuPairsControllerTest {
         when(userDictionaryController.getAllByTelegramId(telegramId)).thenReturn(dictionaryList);
         when(deRuPairsService.findPairById(p1Id)).thenReturn(Optional.of(pair1));
         when(deRuPairsService.findPairById(p2Id)).thenReturn(Optional.of(pair2));
-        when(russianController.findAllRussianWordsWhichContain(looksFor)).thenReturn(found);
+        when(russianController.findSmartMatches(looksFor)).thenReturn(found);
         List<String> result = deRuPairsController.getWordsWhichUserLooksFor(telegramId, looksFor, identifier);
 
         assertEquals(3, result.size());
@@ -466,7 +466,7 @@ class DeRuPairsControllerTest {
         when(deRuPairsService.findPairById(pair1.getId())).thenReturn(Optional.of(pair1));
         when(deRuPairsService.findPairById(pair2.getId())).thenReturn(Optional.of(pair2));
         when(deutschController.findSmartMatches(userDEWord)).thenReturn(deutschList);
-        when(russianController.findAllRussianWordsWhichContain(userRUWord)).thenReturn(russianList);
+        when(russianController.findSmartMatches(userRUWord)).thenReturn(russianList);
 
         Map<Long, String> resultDe = deRuPairsController.getWordMapWhichUserLooksFor(telegramId, userDEWord, "DE");
         Map<Long, String> resultRu = deRuPairsController.getWordMapWhichUserLooksFor(telegramId, userRUWord, "RU");

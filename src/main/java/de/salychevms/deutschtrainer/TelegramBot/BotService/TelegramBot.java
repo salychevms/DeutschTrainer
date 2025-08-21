@@ -93,77 +93,55 @@ public class TelegramBot extends TelegramLongPollingBot {
                                     + EmojiGive.joystick + " Главное меню:");
                     //global menu
                 } else if (queue != null) {//List<String>
-                    Iterator<String> iterator = queue.iterator();//Iterator<String> for queue
-                    while (iterator.hasNext()) {
-                        String item = iterator.next();
-                        if (item.startsWith(String.valueOf(telegramId))) {
-                            String userText = item.substring(String.valueOf(telegramId).length());
-                            if (userText.equals("/settings/changeName")) {
-                                usersController.updateNameByTelegramId(telegramId, messageText);
-                                iterator.remove();
-                                sendKeyboard(menuMaker.settingsMenu(), chatId, "Ваше имя изменено! \""
-                                        + messageText + "\""
-                                        + "\n\n" + EmojiGive.wrench + " Настройки:");
-                            } else if (userText.equals("/settings/changeSurname")) {
-                                usersController.updateSurnameByTelegramId(telegramId, messageText);
-                                iterator.remove();
-                                sendKeyboard(menuMaker.settingsMenu(), chatId, "Ваша фамилия изменена! \""
-                                        + messageText + "\""
-                                        + "\n\n" + EmojiGive.wrench + " Настройки:");
-                            } else if (userText.equals("/adminMenu/addWordsAdmin")) {
-                                iterator.remove();
-                                //create one german word
-                                Deutsch germanWord = deutschController.createNewWord(messageText);
-                                //create a lot of russian words
-                                List<Russian> russianTranslate = russianController.createNewWords(messageText);
-                                //create pairs of words
-                                List<Long> pairs = deRuPairsController.createPairs(germanWord, russianTranslate);
-                                String result = deRuPairsController.getAllWordPairsByPairId(germanWord.getId(), pairs);
-                                sendKeyboard(menuMaker.adminMenu(), chatId, result);
-                            } else if (userText.equals("/tr/addNewWords")) {
-                                iterator.remove();
-                                if (!messageText.isEmpty()) {
-                                    if (deRuPairsController.isItGerman(messageText)) {
-                                        //look for a word
-                                        //List<String> searchList = deRuPairsController.getWordsWhichUserLooksFor(telegramId, messageText, "DE");
-                                        Map<Long, String> searchMap = deRuPairsController.getWordMapWhichUserLooksFor(telegramId, messageText, "DE");
-                                        if (!searchMap.isEmpty()) {
-                                            sendKeyboard(menuMaker.getSearchWordMenu(searchMap, messageText, "DE", "no"), chatId,
-                                                    "Вы ввели слово: " + messageText + "\nВыберите одно из предложенных слов (первые 20 совпадений)" +
-                                                            "\nи получите доступные варианты перевода." +
-                                                            "\n\nВажно!!! Выводятся только первые 20 совпадений по запросу пользователя. " +
-                                                            "Возможно нужное слово вы найдете, если напишете новый более подробный запрос.");
-                                        } else {
-                                            UserLanguage userLanguage = trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE");
-                                            sendKeyboard(menuMaker.trainingMenu(telegramId, userLanguage, "DE"), chatId,
-                                                    "Вы ввели слово: " + messageText +
-                                                            "\nК сожалению ни чего подходящегок этому не нашлось! Попробуйте что-то другое.\n\n" +
-                                                            EmojiGive.gameDie + " Тренировки:");
-                                        }
-                                    } else if (deRuPairsController.isItRussian(messageText)) {
-                                        //look for a word
-                                        //List<String> searchList = deRuPairsController.getWordsWhichUserLooksFor(telegramId, messageText, "RU");
-                                        Map<Long, String> searchMap = deRuPairsController.getWordMapWhichUserLooksFor(telegramId, messageText, "RU");
-                                        if (!searchMap.isEmpty()) {
-                                            sendKeyboard(menuMaker.getSearchWordMenu(searchMap, messageText, "RU", "no"), chatId,
-                                                    "Вы ввели слово: " + messageText + "\nВыберите одно из преложенных слов (первые 20 совпадений)" +
-                                                            "\nи получите доступные варианты перевода." +
-                                                            "\n\nВажно!!! Выводятся только первые 20 совпадений по запросу пользователя. " +
-                                                            "Возможно нужное слово вы найдете, если напишете новый более подробный запрос.");
-                                        } else {
-                                            UserLanguage userLanguage = trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE");
-                                            sendKeyboard(menuMaker.trainingMenu(telegramId, userLanguage, "DE"), chatId,
-                                                    "Вы ввели слово: " + messageText +
-                                                            "\nК сожалению ни чего подходящего к этому не нашлось! Попробуйте что-то другое.\n\n" +
-                                                            EmojiGive.gameDie + " Тренировки:");
-                                        }
-                                    }
+                    // Сначала соберем все команды текущего пользователя
+                    List<String> toProcess = new ArrayList<>();
+                    for (String item : queue) {
+                        if (item.startsWith(telegramId + "/")) {
+                            toProcess.add(item);
+                        }
+                    }
+
+                    for (String item : toProcess) {
+                        String userText = item.substring(String.valueOf(telegramId).length());
+
+                        if (userText.equals("/settings/changeName")) {
+                            usersController.updateNameByTelegramId(telegramId, messageText);
+                            queue.remove(item);
+                            sendKeyboard(menuMaker.settingsMenu(), chatId, "Ваше имя изменено! \"" + messageText + "\"\n\n" + EmojiGive.wrench + " Настройки:");
+                        } else if (userText.equals("/settings/changeSurname")) {
+                            usersController.updateSurnameByTelegramId(telegramId, messageText);
+                            queue.remove(item);
+                            sendKeyboard(menuMaker.settingsMenu(), chatId, "Ваша фамилия изменена! \"" + messageText + "\"\n\n" + EmojiGive.wrench + " Настройки:");
+                        } else if (userText.equals("/adminMenu/addWordsAdmin")) {
+                            queue.remove(item);
+                            Deutsch germanWord = deutschController.createNewWord(messageText);
+                            List<Russian> russianTranslate = russianController.createNewWords(messageText);
+                            List<Long> pairs = deRuPairsController.createPairs(germanWord, russianTranslate);
+                            String result = deRuPairsController.getAllWordPairsByPairId(germanWord.getId(), pairs);
+                            sendKeyboard(menuMaker.adminMenu(), chatId, result);
+                        } else if (userText.equals("/tr/addNewWords")) {
+                            queue.remove(item);
+                            if (!messageText.isEmpty()) {
+                                queue.removeIf(e -> e.startsWith(telegramId + "/lastAddWord="));
+                                queue.add(telegramId + "/lastAddWord=" + messageText);
+                                String lang = deRuPairsController.isItGerman(messageText) ? "DE" : "RU";
+                                Map<Long, String> searchMap = deRuPairsController.getWordMapWhichUserLooksFor(telegramId, messageText, lang);
+                                if (!searchMap.isEmpty()) {
+                                    sendKeyboard(menuMaker.getSearchWordMenu(searchMap, messageText, lang, "no"), chatId,
+                                            "Вы ввели слово: " + messageText + "\nВыберите одно из предложенных слов (первые 20 совпадений)" +
+                                                    "\nи получите доступные варианты перевода." +
+                                                    "\n\nВажно!!! Выводятся только первые 20 совпадений по запросу пользователя. " +
+                                                    "Возможно нужное слово вы найдете, если напишете новый более подробный запрос.");
                                 } else {
                                     UserLanguage userLanguage = trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE");
                                     sendKeyboard(menuMaker.trainingMenu(telegramId, userLanguage, "DE"), chatId,
-                                            "Либо вы ни чего не ввели, либо что-то пошло не так...\nИзвините, найдем - починим!\n\n" +
+                                            "Вы ввели слово: " + messageText + "\nК сожалению ни чего подходящего не нашлось!\n\n" +
                                                     EmojiGive.gameDie + " Тренировки:");
                                 }
+                            } else {
+                                UserLanguage userLanguage = trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE");
+                                sendKeyboard(menuMaker.trainingMenu(telegramId, userLanguage, "DE"), chatId,
+                                        "Либо вы ничего не ввели, либо что-то пошло не так...\nПопробуйте снова!\n\n" + EmojiGive.gameDie + " Тренировки:");
                             }
                         }
                     }
@@ -181,7 +159,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 UserLanguage userLanguage = trainingController.getUserLangByTgIdAndLangIdentifier(telegramId, "DE");
                 //reg keyboard
                 if (callBackData.equals("/tr")) {
-                    editKeyboard(update.getCallbackQuery(), menuMaker.trainingMenu(telegramId,userLanguage, "DE"), EmojiGive.gameDie + " Тренировки:");
+                    editKeyboard(update.getCallbackQuery(), menuMaker.trainingMenu(telegramId, userLanguage, "DE"), EmojiGive.gameDie + " Тренировки:");
                 } else if (callBackData.equals("/tr/addNewWords")) {
                     editMessage(callbackQuery, """
                             Вы можете ввести слово (к примеру существительное с/без артикля)
@@ -253,15 +231,15 @@ public class TelegramBot extends TelegramLongPollingBot {
                 } else if (callBackData.startsWith("/tr")) {// /tr= - training
                     if (callBackData.equals("/tr=/sLT")) {// /tr=/sLT - training/StartLearningTraining
                         learningList = trainingController.createLearningList(telegramId);
-                        int size= learningList.size();
+                        int size = learningList.size();
                         TrainingPair pair = learningList.get(0);
                         learningList.remove(pair);
                         editKeyboard(callbackQuery,
                                 trainingController.getTestKeyboard(pair, "/tr=/LT=/DRI=:"),// /tr=/LT=/DRI=: - training/LearningTraining/DeRuId
-                                getHeaderForTraining(pair.getGerman().getDeWord(), size ));
+                                getHeaderForTraining(pair.getGerman().getDeWord(), size));
                     } else if (callBackData.equals("/tr=/sRT")) {// /tr=/sRT - training/StartRepeatTraining
                         repeatList = trainingController.createTrainingRepeatList(telegramId);
-                        int size= repeatList.size();
+                        int size = repeatList.size();
                         TrainingPair pair = repeatList.get(0);
                         repeatList.remove(pair);
                         editKeyboard(callbackQuery,
@@ -269,12 +247,12 @@ public class TelegramBot extends TelegramLongPollingBot {
                                 getHeaderForTraining(pair.getGerman().getDeWord(), size));
                     } else if (callBackData.equals("/tr=/sFT")) {// /tr=/sFT - training/StartFailsTraining
                         failList = trainingController.createTrainingFailList(telegramId);
-                        int size= failList.size();
+                        int size = failList.size();
                         TrainingPair pair = failList.get(0);
                         failList.remove(pair);
                         editKeyboard(callbackQuery,
                                 trainingController.getTestKeyboard(pair, "/tr=/FT=/DRI=:"),// /tr=/FT=/DRI=: - training/FailsTraining/DeRuId
-                                getHeaderForTraining(pair.getGerman().getDeWord(),size));
+                                getHeaderForTraining(pair.getGerman().getDeWord(), size));
                     } else if (callBackData.startsWith("/tr=/LT=/DRI=:")) {// /tr=/LT=/DRI=: - training/LearningTraining/DeRuId
                         String result = trainingController.getAnswerFromUser(callBackData);
                         if (learningList.isEmpty()) {
@@ -285,11 +263,11 @@ public class TelegramBot extends TelegramLongPollingBot {
                                     chatId, EmojiGive.gameDie + " Тренировки:");
                         } else {
                             TrainingPair pair = learningList.get(0);
-                            int size= learningList.size();
+                            int size = learningList.size();
                             learningList.remove(pair);
                             editKeyboard(callbackQuery, null, result);
                             sendKeyboard(trainingController.getTestKeyboard(pair, "/tr=/LT=/DRI=:"),// /tr=/LT=/DRI=: - training/LearningTraining/DeRuId
-                                    chatId, getHeaderForTraining(pair.getGerman().getDeWord(),size));
+                                    chatId, getHeaderForTraining(pair.getGerman().getDeWord(), size));
                         }
                     } else if (callBackData.startsWith("/tr=/RT=/DRI=:")) {// /tr=/RT=/DRI=: - training/RepeatTraining/DeRuId
                         String result = trainingController.getAnswerFromUser(callBackData);
@@ -301,11 +279,11 @@ public class TelegramBot extends TelegramLongPollingBot {
                                     chatId, EmojiGive.gameDie + " Тренировки:");
                         } else {
                             TrainingPair pair = repeatList.get(0);
-                            int size=repeatList.size();
+                            int size = repeatList.size();
                             repeatList.remove(pair);
                             editKeyboard(callbackQuery, null, result);
                             sendKeyboard(trainingController.getTestKeyboard(pair, "/tr=/RT=/DRI=:"),// /tr=/RT=/DRI=: - training/RepeatTraining/DeRuId
-                                    chatId, getHeaderForTraining(pair.getGerman().getDeWord(),size));
+                                    chatId, getHeaderForTraining(pair.getGerman().getDeWord(), size));
                         }
                     } else if (callBackData.startsWith("/tr=/FT=/DRI=:")) {// /tr=/FT=/DRI=: - training/FailsTraining/DeRuId
                         String result = trainingController.getAnswerFromUser(callBackData);
@@ -317,11 +295,11 @@ public class TelegramBot extends TelegramLongPollingBot {
                                     chatId, EmojiGive.gameDie + " Тренировки:");
                         } else {
                             TrainingPair pair = failList.get(0);
-                            int size=failList.size();
+                            int size = failList.size();
                             failList.remove(pair);
                             editKeyboard(callbackQuery, null, result);
                             sendKeyboard(trainingController.getTestKeyboard(pair, "/tr=/FT=/DRI=:"),// /tr=/FT=/DRI=: - training/FailsTraining/DeRuId
-                                    chatId, getHeaderForTraining(pair.getGerman().getDeWord(),size));
+                                    chatId, getHeaderForTraining(pair.getGerman().getDeWord(), size));
                         }
                     } else if (callBackData.startsWith("/tr=/FAT")) { // /tr=/FAT - training/FinishAllTrainings
                         editKeyboard(callbackQuery, null, "Вы прервали занятие! Жаль!" +
@@ -409,6 +387,28 @@ public class TelegramBot extends TelegramLongPollingBot {
                                     "\nСпасибо, что уделили время этому проекту! Надеюсь он вам поможет!" +
                                     "\nУдачи в учебе и хорошего настроения! =)\n\n" +
                                     EmojiGive.joystick + " Главное меню:");
+                } else if (callBackData.equals("/toSearchOffer")) {
+                    Optional<String> found = queue.stream()
+                            .filter(s -> s.startsWith(telegramId + "/lastAddWord="))
+                            .findFirst();
+
+                    if (found.isPresent()) {
+                        String inputWord = found.get().replaceFirst(telegramId + "/lastAddWord=", "").trim();
+
+                        if (inputWord.isEmpty()) {
+                            sendMessage(chatId, "Предыдущее слово не найдено. Введите слово заново.");
+                            return;
+                        }
+
+                        String lang = deRuPairsController.isItGerman(inputWord) ? "DE" : "RU";
+                        Map<Long, String> searchMap = deRuPairsController.getWordMapWhichUserLooksFor(telegramId, inputWord, lang);
+                        InlineKeyboardMarkup keyboard = menuMaker.getSearchWordMenu(searchMap, inputWord, lang, "no");
+
+                        editKeyboard(callbackQuery, keyboard,
+                                "Вы ввели слово: " + inputWord + "\nВыберите одно из предложенных слов (первые 20 совпадений):");
+                    } else {
+                        sendMessage(chatId, "История поиска не найдена. Введите слово заново.");
+                    }
                 } else if (callBackData.equals("/settings/changeName")) {
                     editMessage(callbackQuery, "Сменить имя:");
                     sendMessage(chatId, "введите новое имя:");
@@ -450,7 +450,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         stripe.append("=".repeat(count));
         stripe.append("=");
         size--;
-        return stripe + "\n\n" + word + "\n\n" + stripe+"\n(еще "+size+" слов)";
+        return stripe + "\n\n" + word + "\n\n" + stripe + "\n(еще " + size + " слов)";
     }
 
     private void sendKeyboard(InlineKeyboardMarkup keyboardMarkup, long chatId, String msg) {
@@ -468,6 +468,13 @@ public class TelegramBot extends TelegramLongPollingBot {
     private void editKeyboard(CallbackQuery callbackQuery, InlineKeyboardMarkup keyboardMarkup, String msg) {
         long messageId = callbackQuery.getMessage().getMessageId();
         long chatId = callbackQuery.getMessage().getChatId();
+
+        String currentText = callbackQuery.getMessage().getText();
+
+        // ⚠️ Проверка: если текст не изменился и клавиатура такая же — не редактируем
+        if (currentText.equals(msg) && callbackQuery.getMessage().getReplyMarkup().equals(keyboardMarkup)) {
+            return; // Просто выходим, ничего не обновляем
+        }
 
         EditMessageText message = new EditMessageText();
 

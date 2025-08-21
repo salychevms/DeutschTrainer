@@ -15,7 +15,7 @@ public class EmojiGive {
     public static String barChart=EmojiParser.parseToUnicode("\uD83D\uDCCA");
     public static String clipboard=EmojiParser.parseToUnicode("\uD83D\uDCCB");
     public static String lockedWithKey=EmojiParser.parseToUnicode("\uD83D\uDD10");
-    public static String backArrow=EmojiParser.parseToUnicode("\uD83D\uDD19");
+    public static String backArrow = "↩";
     public static String robot=EmojiParser.parseToUnicode("\uD83E\uDD16");
     public static String alien =EmojiParser.parseToUnicode("\uD83D\uDC7D");
     public static String newButton=EmojiParser.parseToUnicode("\uD83C\uDD95");

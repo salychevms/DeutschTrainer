@@ -87,8 +87,8 @@ class RussianControllerTest {
         russianList.add(ru2);
         russianList.add(ru1);
 
-        when(russianService.findWordsContaining(part)).thenReturn(russianList);
-        List<Russian> result = russianController.findAllRussianWordsWhichContain(part);
+        when(russianService.findSmartMatches(part)).thenReturn(russianList);
+        List<Russian> result = russianController.findSmartMatches(part);
 
         assertFalse(result.isEmpty());
         assertEquals(russianList, result);
@@ -98,8 +98,8 @@ class RussianControllerTest {
     void findAllRussianWordsWhichContainIfDoesNotContain() {
         String part = "part";
 
-        when(russianService.findWordsContaining(part)).thenReturn(Collections.emptyList());
-        List<Russian> result = russianController.findAllRussianWordsWhichContain(part);
+        when(russianService.findSmartMatches(part)).thenReturn(Collections.emptyList());
+        List<Russian> result = russianController.findSmartMatches(part);
 
         assertTrue(result.isEmpty());
         assertEquals(Collections.emptyList(), result);

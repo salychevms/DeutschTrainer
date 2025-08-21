@@ -87,7 +87,7 @@ public class DeRuPairsController {
                 wordList.add(str.toString());
             }
         } else if (RU.equals(languageIdentifier)) {
-            List<Russian> russian = russianController.findAllRussianWordsWhichContain(userWord);
+            List<Russian> russian = russianController.findSmartMatches(userWord);
             for (Russian item : russian) {
                 StringBuilder str = new StringBuilder(item.getRuWord());
                 boolean postfixAdded = false;
@@ -128,7 +128,7 @@ public class DeRuPairsController {
                 wordMap.put(item.getId(), str.toString());
             }
         } else if (RU.equals(languageIdentifier)) {
-            List<Russian> russian = russianController.findAllRussianWordsWhichContain(userWord);
+            List<Russian> russian = russianController.findSmartMatches(userWord);
             for (Russian item : russian) {
                 StringBuilder str = new StringBuilder(item.getRuWord());
                 boolean postfixAdded = false;
